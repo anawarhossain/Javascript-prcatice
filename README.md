@@ -57,7 +57,7 @@
 - [ ] `sort` এবং `reverse`
 - [ ] Chaining Methods
 
-[### 🟢 পর্যায় ০৮: Strings এবং String Methods](https://anawarhossain.github.io/Javascript-prcatice/08.Strings-And-Strings-Methods/)
+[### 🟢 পর্যায় ০৮: Strings এবং String Methods](https://anawarhossain.github.io/Javascript-prcatice/08-Strings-And-Strings-Methods/)
 - [ ] String Properties এবং Basic Methods
 - [ ] Template Literals (Backticks)
 - [ ] `split`, `join`, `trim`, `replace`
@@ -87,7 +87,7 @@
 - [ ] Callback Hell সমস্যা
 - [ ] Synchronous vs Asynchronous বোঝা
 
-[### 🟣 পর্যায় ১৩: Async JavaScript — পার্ট ২](https://anawarhossain.github.io/Javascript-prcatice/(https://anawarhossain.github.io/Javascript-prcatice/Projects/)/)
+[### 🟣 পর্যায় ১৩: Async JavaScript — পার্ট ২](https://anawarhossain.github.io/Javascript-prcatice/13-Asynchronous-JavaScript-Part2/)
 - [ ] Promises এর ভিত্তি
 - [ ] `then`, `catch`, `finally`
 - [ ] Promise Chaining
