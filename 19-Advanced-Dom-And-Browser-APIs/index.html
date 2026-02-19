@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>পর্যায় ১৯ — Advanced DOM & Browser APIs</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Sora:wght@300;600;800&display=swap');
+
+  :root {
+    --bg: #0d0f1a;
+    --surface: #141728;
+    --card: #1a1f35;
+    --border: #2a3055;
+    --accent: #00e5ff;
+    --accent2: #ff6b6b;
+    --accent3: #a78bfa;
+    --accent4: #34d399;
+    --text: #e2e8f0;
+    --muted: #8892a4;
+    --code-bg: #0a0c16;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
+
+  /* Header */
+  header {
+    padding: 40px 0 20px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 30px;
+  }
+
+  .stage-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    color: #000;
+    font-weight: 800;
+    font-size: 0.75rem;
+    padding: 4px 14px;
+    border-radius: 20px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  header h1 {
+    font-size: clamp(1.6rem, 4vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.2;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent3) 50%, var(--accent4) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+  }
+
+  header p { color: var(--muted); font-size: 0.95rem; font-weight: 300; }
+
+  /* Topic Nav */
+  .topic-nav {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 40px;
+  }
+
+  .topic-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 8px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .topic-btn:hover, .topic-btn.active {
+    background: rgba(0,229,255,0.1);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Topic sections */
+  .topic-section { display: none; }
+  .topic-section.active { display: block; }
+
+  /* Section tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 7px;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .tab.active {
+    background: linear-gradient(135deg, rgba(0,229,255,0.15), rgba(167,139,250,0.15));
+    color: var(--accent);
+    border: 1px solid rgba(0,229,255,0.3);
+  }
+
+  /* Content panels */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card h3 .icon {
+    width: 28px; height: 28px;
+    background: rgba(0,229,255,0.1);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem;
+  }
+
+  .card p, .card li {
+    font-size: 0.88rem;
+    line-height: 1.8;
+    color: #b0bec5;
+  }
+
+  .card ul { padding-left: 18px; }
+
+  /* Code blocks */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    overflow-x: auto;
+    margin: 14px 0;
+    position: relative;
+  }
+
+  pre::before {
+    content: attr(data-lang);
+    position: absolute;
+    top: 8px; right: 12px;
+    font-size: 0.65rem;
+    color: var(--accent3);
+    font-family: 'Fira Code', monospace;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  code {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.82rem;
+    line-height: 1.9;
+    color: #cdd6f4;
+  }
+
+  .kw { color: #cba6f7; }
+  .fn { color: #89dceb; }
+  .str { color: #a6e3a1; }
+  .cm { color: #585b70; }
+  .num { color: #fab387; }
+  .prop { color: #89b4fa; }
+  .tag { color: #f38ba8; }
+
+  /* Viva Q&A */
+  .qa-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    border-radius: 0 10px 10px 0;
+    padding: 16px 20px;
+    margin-bottom: 14px;
+  }
+
+  .qa-item .q {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--accent2);
+    margin-bottom: 8px;
+  }
+
+  .qa-item .a {
+    font-size: 0.83rem;
+    color: #94a3b8;
+    line-height: 1.8;
+  }
+
+  /* Challenge */
+  .challenge-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent3);
+    border-radius: 0 10px 10px 0;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+
+  .challenge-item .title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent3);
+    margin-bottom: 8px;
+  }
+
+  .diff-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .easy { background: rgba(52,211,153,0.15); color: var(--accent4); }
+  .medium { background: rgba(0,229,255,0.15); color: var(--accent); }
+  .hard { background: rgba(255,107,107,0.15); color: var(--accent2); }
+
+  /* Project cards */
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    margin-top: 10px;
+  }
+
+  .project-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    transition: border-color 0.2s;
+  }
+
+  .project-card:hover { border-color: var(--accent4); }
+
+  .project-card .proj-icon {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+
+  .project-card h4 {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--accent4);
+    margin-bottom: 6px;
+  }
+
+  .project-card p {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* Live Demo */
+  .demo-area {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-top: 20px;
+  }
+
+  .demo-area h4 { 
+    color: var(--accent4); 
+    font-size: 0.85rem; 
+    font-weight: 700; 
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .demo-form input, .demo-form select {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .demo-form input:focus, .demo-form select:focus { border-color: var(--accent); }
+
+  .demo-form input.error { border-color: var(--accent2); }
+  .demo-form input.success { border-color: var(--accent4); }
+
+  .error-msg { font-size: 0.75rem; color: var(--accent2); margin-top: -6px; margin-bottom: 10px; }
+  .success-msg { font-size: 0.75rem; color: var(--accent4); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    color: #000;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .btn-primary:hover { opacity: 0.85; }
+
+  .theme-toggle-demo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 56px;
+    height: 28px;
+  }
+
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+  .slider {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 28px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .slider::before {
+    content: '';
+    position: absolute;
+    width: 20px; height: 20px;
+    left: 4px; top: 4px;
+    background: var(--muted);
+    border-radius: 50%;
+    transition: 0.3s;
+  }
+
+  .toggle-switch input:checked + .slider { background: var(--accent); }
+  .toggle-switch input:checked + .slider::before { transform: translateX(28px); background: #000; }
+
+  .demo-output {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.8rem;
+    color: var(--accent4);
+    margin-top: 12px;
+    min-height: 40px;
+  }
+
+  /* Geo demo */
+  .geo-btn {
+    background: rgba(52,211,153,0.1);
+    border: 1px solid var(--accent4);
+    color: var(--accent4);
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .geo-btn:hover { background: rgba(52,211,153,0.2); }
+
+  /* Scroll indicator for IO demo */
+  .scroll-demo-container {
+    height: 200px;
+    overflow-y: scroll;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 12px;
+  }
+
+  .scroll-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+    font-size: 0.8rem;
+    opacity: 0.3;
+    transform: translateX(-20px);
+    transition: all 0.4s ease;
+  }
+
+  .scroll-item.visible {
+    opacity: 1;
+    transform: translateX(0);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* dividers */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 24px 0;
+  }
+
+  /* topic header */
+  .topic-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .topic-number {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800;
+    font-size: 1rem;
+    color: #000;
+    flex-shrink: 0;
+  }
+
+  .topic-title-text h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  .topic-title-text p {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  footer {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--muted);
+    font-size: 0.75rem;
+    border-top: 1px solid var(--border);
+    margin-top: 50px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <div class="stage-badge">পর্যায় ১৯</div>
+    <h1>Advanced DOM & Browser APIs</h1>
+    <p>Form Validation • Intersection Observer • Geolocation • Theme Toggle</p>
+  </header>
+
+  <!-- Topic Navigation -->
+  <div class="topic-nav">
+    <button class="topic-btn active" onclick="showTopic('form')">📋 Form Handling & Validation</button>
+    <button class="topic-btn" onclick="showTopic('io')">👁️ Intersection Observer</button>
+    <button class="topic-btn" onclick="showTopic('geo')">📍 Geolocation API</button>
+    <button class="topic-btn" onclick="showTopic('theme')">🌙 Theme Toggle</button>
+  </div>
+
+  <!-- ===================== TOPIC 1: FORM HANDLING ===================== -->
+  <div class="topic-section active" id="topic-form">
+    <div class="topic-header">
+      <div class="topic-number">1</div>
+      <div class="topic-title-text">
+        <h2>Form Handling & Validation</h2>
+        <p>ফর্ম ডেটা নেওয়া, ভ্যালিডেট করা এবং সাবমিট হ্যান্ডেল করা</p>
+      </div>
+    </div>
+
+    <div class="tabs" id="tabs-form">
+      <button class="tab active" onclick="showPanel('form','concept')">📖 কনসেপ্ট</button>
+      <button class="tab" onclick="showPanel('form','viva')">🎤 ভাইবা গাইড</button>
+      <button class="tab" onclick="showPanel('form','challenge')">💻 চ্যালেঞ্জ</button>
+      <button class="tab" onclick="showPanel('form','project')">🚀 ফিউচার</button>
+    </div>
+
+    <!-- CONCEPT -->
+    <div class="panel active" id="panel-form-concept">
+      <div class="card">
+        <h3><span class="icon">📖</span> Form কি এবং কেন Validation দরকার?</h3>
+        <p>Form হলো ইউজার থেকে ডেটা নেওয়ার মূল উপায়। Validation মানে — সেই ডেটা সঠিক কিনা চেক করা, সার্ভারে পাঠানোর আগেই। দুই ধরনের ভ্যালিডেশন আছে: <strong>HTML5 Built-in</strong> এবং <strong>JavaScript Custom Validation</strong>।</p>
+      </div>
+
+      <div class="card">
+        <h3><span class="icon">1️⃣</span> HTML5 Built-in Validation</h3>
+        <pre data-lang="HTML"><code><span class="tag">&lt;form&gt;</span>
+  <span class="cm">&lt;!-- required: খালি রাখা যাবে না --&gt;</span>
+  <span class="tag">&lt;input</span> <span class="prop">type</span>=<span class="str">"text"</span> <span class="prop">required</span> <span class="prop">placeholder</span>=<span class="str">"নাম লিখুন"</span><span class="tag">&gt;</span>
+
+  <span class="cm">&lt;!-- minlength / maxlength --&gt;</span>
+  <span class="tag">&lt;input</span> <span class="prop">type</span>=<span class="str">"text"</span> <span class="prop">minlength</span>=<span class="str">"3"</span> <span class="prop">maxlength</span>=<span class="str">"20"</span><span class="tag">&gt;</span>
+
+  <span class="cm">&lt;!-- email type: @ এবং . চেক করে --&gt;</span>
+  <span class="tag">&lt;input</span> <span class="prop">type</span>=<span class="str">"email"</span> <span class="prop">required</span><span class="tag">&gt;</span>
+
+  <span class="cm">&lt;!-- pattern: regex দিয়ে --&gt;</span>
+  <span class="tag">&lt;input</span> <span class="prop">type</span>=<span class="str">"text"</span> <span class="prop">pattern</span>=<span class="str">"[0-9]{11}"</span> <span class="prop">title</span>=<span class="str">"১১ সংখ্যার নম্বর"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/form&gt;</span></code></pre>
+      </div>
+
+      <div class="card">
+        <h3><span class="icon">2️⃣</span> JavaScript Custom Validation</h3>
+        <pre data-lang="JavaScript"><code><span class="kw">const</span> form = document.<span class="fn">getElementById</span>(<span class="str">'myForm'</span>);
+<span class="kw">const</span> nameInput = document.<span class="fn">getElementById</span>(<span class="str">'name'</span>);
+<span class="kw">const</span> emailInput = document.<span class="fn">getElementById</span>(<span class="str">'email'</span>);
+
+<span class="cm">// ইমেইল চেক করার function</span>
+<span class="kw">function</span> <span class="fn">isValidEmail</span>(email) {
+  <span class="kw">const</span> regex = <span class="str">/^[^\s@]+@[^\s@]+\.[^\s@]+$/</span>;
+  <span class="kw">return</span> regex.<span class="fn">test</span>(email);
+}
+
+<span class="cm">// ফর্ম সাবমিটে ভ্যালিডেশন</span>
+form.<span class="fn">addEventListener</span>(<span class="str">'submit'</span>, <span class="kw">function</span>(e) {
+  e.<span class="fn">preventDefault</span>(); <span class="cm">// পেজ রিলোড বন্ধ</span>
+
+  <span class="kw">let</span> isValid = <span class="kw">true</span>;
+
+  <span class="kw">if</span> (nameInput.value.trim() === <span class="str">''</span>) {
+    <span class="fn">showError</span>(nameInput, <span class="str">'নাম আবশ্যক!'</span>);
+    isValid = <span class="kw">false</span>;
+  } <span class="kw">else</span> {
+    <span class="fn">showSuccess</span>(nameInput);
+  }
+
+  <span class="kw">if</span> (!<span class="fn">isValidEmail</span>(emailInput.value)) {
+    <span class="fn">showError</span>(emailInput, <span class="str">'সঠিক ইমেইল দিন!'</span>);
+    isValid = <span class="kw">false</span>;
+  } <span class="kw">else</span> {
+    <span class="fn">showSuccess</span>(emailInput);
+  }
+
+  <span class="kw">if</span> (isValid) console.<span class="fn">log</span>(<span class="str">'Form Submitted!'</span>);
+});
+
+<span class="kw">function</span> <span class="fn">showError</span>(input, message) {
+  input.classList.<span class="fn">add</span>(<span class="str">'error'</span>);
+  <span class="kw">const</span> errorDiv = input.nextElementSibling;
+  <span class="kw">if</span> (errorDiv) errorDiv.textContent = message;
+}
+
+<span class="kw">function</span> <span class="fn">showSuccess</span>(input) {
+  input.classList.<span class="fn">remove</span>(<span class="str">'error'</span>);
+  input.classList.<span class="fn">add</span>(<span class="str">'success'</span>);
+}</code></pre>
+      </div>
+
+      <div class="card">
+        <h3><span class="icon">3️⃣</span> Real-time Validation (Input Event)</h3>
+        <pre data-lang="JavaScript"><code><span class="cm">// টাইপ করার সাথে সাথে চেক</span>
+passwordInput.<span class="fn">addEventListener</span>(<span class="str">'input'</span>, <span class="kw">function</span>() {
+  <span class="kw">const</span> val = <span class="kw">this</span>.value;
+  <span class="kw">const</span> checks = {
+    length: val.length >= <span class="num">8</span>,
+    uppercase: <span class="str">/[A-Z]/</span>.<span class="fn">test</span>(val),
+    number: <span class="str">/[0-9]/</span>.<span class="fn">test</span>(val),
+    special: <span class="str">/[!@#$%^&*]/</span>.<span class="fn">test</span>(val)
+  };
+
+  Object.<span class="fn">entries</span>(checks).<span class="fn">forEach</span>(([key, passed]) => {
+    <span class="kw">const</span> el = document.<span class="fn">getElementById</span>(<span class="str">`check-</span><span class="kw">${key}</span><span class="str">`</span>);
+    <span class="kw">if</span> (el) el.style.color = passed ? <span class="str">'green'</span> : <span class="str">'red'</span>;
+  });
+});</code></pre>
+      </div>
+
+      <!-- Live Demo -->
+      <div class="demo-area">
+        <h4>🧪 লাইভ ডেমো — Form Validation</h4>
+        <div class="demo-form">
+          <input type="text" id="demo-name" placeholder="আপনার নাম (min 3 অক্ষর)">
+          <div class="error-msg" id="name-error"></div>
+          <input type="email" id="demo-email" placeholder="Email: example@domain.com">
+          <div class="error-msg" id="email-error"></div>
+          <input type="text" id="demo-phone" placeholder="ফোন নম্বর (11 সংখ্যা)">
+          <div class="error-msg" id="phone-error"></div>
+          <button class="btn-primary" onclick="validateDemo()">Submit করুন</button>
+          <div class="demo-output" id="form-output">এখানে রেজাল্ট দেখাবে...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIVA -->
+    <div class="panel" id="panel-form-viva">
+      <div class="qa-item">
+        <div class="q">Q1. preventDefault() কেন ব্যবহার করি?</div>
+        <div class="a">ফর্ম সাবমিটে ব্রাউজার ডিফল্টভাবে পেজ রিলোড করে। <code>e.preventDefault()</code> সেই ডিফল্ট আচরণ বন্ধ করে, যাতে আমরা JavaScript দিয়ে নিজে ডেটা হ্যান্ডেল করতে পারি।</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Q2. Client-side validation যথেষ্ট? Server-side দরকার নেই?</div>
+        <div class="a">না! Client-side validation শুধু UX-এর জন্য — ইউজার browser console থেকে বাইপাস করতে পারে। Security-র জন্য সবসময় server-side validation আবশ্যক।</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Q3. input event এবং change event-এর পার্থক্য কী?</div>
+        <div class="a"><code>input</code> প্রতিটি keystroke-এ fire করে (real-time)। <code>change</code> শুধু তখন fire করে যখন field থেকে focus চলে যায় এবং মান পরিবর্তিত হয়।</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Q4. FormData API কী?</div>
+        <div class="a"><code>new FormData(formElement)</code> দিয়ে ফর্মের সব ডেটা key-value pair হিসেবে সহজে পাওয়া যায়, বিশেষত file upload-এ খুব কাজের।</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Q5. Constraint Validation API কী?</div>
+        <div class="a">HTML5-এর built-in API যা input element-এ <code>checkValidity()</code>, <code>setCustomValidity()</code>, <code>validity</code> property দেয় — JavaScript দিয়ে native ভ্যালিডেশন কন্ট্রোল করতে।</div>
+      </div>
+    </div>
+
+    <!-- CHALLENGE -->
+    <div class="panel" id="panel-form-challenge">
+      <div class="challenge-item">
+        <div class="title">চ্যালেঞ্জ ১ — Registration Form <span class="diff-badge easy">Easy</span></div>
+        <p style="font-size:0.83rem;color:#94a3b8;margin-bottom:12px;">নাম, ইমেইল, পাসওয়ার্ড, confirm password — ৪টি ফিল্ড সহ একটি registration form বানাও। Submit-এ সব ভ্যালিডেট হবে। পাসওয়ার্ড মিলছে কিনা চেক করবে।</p>
+        <pre data-lang="Solution"><code><span class="cm">// Key Logic</span>
+<span class="kw">if</span> (password !== confirmPassword) {
+  <span class="fn">showError</span>(confirmInput, <span class="str">'পাসওয়ার্ড মিলছে না!'</span>);
+  isValid = <span class="kw">false</span>;
+}
+
+<span class="cm">// Password strength check</span>
+<span class="kw">function</span> <span class="fn">checkStrength</span>(pass) {
+  <span class="kw">if</span> (pass.length < <span class="num">6</span>) <span class="kw">return</span> <span class="str">'দুর্বল'</span>;
+  <span class="kw">if</span> (pass.length < <span class="num">10</span>) <span class="kw">return</span> <span class="str">'মাঝারি'</span>;
+  <span class="kw">return</span> <span class="str">'শক্তিশালী'</span>;
+}</code></pre>
+      </div>
+
+      <div class="challenge-item">
+        <div class="title">চ্যালেঞ্জ ২ — Real-time Character Counter <span class="diff-badge easy">Easy</span></div>
+        <p style="font-size:0.83rem;color:#94a3b8;margin-bottom:12px;">একটি textarea বানাও (max 200 অক্ষর)। টাইপ করার সাথে সাথে বাকি অক্ষর সংখ্যা দেখাবে। ১০-এর কম হলে লাল হবে।</p>
+        <pre data-lang="Solution"><code>textarea.<span class="fn">addEventListener</span>(<span class="str">'input'</span>, <span class="kw">function</span>() {
+  <span class="kw">const</span> remaining = <span class="num">200</span> - <span class="kw">this</span>.value.length;
+  counter.textContent = <span class="str">`</span><span class="kw">${remaining}</span><span class="str"> অক্ষর বাকি`</span>;
+  counter.style.color = remaining < <span class="num">10</span> ? <span class="str">'#ff6b6b'</span> : <span class="str">'#34d399'</span>;
+  <span class="kw">if</span> (remaining < <span class="num">0</span>) <span class="kw">this</span>.value = <span class="kw">this</span>.value.<span class="fn">slice</span>(<span class="num">0</span>, <span class="num">200</span>);
+});</code></pre>
+      </div>
+
+      <div class="challenge-item">
+        <div class="title">চ্যালেঞ্জ ৩ — Multi-step Form <span class="diff-badge hard">Hard</span></div>
+        <p style="font-size:0.83rem;color:#94a3b8;margin-bottom:12px;">৩-স্টেপের ফর্ম বানাও: Step 1 (Personal Info), Step 2 (Contact), Step 3 (Review & Submit)। প্রতিটি স্টেপ ভ্যালিডেট না হলে Next যাবে না। Progress bar দেখাবে।</p>
+        <pre data-lang="Solution"><code><span class="kw">let</span> currentStep = <span class="num">1</span>;
+<span class="kw">const</span> totalSteps = <span class="num">3</span>;
+
+<span class="kw">function</span> <span class="fn">nextStep</span>() {
+  <span class="kw">if</span> (!<span class="fn">validateStep</span>(currentStep)) <span class="kw">return</span>;
+  
+  document.<span class="fn">getElementById</span>(<span class="str">`step-</span><span class="kw">${currentStep}</span><span class="str">`</span>)
+    .classList.<span class="fn">remove</span>(<span class="str">'active'</span>);
+  currentStep++;
+  document.<span class="fn">getElementById</span>(<span class="str">`step-</span><span class="kw">${currentStep}</span><span class="str">`</span>)
+    .classList.<span class="fn">add</span>(<span class="str">'active'</span>);
+  
+  <span class="cm">// Progress bar update</span>
+  progressBar.style.width = 
+    <span class="str">`</span><span class="kw">${(currentStep / totalSteps) * 100}</span><span class="str">%`</span>;
+}</code></pre>
+      </div>
+    </div>
+
+    <!-- PROJECT -->
+    <div class="panel" id="panel-form-project">
+      <div class="card">
+        <h3><span class="icon">🚀</span> বাস্তব প্রজেক্টে ব্যবহার</h3>
+        <p>Form Handling & Validation প্রায় প্রতিটি ওয়েব অ্যাপে লাগে।</p>
+      </div>
+      <div class="project-grid">
+        <div class="project-card">
+          <div class="proj-icon">🛒</div>
+          <h4>E-commerce Checkout</h4>
+          <p>Payment form-এ card number, expiry, CVV validation। ভুল দিলে সাবমিট হবে না।</p>
+        </div>
+        <div class="project-card">
+          <div class="proj-icon">👤</div>
+          <h4>User Registration</h4>
+          <p>Real-time password strength meter, username availability check, email format validation।</p>
+        </div>
+        <div class="project-card">
+          <div class="proj-icon">📞</div>
+          <h4>Contact/Support Form</h4>
+          <p>নাম, বিষয়, বার্তা — সব required field check করে তারপর API-তে পাঠানো।</p>
+        </div>
+        <div class="project-card">
+          <div class="proj-icon">🏦</div>
+          <h4>Banking/Finance App</h4>
+          <p>Transfer amount সীমার মধ্যে কিনা, account number format সঠিক কিনা — critical validation।</p>
+        </div>
+        <div class="project-card">
+          <div class="proj-icon">📋</div>
+          <h4>Job Application</h4>
+          <p>Multi-step form — ব্যক্তিগত তথ্য, শিক্ষা, অভিজ্ঞতা। প্রতিটি স্টেপে validation।</p>
+        </div>
+        <div class="project-card">
+          <div class="proj-icon">🔐</div>
+          <h4>Login System</h4>
+          <p>Email/password চেক, "Forgot Password" ফ্লো, 2FA code validation।</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TOPIC 2: INTERSECTION OBSERVER ===================== -->
+  <div class="topic-section" id="topic-io">
+    <div class="topic-header">
+      <div class="topic-number">2</div>
+      <div class="topic-title-text">
+        <h2>Intersection Observer API</h2>
+        <p>Element কখন viewport-এ আসে তা detect করা</p>
+      </div>
+    </div>
+
+    <div class="tabs" id="tabs-io">
+      <button class="tab active" onclick="showPanel('io','concept')">📖 কনসেপ্ট</button>
+      <button class="tab" onclick="showPanel('io','viva')">🎤 ভাইবা গাইড</button>
+      <button class="tab" onclick="showPanel('io','challenge')">💻 চ্যালেঞ্জ</button>
+      <button class="tab" onclick="showPanel('io','project')">🚀 ফিউচার</button>
+    </div>
+
+    <div class="panel active" id="panel-io-concept">
+      <div class="card">
+        <h3><span class="icon">📖</span> Intersection Observer কী?</h3>
+        <p>এটি একটি browser API যা detect করে কোন element viewport (দৃশ্যমান অংশ) বা নির্দিষ্ট container-এর সাথে intersect (মিলছে) কিনা। আগে এই কাজ <code>scroll</code> event দিয়ে করতে হতো — যা performance-এর জন্য খুব খারাপ ছিল।</p>
+      </div>
+
+      <div class="card">
+        <h3><span class="icon">1️⃣</span> Basic Syntax</h3>
+        <pre data-lang="JavaScript"><code><span class="cm">// Observer তৈরি করা</span>
+<span class="kw">const</span> observer = <span class="kw">new</span> <span class="fn">IntersectionObserver</span>(<span class="kw">function</span>(entries) {
+  entries.<span class="fn">forEach</span>(entry => {
+    <span class="kw">if</span> (entry.isIntersecting) {
+      <span class="cm">// element viewport-এ এসেছে</span>
+      entry.target.classList.<span class="fn">add</span>(<span class="str">'visible'</span>);
+      observer.<span class="fn">unobserve</span>(entry.target); <span class="cm">// একবার দেখলে বন্ধ</span>
+    }
+  });
+}, {
+  threshold: <span class="num">0.1</span>,   <span class="cm">// 10% দেখা গেলে trigger</span>
+  rootMargin: <span class="str">'0px 0px -50px 0px'</span> <span class="cm">// নিচ থেকে 50px আগে</span>
+});
+
+<span class="cm">// কোন elements observe করব</span>
+document.<span class="fn">querySelectorAll</span>(<span class="str">'.animate-item'</span>)
+  .<span class="fn">forEach</span>(el => observer.<span class="fn">observe</span>(el));</code></pre>
+      </div>
+
+      <div class="card">
+        <h3><span class="icon">2️⃣</span> Lazy Loading Images</h3>
+        <pre data-lang="JavaScript"><code><span class="kw">const</span> imageObserver = <span class="kw">new</span> <span class="fn">IntersectionObserver</span>((entries) => {
+  entries.<span class="fn">forEach</span>(entry => {
+    <span class="kw">if</span> (entry.isIntersecting) {
+      <span class="kw">const</span> img = entry.target;
+      <span class="cm">// data-src থেকে src-এ নিয়ে আসা</span>
+      img.src = img.dataset.src;
+      img.classList.<span class="fn">add</span>(<span class="str">'loaded'</span>);
+      imageObserver.<span class="fn">unobserve</span>(img);
+    }
+  });
+});
+
+<span class="cm">// সব lazy image observe করা</span>
+document.<span class="fn">querySelectorAll</span>(<span class="str">'img[data-src]'</span>)
+  .<span class="fn">forEach</span>(img => imageObserver.<span class="fn">observe</span>(img));</code></pre>
+        <pre data-lang="HTML"><code><span class="cm">&lt;!-- HTML: src খালি, data-src-এ real URL --&gt;</span>
+<span class="tag">&lt;img</span> <span class="prop">src</span>=<span class="str">"placeholder.jpg"</span> 
+     <span class="prop">data-src</span>=<span class="str">"real-image.jpg"</span>
+     <span class="prop">class</span>=<span class="str">"lazy"</span><span class="tag">&gt;</span></code></pre>
+      </div>
+
+      <div class="card">
+        <h3><span class="icon">3️⃣</span> Infinite Scroll (কোনো "Load More" button ছাড়া)</h3>
+        <pre data-lang="JavaScript"><code><span class="kw">const</span> sentinel = document.<span class="fn">getElementById</span>(<span class="str">'sentinel'</span>);
+
+<span class="kw">const</span> loadMoreObserver = <span class="kw">new</span> <span class="fn">IntersectionObserver</span>((entries) => {
+  <span class="kw">if</span> (entries[<span class="num">0</span>].isIntersecting) {
+    <span class="fn">loadMorePosts</span>(); <span class="cm">// নতুন কনটেন্ট লোড</span>
+  }
+});
+
+loadMoreObserver.<span class="fn">observe</span>(sentinel);
+
+<span class="cm">// sentinel: list-এর শেষে একটি div</span>
+<span class="cm">// যখন সেটা দেখা যাবে, নতুন ডেটা লোড হবে</span></code></pre>
+      </div>
+
+      <!-- Live Demo IO -->
+      <div class="demo-area">
+        <h4>🧪 লাইভ ডেমো — Intersection Observer</h4>
+        <p style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;">নিচের বক্সে স্ক্রল করুন — items viewport-এ আসলে animate হবে:</p>
+        <div class="scroll-demo-container" id="scroll-container">
+          <div class="scroll-item" data-observe>📌 আইটেম ১ — Form Validation</div>
+          <div class="scroll-item" data-observe>📌 আইটেম ২ — Intersection Observer</div>
+          <div class="scroll-item" data-observe>📌 আইটেম ৩ — Geolocation API</div>
+          <div class="scroll-item" data-observe>📌 আইটেম ৪ — Theme Toggle</div>
+          <div class="scroll-item" data-observe>📌 আইটেম ৫ — Lazy Loading</div>
+          <div class="scroll-item" data-observe>📌 আইটেম ৬ — Infinite Scroll</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-io-viva">
+      <div class="qa-item">
+        <div class="q">Q1. scroll event দিয়ে করলে কী সমস্যা?</div>
+        <div class="a">scroll event প্রতি millisecond-এ শত শত বার fire করে, getBoundingClientRect() প্রতিবার layout recalculation ঘটায় — এতে "layout thrashing" হয় এবং UI jank (ধাক্কা) দেয়। Intersection Observer asynchronous ও browser-optimized।</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Q2. threshold কী? 0 আর 1 মানে কী?</div>
+        <div class="a"><code>threshold: 0</code> মানে element-এর ১ pixel দেখা গেলেই callback fire হবে। <code>threshold: 1</code> মানে পুরো element দেখা গেলে। <code>[0, 0.5, 1]</code> array দিলে তিনটি পয়েন্টেই fire হবে।</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Q3. rootMargin কী কাজ করে?</div>
+        <div class="a">root element-এর margin বাড়ায় বা কমায় (CSS margin-এর মতো: top right bottom left)। যেমন <code>rootMargin: '0px 0px -100px 0px'</code> দিলে viewport-এর ১০০px উপরে থাকতেই trigger হবে।</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Q4. unobserve() কখন দরকার?</div>
+        <div class="a">যখন animation একবারই দেখাতে চাই (বারবার না), তখন callback-এর ভেতরে <code>observer.unobserve(entry.target)</code> করলে সেই element আর observe হবে না।</div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-io-challenge">
+      <div class="challenge-item">
+        <div class="title">চ্যালেঞ্জ ১ — Scroll Animation <span class="diff-badge easy">Easy</span></div>
+        <p style="font-size:0.83rem;color:#94a3b8;margin-bottom:12px;">৫টি card বানাও যেগুলো scroll করে viewport-এ আসলে fade-in হবে।</p>
+        <pre data-lang="Solution"><code><span class="cm">/* CSS */</span>
+.card { opacity: <span class="num">0</span>; transform: <span class="fn">translateY</span>(<span class="num">30px</span>); transition: <span class="num">0.5s</span>; }
+.card.visible { opacity: <span class="num">1</span>; transform: <span class="fn">translateY</span>(<span class="num">0</span>); }
+
+<span class="cm">/* JS */</span>
+<span class="kw">const</span> obs = <span class="kw">new</span> <span class="fn">IntersectionObserver</span>(entries => {
+  entries.<span class="fn">forEach</span>(e => {
+    <span class="kw">if</span> (e.isIntersecting) e.target.classList.<span class="fn">add</span>(<span class="str">'visible'</span>);
+  });
+}, { threshold: <span class="num">0.2</span> });
+
+document.<span class="fn">querySelectorAll</span>(<span class="str">'.card'</span>)
+  .<span class="fn">forEach</span>(c => obs.<span class="fn">observe</span>(c));</code></pre>
+      </div>
+
+      <div class="challenge-item">
+        <div class="title">চ্যালেঞ্জ ২ — Reading Progress Bar <span class="diff-badge medium">Medium</span></div>
+        <p style="font-size:0.83rem;color:#94a3b8;margin-bottom:12px;">পেজের উপরে একটি progress bar দেখাও যা scroll করার সাথে বাড়বে। Article-এর শেষে পৌঁছালে ১০০% হবে।</p>
+        <pre data-lang="Solution"><code><span class="kw">const</span> article = document.<span class="fn">getElementById</span>(<span class="str">'article'</span>);
+<span class="kw">const</span> progressBar = document.<span class="fn">getElementById</span>(<span class="str">'progress'</span>);
+
+<span class="kw">const</span> obs = <span class="kw">new</span> <span class="fn">IntersectionObserver</span>(entries => {
+  <span class="kw">const</span> ratio = entries[<span class="num">0</span>].intersectionRatio;
+  progressBar.style.width = <span class="str">`</span><span class="kw">${ratio * 100}</span><span class="str">%`</span>;
+}, {
+  threshold: Array.<span class="fn">from</span>({length: <span class="num">101</span>}, (_, i) => i / <span class="num">100</span>)
+});
+
+obs.<span class="fn">observe</span>(article);</code></pre>
+      </div>
+
+      <div class="challenge-item">
+        <div class="title">চ্যালেঞ্জ ৩ — Lazy Image Gallery <span class="diff-badge hard">Hard</span></div>
+        <p style="font-size:0.83rem;color:#94a3b8;margin-bottom:12px;">২০টি ছবির gallery বানাও যেখানে শুধু viewport-এর কাছের ছবিগুলোই load হবে। Loading placeholder দেখাবে।</p>
+        <pre data-lang="Solution"><code><span class="cm">// Dynamic image creation</span>
+<span class="kw">const</span> images = Array.<span class="fn">from</span>({length: <span class="num">20</span>}, (_, i) => ({
+  placeholder: <span class="str">'data:image/svg+xml,...'</span>,
+  src: <span class="str">`https://picsum.photos/300/200?random=</span><span class="kw">${i}</span><span class="str">`</span>
+}));
+
+<span class="kw">const</span> lazyObs = <span class="kw">new</span> <span class="fn">IntersectionObserver</span>(entries => {
+  entries.<span class="fn">forEach</span>(entry => {
+    <span class="kw">if</span> (entry.isIntersecting) {
+      <span class="kw">const</span> img = entry.target;
+      img.src = img.dataset.src;
+      img.onload = () => img.classList.<span class="fn">add</span>(<span class="str">'loaded'</span>);
+      lazyObs.<span class="fn">unobserve</span>(img);
+    }
+  });
+}, { rootMargin: <span class="str">'100px'</span> }); <span class="cm">// 100px আগেই load</span></code></pre>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-io-project">
+      <div class="card">
+        <h3><span class="icon">🚀</span> বাস্তব প্রজেক্টে ব্যবহার</h3>
+      </div>
+      <div class="project-grid">
+        <div class="project-card">
+          <div class="proj-icon">🛍️</div>
+          <h4>Amazon / Daraz</h4>
+          <p>Infinite scroll — page-এর শেষে আসলে নতুন product load হয় automatically।</p>
+        </div>
+        <div class="project-card">
+          <div class="proj-icon">📰</div>
+          <h4>News Feed (Facebook)</h4>
+          <p>Scroll করার সাথে নতুন post লোড হয়, video auto-play হয় viewport-এ আসলে।</p>
+        </div>
+        <div class="project-card">
+          <div class="proj-icon">🎨</div>
+          <h4>Portfolio/Landing Page</h4>
+          <p>Scroll animations — skill bars, counter numbers, section fade-ins।</p>
+        </div>
+        <div class="project-card">
+          <div class="proj-icon">📊</div>
+          <h4>Analytics Dashboard</h4>
+          <p>Charts শুধু তখনই render হয় যখন user সেই section-এ স্ক্রল করে।</p>
+        </div>
+        <div class="project-card">
+          <div class="proj-icon">📸</div>
+          <h4>Instagram Clone</h4>
+          <p>Lazy image loading — হাজার ছবি থাকলেও শুধু দৃশ্যমান ছবিগুলোই load করে।</p>
+        </div>
+        <div class="project-card">
+          <div class="proj-icon">📱</div>
+          <h4>YouTube</h4>
+          <p>Video viewport-এ আসলে autoplay, চলে গেলে pause।</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TOPIC 3: GEOLOCATION ===================== -->
+  <div class="topic-section" id="topic-geo">
+    <div class="topic-header">
+      <div class="topic-number">3</div>
+      <div class="topic-title-text">
+        <h2>Geolocation API</h2>
+        <p>ব্যবহারকারীর অবস্থান GPS/WiFi থেকে নেওয়া</p>
+      </div>
+    </div>
+
+    <div class="tabs" id="tabs-geo">
+      <button class="tab active" onclick="showPanel('geo','concept')">📖 কনসেপ্ট</button>
+      <button class="tab" onclick="showPanel('geo','viva')">🎤 ভাইবা গাইড</button>
+      <button class="tab" onclick="showPanel('geo','challenge')">💻 চ্যালেঞ্জ</button>
+      <button class="tab" onclick="showPanel('geo','project')">🚀 ফিউচার</button>
+    </div>
+
+    <div class="panel active" id="panel-geo-concept">
+      <div class="card">
+        <h3><span class="icon">📖</span> Geolocation API কী?</h3>
+        <p>Browser-এর built-in API যা user-এর ভৌগোলিক অবস্থান (latitude, longitude) জানতে পারে। GPS, WiFi, cell tower, বা IP address ব্যবহার করে। <strong>User permission আবশ্যক</strong> — ব্রাউজার নিজেই permission dialog দেখায়।</p>
+      </div>
+
+      <div class="card">
+        <h3><span class="icon">1️⃣</span> getCurrentPosition — একবার অবস্থান নেওয়া</h3>
+        <pre data-lang="JavaScript"><code><span class="kw">function</span> <span class="fn">getLocation</span>() {
+  <span class="cm">// Browser support চেক</span>
+  <span class="kw">if</span> (!navigator.geolocation) {
+    console.<span class="fn">log</span>(<span class="str">'Geolocation সাপোর্ট নেই!'</span>);
+    <span class="kw">return</span>;
+  }
+
+  navigator.geolocation.<span class="fn">getCurrentPosition</span>(
+    <span class="cm">// Success callback</span>
+    <span class="kw">function</span>(position) {
+      <span class="kw">const</span> lat = position.coords.latitude;
+      <span class="kw">const</span> lng = position.coords.longitude;
+      <span class="kw">const</span> accuracy = position.coords.accuracy; <span class="cm">// মিটারে</span>
+      
+      console.<span class="fn">log</span>(<span class="str">`Latitude: </span><span class="kw">${lat}</span><span class="str">`</span>);
+      console.<span class="fn">log</span>(<span class="str">`Longitude: </span><span class="kw">${lng}</span><span class="str">`</span>);
+      console.<span class="fn">log</span>(<span class="str">`নির্ভুলতা: </span><span class="kw">${accuracy}</span><span class="str"> মিটার`</span>);
+    },
+    <span class="cm">// Error callback</span>
+    <span class="kw">function</span>(error) {
+      <span class="kw">switch</span>(error.code) {
+        <span class="kw">case</span> <span class="num">1</span>: console.<span class="fn">log</span>(<span class="str">'Permission denied'</span>); <span class="kw">break</span>;
+        <span class="kw">case</span> <span class="num">2</span>: console.<span class="fn">log</span>(<span class="str">'Position unavailable'</span>); <span class="kw">break</span>;
+        <span class="kw">case</span> <span class="num">3</span>: console.<span class="fn">log</span>(<span class="str">'Timeout'</span>); <span class="kw">break</span>;
+      }
+    },
+    <span class="cm">// Options</span>
+    {
+      enableHighAccuracy: <span class="kw">true</span>,  <span class="cm">// GPS ব্যবহার করবে</span>
+      timeout: <span class="num">10000</span>,            <span class="cm">// ১০ সেকেন্ড সময়</span>
+      maximumAge: <span class="num">60000</span>          <span class="cm">// ১ মিনিট পুরনো cache ব্যবহার</span>
+    }
+  );
+}</code></pre>
+      </div>
+
+      <div class="card">
+        <h3><span class="icon">2️⃣</span> watchPosition — অবস্থান পরিবর্তন track করা</h3>
+        <pre data-lang="JavaScript"><code><span class="cm">// Location tracking শুরু</span>
+<span class="kw">const</span> watchId = navigator.geolocation.<span class="fn">watchPosition</span>(
+  (position) => {
+    <span class="fn">updateMap</span>(position.coords.latitude, position.coords.longitude);
+    console.<span class="fn">log</span>(<span class="str">'অবস্থান আপডেট হয়েছে!'</span>);
+  },
+  (error) => console.<span class="fn">error</span>(error)
+);
+
+<span class="cm">// Tracking বন্ধ করা</span>
+navigator.geolocation.<span class="fn">clearWatch</span>(watchId);</code></pre>
+      </div>
+
+      <div class="card">
+        <h3><span class="icon">3️⃣</span> Google Maps-এ দেখানো</h3>
+        <pre data-lang="JavaScript"><code>navigator.geolocation.<span class="fn">getCurrentPosition</span>((position) => {
+  <span class="kw">const</span> { latitude, longitude } = position.coords;
+  
+  <span class="cm">// Google Maps link তৈরি</span>
+  <span class="kw">const</span> mapsUrl = 
+    <span class="str">`https://maps.google.com/?q=</span><span class="kw">${latitude}</span><span class="str">,</span><span class="kw">${longitude}</span><span class="str">`</span>;
+  
+  <span class="cm">// Open Street Map embed</span>
+  <span class="kw">const</span> osmUrl = 
+    <span class="str">`https://www.openstreetmap.org/?mlat=</span><span class="kw">${latitude}</span><span class="str">&mlon=</span><span class="kw">${longitude}</span><span class="str">#map=15`</span>;
+  
+  mapLink.href = mapsUrl;
+  mapLink.textContent = <span class="str">'আমার অবস্থান দেখুন'</span>;
+});</code></pre>
+      </div>
+
+      <!-- Live Demo Geo -->
+      <div class="demo-area">
+        <h4>🧪 লাইভ ডেমো — Geolocation</h4>
+        <button class="geo-btn" onclick="getMyLocation()">📍 আমার অবস্থান জানুন</button>
+        <div class="demo-output" id="geo-output">Button ক্লিক করলে browser permission চাইবে...</div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-geo-viva">
+      <div class="qa-item">
+        <div class="q">Q1. Geolocation কি শুধু GPS ব্যবহার করে?</div>
+        <div class="a">না। Browser ৩টি source ব্যবহার করতে পারে: GPS (সবচেয়ে নির্ভুল, mobile-এ), WiFi triangulation (শহরে ভালো কাজ করে), IP address (সবচেয়ে কম নির্ভুল, শুধু city-level)। <code>enableHighAccuracy: true</code> দিলে GPS চেষ্টা করে।</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Q2. HTTP-তে কি Geolocation কাজ করে?</div>
+        <div class="a">না। Security কারণে Geolocation API শুধু <strong>HTTPS</strong> connection-এ কাজ করে (localhost ব্যতীত)। এটা একটি "secure context" requirement।</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Q3. getCurrentPosition আর watchPosition-এর পার্থক্য?</div>
+        <div class="a"><code>getCurrentPosition</code> একবার location নেয়। <code>watchPosition</code> continuous tracking করে — device নড়লে বা location আপডেট হলে callback বারবার fire করে। ID return করে যা দিয়ে <code>clearWatch()</code> করে বন্ধ করা যায়।</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Q4. User যদি permission deny করে?</div>
+        <div class="a">Error callback-এ <code>error.code === 1</code> হবে (PERMISSION_DENIED)। UI-তে friendly message দেখাতে হবে এবং IP-based fallback বা manual address input দেওয়া উচিত।</div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-geo-challenge">
+      <div class="challenge-item">
+        <div class="title">চ্যালেঞ্জ ১ — Distance Calculator <span class="diff-badge medium">Medium</span></div>
+        <p style="font-size:0.83rem;color:#94a3b8;margin-bottom:12px;">User-এর location নিয়ে Dhaka (23.8103, 90.4125) থেকে কতদূরে আছে তা km-এ দেখাও (Haversine formula)।</p>
+        <pre data-lang="Solution"><code><span class="kw">function</span> <span class="fn">haversine</span>(lat1, lon1, lat2, lon2) {
+  <span class="kw">const</span> R = <span class="num">6371</span>; <span class="cm">// km</span>
+  <span class="kw">const</span> dLat = (lat2-lat1) * Math.PI/<span class="num">180</span>;
+  <span class="kw">const</span> dLon = (lon2-lon1) * Math.PI/<span class="num">180</span>;
+  <span class="kw">const</span> a = Math.<span class="fn">sin</span>(dLat/<span class="num">2</span>) ** <span class="num">2</span> +
+    Math.<span class="fn">cos</span>(lat1 * Math.PI/<span class="num">180</span>) *
+    Math.<span class="fn">cos</span>(lat2 * Math.PI/<span class="num">180</span>) *
+    Math.<span class="fn">sin</span>(dLon/<span class="num">2</span>) ** <span class="num">2</span>;
+  <span class="kw">return</span> <span class="num">2</span> * R * Math.<span class="fn">asin</span>(Math.<span class="fn">sqrt</span>(a));
+}
+
+navigator.geolocation.<span class="fn">getCurrentPosition</span>(pos => {
+  <span class="kw">const</span> dist = <span class="fn">haversine</span>(
+    pos.coords.latitude, pos.coords.longitude,
+    <span class="num">23.8103</span>, <span class="num">90.4125</span>
+  );
+  output.textContent = <span class="str">`ঢাকা থেকে </span><span class="kw">${dist.toFixed(1)}</span><span class="str"> km দূরে`</span>;
+});</code></pre>
+      </div>
+
+      <div class="challenge-item">
+        <div class="title">চ্যালেঞ্জ ২ — Location-based Weather <span class="diff-badge hard">Hard</span></div>
+        <p style="font-size:0.83rem;color:#94a3b8;margin-bottom:12px;">User-এর location নিয়ে OpenWeatherMap API থেকে সেই জায়গার আবহাওয়া fetch করে দেখাও।</p>
+        <pre data-lang="Solution"><code>navigator.geolocation.<span class="fn">getCurrentPosition</span>(<span class="kw">async</span> pos => {
+  <span class="kw">const</span> { latitude, longitude } = pos.coords;
+  <span class="kw">const</span> API_KEY = <span class="str">'your_api_key'</span>;
+  
+  <span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(
+    <span class="str">`https://api.openweathermap.org/data/2.5/weather`</span> +
+    <span class="str">`?lat=</span><span class="kw">${latitude}</span><span class="str">&lon=</span><span class="kw">${longitude}</span><span class="str">&appid=</span><span class="kw">${API_KEY}</span><span class="str">&units=metric`</span>
+  );
+  <span class="kw">const</span> data = <span class="kw">await</span> res.<span class="fn">json</span>();
+  
+  output.innerHTML = <span class="str">`
+    🌍 </span><span class="kw">${data.name}</span><span class="str">
+    🌡️ </span><span class="kw">${data.main.temp}</span><span class="str">°C
+    ☁️ </span><span class="kw">${data.weather[0].description}</span><span class="str">
+  `</span>;
+});</code></pre>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-geo-project">
+      <div class="card">
+        <h3><span class="icon">🚀</span> বাস্তব প্রজেক্টে ব্যবহার</h3>
+      </div>
+      <div class="project-grid">
+        <div class="project-card">
+          <div class="proj-icon">🗺️</div>
+          <h4>Google Maps / Pathao</h4>
+          <p>User-এর current location থেকে গন্তব্যের route দেখানো।</p>
+        </div>
+        <div class="project-card">
+          <div class="proj-icon">🌦️</div>
+          <h4>Weather App</h4>
+          <p>Location ধরে automatically সেই এলাকার আবহাওয়া দেখানো।</p>
+        </div>
+        <div class="project-card">
+          <div class="proj-icon">🍕</div>
+          <h4>Food Delivery</h4>
+          <p>Shohoz/Foodpanda: নিকটতম রেস্টুরেন্ট খোঁজা।</p>
+        </div>
+        <div class="project-card">
+          <div class="proj-icon">🚖</div>
+          <h4>Ride Sharing</h4>
+          <p>Uber/Pathao: Live tracking, driver কোথায় আছে দেখানো।</p>
+        </div>
+        <div class="project-card">
+          <div class="proj-icon">🏪</div>
+          <h4>Store Locator</h4>
+          <p>কাছের ATM, হাসপাতাল, দোকান খোঁজা।</p>
+        </div>
+        <div class="project-card">
+          <div class="proj-icon">🎯</div>
+          <h4>Geo-fencing App</h4>
+          <p>নির্দিষ্ট এলাকায় ঢুকলে বা বের হলে notification।</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TOPIC 4: THEME TOGGLE ===================== -->
+  <div class="topic-section" id="topic-theme">
+    <div class="topic-header">
+      <div class="topic-number">4</div>
+      <div class="topic-title-text">
+        <h2>localStorage দিয়ে Theme Toggle</h2>
+        <p>Dark/Light mode পরিবর্তন ও সেটিং save করা</p>
+      </div>
+    </div>
+
+    <div class="tabs" id="tabs-theme">
+      <button class="tab active" onclick="showPanel('theme','concept')">📖 কনসেপ্ট</button>
+      <button class="tab" onclick="showPanel('theme','viva')">🎤 ভাইবা গাইড</button>
+      <button class="tab" onclick="showPanel('theme','challenge')">💻 চ্যালেঞ্জ</button>
+      <button class="tab" onclick="showPanel('theme','project')">🚀 ফিউচার</button>
+    </div>
+
+    <div class="panel active" id="panel-theme-concept">
+      <div class="card">
+        <h3><span class="icon">📖</span> Theme Toggle কীভাবে কাজ করে?</h3>
+        <p>CSS variables দিয়ে দুটো theme define করা হয়। JavaScript দিয়ে body-তে class toggle করা হয়। localStorage-এ user-এর পছন্দ save করা হয় — পেজ refresh বা পরের দিন আবার আসলেও তার পছন্দ মনে থাকে।</p>
+      </div>
+
+      <div class="card">
+        <h3><span class="icon">1️⃣</span> CSS Variables দিয়ে Theme</h3>
+        <pre data-lang="CSS"><code><span class="cm">/* Default: Light Theme */</span>
+<span class="prop">:root</span> {
+  --bg: <span class="str">#ffffff</span>;
+  --text: <span class="str">#333333</span>;
+  --card: <span class="str">#f5f5f5</span>;
+  --border: <span class="str">#dddddd</span>;
+}
+
+<span class="cm">/* Dark Theme: body-তে class দিলে */</span>
+<span class="prop">body.dark-theme</span> {
+  --bg: <span class="str">#0d0f1a</span>;
+  --text: <span class="str">#e2e8f0</span>;
+  --card: <span class="str">#1a1f35</span>;
+  --border: <span class="str">#2a3055</span>;
+}
+
+<span class="cm">/* সব element automatically update হবে */</span>
+<span class="prop">body</span> { background: <span class="prop">var(--bg)</span>; color: <span class="prop">var(--text)</span>; }
+<span class="prop">.card</span> { background: <span class="prop">var(--card)</span>; border: <span class="prop">1px solid var(--border)</span>; }
+
+<span class="cm">/* Smooth transition */</span>
+<span class="prop">*, *::before, *::after</span> {
+  transition: background-color <span class="num">0.3s</span>, color <span class="num">0.3s</span>;
+}</code></pre>
+      </div>
+
+      <div class="card">
+        <h3><span class="icon">2️⃣</span> JavaScript Toggle Logic</h3>
+        <pre data-lang="JavaScript"><code><span class="kw">const</span> toggleBtn = document.<span class="fn">getElementById</span>(<span class="str">'theme-toggle'</span>);
+
+<span class="cm">// Page load-এ saved theme check করা</span>
+<span class="kw">const</span> savedTheme = localStorage.<span class="fn">getItem</span>(<span class="str">'theme'</span>) || <span class="str">'light'</span>;
+<span class="fn">applyTheme</span>(savedTheme);
+
+<span class="cm">// Button click-এ toggle</span>
+toggleBtn.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, <span class="kw">function</span>() {
+  <span class="kw">const</span> current = document.body.classList.contains(<span class="str">'dark-theme'</span>)
+    ? <span class="str">'dark'</span> : <span class="str">'light'</span>;
+  
+  <span class="kw">const</span> next = current === <span class="str">'dark'</span> ? <span class="str">'light'</span> : <span class="str">'dark'</span>;
+  <span class="fn">applyTheme</span>(next);
+});
+
+<span class="kw">function</span> <span class="fn">applyTheme</span>(theme) {
+  <span class="kw">if</span> (theme === <span class="str">'dark'</span>) {
+    document.body.classList.<span class="fn">add</span>(<span class="str">'dark-theme'</span>);
+    toggleBtn.textContent = <span class="str">'☀️ Light Mode'</span>;
+  } <span class="kw">else</span> {
+    document.body.classList.<span class="fn">remove</span>(<span class="str">'dark-theme'</span>);
+    toggleBtn.textContent = <span class="str">'🌙 Dark Mode'</span>;
+  }
+  localStorage.<span class="fn">setItem</span>(<span class="str">'theme'</span>, theme);
+}</code></pre>
+      </div>
+
+      <div class="card">
+        <h3><span class="icon">3️⃣</span> OS Theme Preference (prefers-color-scheme)</h3>
+        <pre data-lang="JavaScript"><code><span class="cm">// OS-এর theme preference detect করা</span>
+<span class="kw">const</span> prefersDark = window
+  .<span class="fn">matchMedia</span>(<span class="str">'(prefers-color-scheme: dark)'</span>)
+  .matches;
+
+<span class="cm">// localStorage না থাকলে OS preference ব্যবহার</span>
+<span class="kw">const</span> savedTheme = localStorage.<span class="fn">getItem</span>(<span class="str">'theme'</span>);
+<span class="kw">const</span> initialTheme = savedTheme || (prefersDark ? <span class="str">'dark'</span> : <span class="str">'light'</span>);
+<span class="fn">applyTheme</span>(initialTheme);
+
+<span class="cm">// OS theme পরিবর্তন হলে auto-update (optional)</span>
+window.<span class="fn">matchMedia</span>(<span class="str">'(prefers-color-scheme: dark)'</span>)
+  .<span class="fn">addEventListener</span>(<span class="str">'change'</span>, e => {
+    <span class="kw">if</span> (!localStorage.<span class="fn">getItem</span>(<span class="str">'theme'</span>)) {
+      <span class="fn">applyTheme</span>(e.matches ? <span class="str">'dark'</span> : <span class="str">'light'</span>);
+    }
+  });</code></pre>
+      </div>
+
+      <!-- Live Demo Theme -->
+      <div class="demo-area">
+        <h4>🧪 লাইভ ডেমো — Theme Toggle</h4>
+        <div class="theme-toggle-demo">
+          <span style="font-size:0.85rem;color:var(--muted)">☀️ Light</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="theme-demo-toggle" onchange="demoThemeToggle()">
+            <span class="slider"></span>
+          </label>
+          <span style="font-size:0.85rem;color:var(--muted)">🌙 Dark</span>
+          <span style="font-size:0.75rem;color:var(--accent3);margin-left:10px;" id="storage-indicator"></span>
+        </div>
+        <div class="demo-output" id="theme-output">Theme toggle করুন...</div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-theme-viva">
+      <div class="qa-item">
+        <div class="q">Q1. CSS variables দিয়ে theme কেন? Separate CSS file কেন না?</div>
+        <div class="a">CSS variables শুধু একটি attribute change করলেই সব UI একসাথে update হয় — কোনো extra DOM manipulation লাগে না। Separate files-এ dynamic switching জটিল হয়।</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Q2. FOUC (Flash of Unstyled Content) সমস্যা কী?</div>
+        <div class="a">যদি theme JavaScript-এর load হওয়ার আগে default theme দেখায়, তাহলে মুহূর্তের জন্য wrong theme flash করে। সমাধান: theme script <code>&lt;head&gt;</code>-এ রাখা বা CSS custom property inline style হিসেবে দেওয়া।</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Q3. data-theme attribute vs class — কোনটা ভালো?</div>
+        <div class="a">দুটোই চলে। <code>data-theme="dark"</code> on <code>&lt;html&gt;</code> বেশি semantic — CSS-এ <code>[data-theme="dark"]</code> দিয়ে select করা যায়। Class approach বেশি সহজ। বড় প্রজেক্টে data-theme বেশি প্রচলিত।</div>
+      </div>
+      <div class="qa-item">
+        <div class="q">Q4. Multiple themes (e.g. 3+ themes) কীভাবে করব?</div>
+        <div class="a">localStorage-এ theme name store করব ('light', 'dark', 'solarized', 'high-contrast')। প্রতিটি theme-এর জন্য CSS variables-এর set। <code>document.documentElement.setAttribute('data-theme', themeName)</code> দিয়ে switch করব।</div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-theme-challenge">
+      <div class="challenge-item">
+        <div class="title">চ্যালেঞ্জ ১ — Full Page Theme Toggle <span class="diff-badge easy">Easy</span></div>
+        <p style="font-size:0.83rem;color:#94a3b8;margin-bottom:12px;">Header, sidebar, main content সহ একটি পেজ বানাও। Dark/Light toggle করলে সব বদলাবে। Refresh করলেও theme মনে থাকবে।</p>
+        <pre data-lang="Solution"><code><span class="cm">// Page load-এ এটা &lt;head&gt;-এ রাখো (FOUC prevent করতে)</span>
+<span class="kw">const</span> theme = localStorage.<span class="fn">getItem</span>(<span class="str">'theme'</span>) ?? <span class="str">'light'</span>;
+document.documentElement
+  .<span class="fn">setAttribute</span>(<span class="str">'data-theme'</span>, theme);</code></pre>
+      </div>
+
+      <div class="challenge-item">
+        <div class="title">চ্যালেঞ্জ ২ — 4-Color Theme Picker <span class="diff-badge medium">Medium</span></div>
+        <p style="font-size:0.83rem;color:#94a3b8;margin-bottom:12px;">৪টি color theme (Blue, Green, Purple, Red) সহ একটি settings panel বানাও। User যেটা বেছে নেবে সেটা localStorage-এ save হবে।</p>
+        <pre data-lang="Solution"><code><span class="kw">const</span> themes = {
+  blue:   { <span class="str">'--accent'</span>: <span class="str">'#00e5ff'</span>, <span class="str">'--bg'</span>: <span class="str">'#0d1117'</span> },
+  green:  { <span class="str">'--accent'</span>: <span class="str">'#34d399'</span>, <span class="str">'--bg'</span>: <span class="str">'#0d1a0f'</span> },
+  purple: { <span class="str">'--accent'</span>: <span class="str">'#a78bfa'</span>, <span class="str">'--bg'</span>: <span class="str">'#0f0d1a'</span> },
+};
+
+<span class="kw">function</span> <span class="fn">setTheme</span>(name) {
+  <span class="kw">const</span> vars = themes[name];
+  Object.<span class="fn">entries</span>(vars).<span class="fn">forEach</span>(([key, val]) => {
+    document.documentElement.style
+      .<span class="fn">setProperty</span>(key, val);
+  });
+  localStorage.<span class="fn">setItem</span>(<span class="str">'colorTheme'</span>, name);
+}</code></pre>
+      </div>
+
+      <div class="challenge-item">
+        <div class="title">চ্যালেঞ্জ ৩ — Animated Theme Transition <span class="diff-badge hard">Hard</span></div>
+        <p style="font-size:0.83rem;color:#94a3b8;margin-bottom:12px;">Theme toggle করার সময় circular reveal animation দেখাও (click point থেকে circle ছড়িয়ে পড়বে)।</p>
+        <pre data-lang="Solution"><code><span class="cm">// View Transitions API ব্যবহার</span>
+toggleBtn.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, <span class="kw">async</span> (e) => {
+  <span class="kw">if</span> (!document.startViewTransition) {
+    <span class="fn">toggleTheme</span>(); <span class="kw">return</span>; <span class="cm">// fallback</span>
+  }
+  
+  <span class="cm">// Click position থেকে animation শুরু</span>
+  <span class="kw">const</span> x = e.clientX, y = e.clientY;
+  document.documentElement.style
+    .<span class="fn">setProperty</span>(<span class="str">'--x'</span>, <span class="str">`</span><span class="kw">${x}</span><span class="str">px`</span>);
+  document.documentElement.style
+    .<span class="fn">setProperty</span>(<span class="str">'--y'</span>, <span class="str">`</span><span class="kw">${y}</span><span class="str">px`</span>);
+  
+  <span class="kw">await</span> document.<span class="fn">startViewTransition</span>(<span class="fn">toggleTheme</span>).ready;
+});</code></pre>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-theme-project">
+      <div class="card">
+        <h3><span class="icon">🚀</span> বাস্তব প্রজেক্টে ব্যবহার</h3>
+      </div>
+      <div class="project-grid">
+        <div class="project-card">
+          <div class="proj-icon">💻</div>
+          <h4>GitHub / VS Code</h4>
+          <p>Dark/Light theme toggle — developer সবচেয়ে বেশি ব্যবহার করে এই feature।</p>
+        </div>
+        <div class="project-card">
+          <div class="proj-icon">📱</div>
+          <h4>Social Media Apps</h4>
+          <p>Facebook, Twitter, Instagram — সব app-এ dark mode এখন standard feature।</p>
+        </div>
+        <div class="project-card">
+          <div class="proj-icon">📰</div>
+          <h4>News/Blog Sites</h4>
+          <p>রাতে পড়ার জন্য dark mode — eye strain কমায়।</p>
+        </div>
+        <div class="project-card">
+          <div class="proj-icon">🛒</div>
+          <h4>E-commerce</h4>
+          <p>User preference save করে personalized experience দেওয়া।</p>
+        </div>
+        <div class="project-card">
+          <div class="proj-icon">🎨</div>
+          <h4>Portfolio</h4>
+          <p>থিম সুইচার যোগ করলে ইন্টারেক্টিভ এবং professional দেখায়।</p>
+        </div>
+        <div class="project-card">
+          <div class="proj-icon">♿</div>
+          <h4>Accessibility</h4>
+          <p>High contrast theme visually impaired users-দের জন্য।</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>পর্যায় ১৯ — Advanced DOM & Browser APIs | JavaScript Mastery Journey 🚀</p>
+    <p style="margin-top:6px;">পরের পর্যায়ের জন্য <strong>"Next"</strong> বাটন ক্লিক করো →  পর্যায় ২০: Projects & Practice</p>
+    <nav class="toc">
+        <a href="https://anawarhossain.github.io/Javascript-prcatice/20-Projects/">Next</a>
+    </nav>
+  </footer>
+
+</div>
+
+<script>
+// ============ NAVIGATION ============
+function showTopic(name) {
+  document.querySelectorAll('.topic-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('topic-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function showPanel(topic, panel) {
+  const section = document.getElementById('topic-' + topic);
+  section.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  section.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + topic + '-' + panel).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ============ FORM DEMO ============
+function validateDemo() {
+  const name = document.getElementById('demo-name');
+  const email = document.getElementById('demo-email');
+  const phone = document.getElementById('demo-phone');
+  const output = document.getElementById('form-output');
+  let valid = true;
+
+  // Name
+  document.getElementById('name-error').textContent = '';
+  name.className = '';
+  if (name.value.trim().length < 3) {
+    document.getElementById('name-error').textContent = '❌ নাম কমপক্ষে ৩ অক্ষর হতে হবে';
+    name.classList.add('error'); valid = false;
+  } else { name.classList.add('success'); }
+
+  // Email
+  document.getElementById('email-error').textContent = '';
+  email.className = '';
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRe.test(email.value)) {
+    document.getElementById('email-error').textContent = '❌ সঠিক email দিন';
+    email.classList.add('error'); valid = false;
+  } else { email.classList.add('success'); }
+
+  // Phone
+  document.getElementById('phone-error').textContent = '';
+  phone.className = '';
+  if (!/^\d{11}$/.test(phone.value)) {
+    document.getElementById('phone-error').textContent = '❌ ১১ সংখ্যার ফোন নম্বর দিন';
+    phone.classList.add('error'); valid = false;
+  } else { phone.classList.add('success'); }
+
+  output.style.color = valid ? '#34d399' : '#ff6b6b';
+  output.textContent = valid
+    ? `✅ Form Valid! নাম: ${name.value}, Email: ${email.value}, ফোন: ${phone.value}`
+    : '❌ উপরের ত্রুটিগুলো ঠিক করুন।';
+}
+
+// ============ IO DEMO ============
+const scrollContainer = document.getElementById('scroll-container');
+const scrollItems = scrollContainer.querySelectorAll('[data-observe]');
+
+const ioObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    } else {
+      entry.target.classList.remove('visible');
+    }
+  });
+}, { root: scrollContainer, threshold: 0.5 });
+
+scrollItems.forEach(item => ioObserver.observe(item));
+
+// ============ GEO DEMO ============
+function getMyLocation() {
+  const output = document.getElementById('geo-output');
+  output.textContent = '⏳ অবস্থান খোঁজা হচ্ছে...';
+  output.style.color = '#00e5ff';
+
+  if (!navigator.geolocation) {
+    output.textContent = '❌ আপনার ব্রাউজার Geolocation সাপোর্ট করে না।';
+    output.style.color = '#ff6b6b';
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const { latitude, longitude, accuracy } = position.coords;
+      const mapsUrl = `https://maps.google.com/?q=${latitude},${longitude}`;
+      output.innerHTML = `✅ অবস্থান পাওয়া গেছে!\n📍 Latitude: ${latitude.toFixed(6)}\n📍 Longitude: ${longitude.toFixed(6)}\n🎯 নির্ভুলতা: ${accuracy.toFixed(0)} মিটার\n🗺️ Google Maps: <a href="${mapsUrl}" target="_blank" style="color:var(--accent)">দেখুন →</a>`;
+      output.style.color = '#34d399';
+    },
+    (error) => {
+      const msgs = {
+        1: '❌ Permission denied — ব্রাউজারে location access দিন।',
+        2: '❌ অবস্থান পাওয়া সম্ভব হয়নি।',
+        3: '❌ Timeout — আবার চেষ্টা করুন।'
+      };
+      output.textContent = msgs[error.code] || '❌ কোনো ত্রুটি হয়েছে।';
+      output.style.color = '#ff6b6b';
+    },
+    { enableHighAccuracy: false, timeout: 10000 }
+  );
+}
+
+// ============ THEME DEMO ============
+function demoThemeToggle() {
+  const toggle = document.getElementById('theme-demo-toggle');
+  const output = document.getElementById('theme-output');
+  const indicator = document.getElementById('storage-indicator');
+  const theme = toggle.checked ? 'dark' : 'light';
+  
+  localStorage.setItem('demo-theme', theme);
+  
+  output.textContent = `✅ Theme: "${theme}" — localStorage-এ save হয়েছে!\nKey: "demo-theme", Value: "${theme}"`;
+  output.style.color = toggle.checked ? '#a78bfa' : '#fbbf24';
+  indicator.textContent = `💾 Saved: ${theme}`;
+}
+
+// Load saved demo theme
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('demo-theme');
+  const indicator = document.getElementById('storage-indicator');
+  if (saved) {
+    document.getElementById('theme-demo-toggle').checked = saved === 'dark';
+    indicator.textContent = `💾 Saved: ${saved}`;
+  }
+});
+</script>
+</body>
+</html>

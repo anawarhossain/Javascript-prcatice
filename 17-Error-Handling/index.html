@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>পর্যায় ১৭ — Error Handling | JS বস মিশন</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+Bengali:wght@400;600;700;800&family=Anton&display=swap');
+
+  :root {
+    --bg:       #0f0f0f;
+    --surface:  #161616;
+    --card:     #1c1c1c;
+    --border:   #2a2a2a;
+    --acc1:     #ff3b3b;   /* try-catch     — signal red    */
+    --acc2:     #ff9500;   /* custom errors — amber         */
+    --acc3:     #30d158;   /* error types   — system green  */
+    --acc4:     #0a84ff;   /* debugging     — system blue   */
+    --text:     #e8e8e8;
+    --muted:    #666;
+    --code-bg:  #080808;
+  }
+
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans Bengali', sans-serif;
+    line-height: 1.75;
+    min-height: 100vh;
+  }
+
+  /* ═══ HERO ═══ */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding: 80px 40px 60px;
+    text-align: center;
+    background: #0f0f0f;
+    border-bottom: 1px solid #1e1e1e;
+  }
+  /* animated scan-line bg */
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0px, transparent 3px,
+      rgba(255,59,59,.015) 3px, rgba(255,59,59,.015) 4px
+    );
+    pointer-events: none;
+  }
+  .hero-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(255,59,59,.1) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    pointer-events: none;
+  }
+  .hero-inner { position: relative; z-index: 1; }
+
+  .stage-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; font-weight: 600; letter-spacing: 3px;
+    color: var(--acc1); border: 1px solid rgba(255,59,59,.4);
+    background: rgba(255,59,59,.07);
+    padding: 5px 16px; border-radius: 2px; margin-bottom: 24px;
+  }
+  .stage-chip::before { content: '⚠'; font-size: 12px; }
+
+  .hero h1 {
+    font-family: 'Anton', sans-serif;
+    font-size: clamp(52px, 10vw, 100px);
+    color: #fff; line-height: 0.95;
+    letter-spacing: -1px; margin-bottom: 14px;
+  }
+  .hero h1 em { color: var(--acc1); font-style: normal; display: block; }
+  .hero-desc { color: var(--muted); font-size: 15px; max-width: 540px; margin: 0 auto 28px; }
+
+  .topics-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .topic-chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; font-weight: 600;
+    padding: 5px 14px; border-radius: 3px; border: 1px solid;
+  }
+  .tc1 { color:var(--acc1); border-color:rgba(255,59,59,.35);  background:rgba(255,59,59,.08); }
+  .tc2 { color:var(--acc2); border-color:rgba(255,149,0,.35);  background:rgba(255,149,0,.08); }
+  .tc3 { color:var(--acc3); border-color:rgba(48,209,88,.35);  background:rgba(48,209,88,.08); }
+  .tc4 { color:var(--acc4); border-color:rgba(10,132,255,.35); background:rgba(10,132,255,.08); }
+
+  /* ═══ STICKY NAV ═══ */
+  .toc {
+    display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;
+    padding: 13px 24px; background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .toc a {
+    text-decoration: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; font-weight: 600; letter-spacing: 1px;
+    color: var(--muted); padding: 5px 14px;
+    border: 1px solid var(--border); border-radius: 3px;
+    transition: all .18s;
+  }
+  .toc a:hover { color: var(--acc1); border-color: var(--acc1); background: rgba(255,59,59,.06); }
+
+  /* ═══ LAYOUT ═══ */
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 48px 24px 110px; }
+
+  /* ═══ SECTION HEADER ═══ */
+  .sec { margin-top: 72px; }
+  .sec-hd {
+    display: flex; align-items: flex-end; gap: 18px;
+    margin-bottom: 28px; padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .sec-hd::after {
+    content: ''; position: absolute;
+    bottom: -1px; left: 0; height: 2px; width: 80px;
+  }
+  .s1 .sec-hd::after { background: var(--acc1); }
+  .s2 .sec-hd::after { background: var(--acc2); }
+  .s3 .sec-hd::after { background: var(--acc3); }
+  .s4 .sec-hd::after { background: var(--acc4); }
+
+  .sec-n {
+    font-family: 'Anton', sans-serif;
+    font-size: 72px; line-height: 1; opacity: .09; flex-shrink: 0;
+  }
+  .s1 .sec-n { color: var(--acc1); }
+  .s2 .sec-n { color: var(--acc2); }
+  .s3 .sec-n { color: var(--acc3); }
+  .s4 .sec-n { color: var(--acc4); }
+
+  .sec-info h2  { font-size: 22px; font-weight: 800; color: #fff; }
+  .sec-info sub { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); display: block; margin-top: 3px; }
+
+  /* ═══ CARD ═══ */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 22px;
+    overflow: hidden;
+  }
+  .card-hd {
+    padding: 12px 22px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; font-weight: 600; letter-spacing: 3px;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .h-c1 { color:var(--acc1); background:rgba(255,59,59,.07);  }
+  .h-c2 { color:var(--acc2); background:rgba(255,149,0,.07);  }
+  .h-c3 { color:var(--acc3); background:rgba(48,209,88,.07);  }
+  .h-c4 { color:var(--acc4); background:rgba(10,132,255,.07); }
+  .h-viva { color:var(--acc3); background:rgba(48,209,88,.07); border-bottom:1px solid var(--border); }
+  .h-chal { color:var(--acc2); background:rgba(255,149,0,.07); border-bottom:1px solid var(--border); }
+  .h-fut  { color:var(--acc4); background:rgba(10,132,255,.07); border-bottom:1px solid var(--border); }
+
+  .card-body { padding: 26px; }
+
+  /* ═══ CODE ═══ */
+  pre {
+    background: var(--code-bg);
+    border-radius: 8px; padding: 20px 22px;
+    overflow-x: auto; margin: 14px 0;
+    border-left: 3px solid var(--border);
+  }
+  pre.l1 { border-left-color: var(--acc1); }
+  pre.l2 { border-left-color: var(--acc2); }
+  pre.l3 { border-left-color: var(--acc3); }
+  pre.l4 { border-left-color: var(--acc4); }
+
+  code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px; line-height: 1.95; color: #636363;
+  }
+  .kw  { color: #ff6b6b; }
+  .fn  { color: #79b8ff; }
+  .str { color: #85e89d; }
+  .cm  { color: #333; font-style: italic; }
+  .num { color: #ffab70; }
+  .op  { color: #79b8ff; }
+  .cl  { color: #ffd700; }
+  .a1  { color: #ff8c8c; font-weight: 600; }
+  .a2  { color: #ffb347; font-weight: 600; }
+  .a3  { color: #6ef094; font-weight: 600; }
+  .a4  { color: #6ab0ff; font-weight: 600; }
+
+  /* ═══ PROSE ═══ */
+  .prose p { font-size: 15px; margin-bottom: 14px; color: #aaa; }
+  .prose p:last-child { margin-bottom: 0; }
+  .hl1 { color: var(--acc1); font-weight: 700; }
+  .hl2 { color: var(--acc2); font-weight: 700; }
+  .hl3 { color: var(--acc3); font-weight: 700; }
+  .hl4 { color: var(--acc4); font-weight: 700; }
+
+  /* ═══ INFO BOX ═══ */
+  .info {
+    border-radius: 8px; padding: 15px 20px;
+    margin: 14px 0; font-size: 14px; line-height: 1.7; color: #999;
+  }
+  .info strong { font-weight: 700; }
+  .i1 { background: rgba(255,59,59,.06);  border-left: 3px solid var(--acc1); }
+  .i1 strong { color: var(--acc1); }
+  .i2 { background: rgba(255,149,0,.06);  border-left: 3px solid var(--acc2); }
+  .i2 strong { color: var(--acc2); }
+  .i3 { background: rgba(48,209,88,.06);  border-left: 3px solid var(--acc3); }
+  .i3 strong { color: var(--acc3); }
+  .i4 { background: rgba(10,132,255,.06); border-left: 3px solid var(--acc4); }
+  .i4 strong { color: var(--acc4); }
+
+  /* ═══ TRY-CATCH FLOW DIAGRAM ═══ */
+  .flow {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 0; margin: 20px auto; max-width: 480px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .flow-box {
+    width: 100%; padding: 14px 20px; border-radius: 8px;
+    font-size: 12px; font-weight: 600; text-align: center;
+  }
+  .fb-try     { background: rgba(255,59,59,.1);  border: 2px solid rgba(255,59,59,.4);  color: var(--acc1); }
+  .fb-catch   { background: rgba(255,149,0,.1);  border: 2px solid rgba(255,149,0,.4);  color: var(--acc2); }
+  .fb-finally { background: rgba(48,209,88,.1);  border: 2px solid rgba(48,209,88,.4);  color: var(--acc3); }
+  .flow-arr   { font-size: 20px; color: var(--muted); padding: 4px 0; line-height: 1; }
+  .flow-note  { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+
+  /* ═══ ERROR TYPES TABLE ═══ */
+  .err-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin: 16px 0; }
+  .err-card {
+    border-radius: 8px; padding: 15px 16px; border: 1px solid var(--border);
+    background: var(--code-bg);
+  }
+  .err-name { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; color: var(--acc3); margin-bottom: 6px; }
+  .err-desc { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .err-ex   { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #555; margin-top: 6px; }
+
+  /* ═══ COMPARE ═══ */
+  .cmp { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  @media(max-width: 580px) { .cmp { grid-template-columns: 1fr; } }
+  .cmp-box { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .cmp-lbl {
+    padding: 8px 14px; font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; font-weight: 600; letter-spacing: 2px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cl-bad  { background: rgba(255,59,59,.1);  color: var(--acc1); }
+  .cl-good { background: rgba(48,209,88,.1);  color: var(--acc3); }
+  .cmp-box pre { margin: 0; border-radius: 0; border-left: none; border-top: none; }
+
+  /* ═══ VIVA ═══ */
+  .viva { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 14px; overflow: hidden; }
+  .vq {
+    background: rgba(48,209,88,.06);
+    padding: 13px 18px; font-size: 14px; font-weight: 700;
+    color: var(--acc3); display: flex; gap: 10px;
+  }
+  .vq::before { content: 'Q'; font-family: 'IBM Plex Mono', monospace; font-size: 10px; opacity: .7; flex-shrink: 0; padding-top: 3px; }
+  .va {
+    padding: 14px 18px; font-size: 13.5px; color: #888;
+    border-top: 1px solid var(--border); background: var(--code-bg); line-height: 1.75;
+  }
+  .va strong { color: var(--acc3); }
+
+  /* ═══ CHALLENGE ═══ */
+  .chal { border: 1px solid rgba(255,149,0,.2); border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
+  .chal-hd {
+    background: rgba(255,149,0,.07); padding: 11px 18px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; font-weight: 600; letter-spacing: 2px; color: var(--acc2);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .chal-body { padding: 18px; font-size: 14px; color: #888; }
+  .chal-body p { margin-bottom: 10px; }
+
+  /* ═══ FUTURE GRID ═══ */
+  .fg { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 13px; margin-top: 12px; }
+  .fc {
+    background: rgba(10,132,255,.04); border: 1px solid rgba(10,132,255,.16);
+    border-radius: 10px; padding: 17px; transition: border-color .2s;
+  }
+  .fc:hover { border-color: var(--acc4); }
+  .fi { font-size: 26px; margin-bottom: 8px; }
+  .ft { font-size: 13px; font-weight: 800; color: var(--acc4); margin-bottom: 5px; }
+  .fd { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+  /* ═══ DIVIDER ═══ */
+  .div {
+    display: flex; align-items: center; gap: 12px;
+    margin: 52px 0; color: #222;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 4px;
+  }
+  .div::before, .div::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ═══ DEBUG STEPS ═══ */
+  .debug-steps { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
+  .ds {
+    display: flex; gap: 14px; align-items: flex-start;
+    background: var(--code-bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 16px;
+  }
+  .ds-num {
+    font-family: 'Anton', sans-serif; font-size: 28px; line-height: 1;
+    color: var(--acc4); opacity: .4; flex-shrink: 0; width: 30px;
+  }
+  .ds-content h4 { font-size: 14px; font-weight: 700; color: #ddd; margin-bottom: 4px; }
+  .ds-content p  { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .ds-content code { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--acc4); background: rgba(10,132,255,.1); padding: 1px 6px; border-radius: 3px; }
+
+  /* ═══ FINAL ═══ */
+  .final {
+    margin-top: 72px;
+    background: linear-gradient(135deg, rgba(255,59,59,.06), rgba(10,132,255,.04));
+    border: 1px solid rgba(255,59,59,.25);
+    border-radius: 16px; padding: 42px; text-align: center;
+  }
+  .final-title {
+    font-family: 'Anton', sans-serif; font-size: 32px;
+    color: #fff; letter-spacing: 1px; margin-bottom: 8px;
+  }
+  .final-title span { color: var(--acc1); }
+  .cl { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 18px; }
+  .ci {
+    background: rgba(48,209,88,.1); color: var(--acc3);
+    padding: 6px 16px; border-radius: 3px;
+    font-size: 11px; font-weight: 700; letter-spacing: 1px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .nxt { margin-top: 24px; color: var(--muted); font-size: 13px; }
+  .nxt strong { color: var(--acc1); font-family: 'IBM Plex Mono', monospace; }
+
+  footer {
+    text-align: center; padding: 36px; color: #333;
+    font-size: 10px; letter-spacing: 4px;
+    border-top: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="stage-chip">JS BOS MISSION · STAGE 17</div>
+    <h1>ERROR<em>HANDLING</em></h1>
+    <p class="hero-desc">Bug ধরো, Handle করো, জয় করো — Production-grade error management শেখো</p>
+    <div class="topics-row">
+      <span class="topic-chip tc1">try-catch-finally</span>
+      <span class="topic-chip tc2">Custom Errors</span>
+      <span class="topic-chip tc3">Error Types</span>
+      <span class="topic-chip tc4">Debugging Techniques</span>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="toc">
+  <a href="#s1">01 · try-catch-finally</a>
+  <a href="#s2">02 · Custom Errors</a>
+  <a href="#s3">03 · Error Types</a>
+  <a href="#s4">04 · Debugging</a>
+</nav>
+
+<div class="wrap">
+
+<!-- ═══════════════════════════════
+     01 — try-catch-finally
+═══════════════════════════════ -->
+<div id="s1" class="sec s1">
+  <div class="sec-hd">
+    <div class="sec-n">01</div>
+    <div class="sec-info">
+      <h2>try / catch / finally</h2>
+      <sub>// error-কে ভয় না পেয়ে handle করার মূল অস্ত্র</sub>
+    </div>
+  </div>
+
+  <!-- CONCEPT -->
+  <div class="card">
+    <div class="card-hd h-c1">📖 CONCEPT &amp; EXAMPLES</div>
+    <div class="card-body prose">
+
+      <div class="info i1">
+        <strong>try:</strong> যে code error করতে পারে সেটা এখানে রাখো।<br>
+        <strong>catch:</strong> error হলে এখানে আসে — error object পাওয়া যায়।<br>
+        <strong>finally:</strong> error হোক বা না হোক, সবসময় চলে — cleanup-এর জন্য।
+      </div>
+
+      <!-- FLOW DIAGRAM -->
+      <div class="flow">
+        <div class="flow-box fb-try">🔴 try { ... risky code ... }</div>
+        <div class="flow-arr">↓ <span style="font-size:10px;color:var(--muted)">error হলে</span></div>
+        <div class="flow-box fb-catch">🟠 catch(err) { ... handle error ... }</div>
+        <div class="flow-arr">↓ <span style="font-size:10px;color:var(--muted)">সবসময়</span></div>
+        <div class="flow-box fb-finally">🟢 finally { ... cleanup ... }</div>
+        <div class="flow-note" style="margin-top:8px;">error না হলে: try → finally (catch skip হয়)</div>
+      </div>
+
+      <pre class="l1"><code><span class="cm">// ✅ Ex 1: Basic try-catch</span>
+<span class="kw">function</span> <span class="fn">divide</span>(a, b) {
+  <span class="kw">try</span> {
+    <span class="kw">if</span> (b <span class="op">===</span> <span class="num">0</span>) {
+      <span class="kw">throw new</span> <span class="cl">Error</span>(<span class="str">"শূন্য দিয়ে ভাগ করা যাবে না!"</span>);
+    }
+    <span class="kw">const</span> result <span class="op">=</span> a <span class="op">/</span> b;
+    console.<span class="fn">log</span>(<span class="str">`✅ ${a} ÷ ${b} = ${result}`</span>);
+    <span class="kw">return</span> result;
+
+  } <span class="kw">catch</span> (err) {
+    console.<span class="fn">log</span>(<span class="str">`❌ Error: ${err.message}`</span>);
+    <span class="kw">return</span> <span class="kw">null</span>;
+
+  } <span class="kw">finally</span> {
+    console.<span class="fn">log</span>(<span class="str">"🏁 divide() শেষ হয়েছে"</span>);
+  }
+}
+
+<span class="fn">divide</span>(<span class="num">10</span>, <span class="num">2</span>);  <span class="cm">// ✅ 5, তারপর finally</span>
+<span class="fn">divide</span>(<span class="num">10</span>, <span class="num">0</span>);  <span class="cm">// ❌ Error, তারপর finally</span></code></pre>
+
+      <pre class="l1"><code><span class="cm">// ✅ Ex 2: catch এ Error Object এর Properties</span>
+<span class="kw">try</span> {
+  <span class="kw">const</span> data <span class="op">=</span> <span class="fn">JSON</span>.<span class="fn">parse</span>(<span class="str">"{ invalid json"</span>); <span class="cm">// SyntaxError!</span>
+} <span class="kw">catch</span> (err) {
+  console.<span class="fn">log</span>(err.<span class="a1">name</span>);    <span class="cm">// "SyntaxError"</span>
+  console.<span class="fn">log</span>(err.<span class="a1">message</span>); <span class="cm">// "Unexpected token..."</span>
+  console.<span class="fn">log</span>(err.<span class="a1">stack</span>);   <span class="cm">// Full stack trace (debugging-এ দরকার)</span>
+}</code></pre>
+
+      <pre class="l1"><code><span class="cm">// ✅ Ex 3: Nested try-catch — আলাদা layer এ আলাদা handling</span>
+<span class="kw">function</span> <span class="fn">processUserData</span>(jsonString) {
+  <span class="kw">let</span> user;
+
+  <span class="kw">try</span> {
+    <span class="cm">// Layer 1: JSON parse</span>
+    user <span class="op">=</span> <span class="fn">JSON</span>.<span class="fn">parse</span>(jsonString);
+  } <span class="kw">catch</span> (err) {
+    <span class="kw">throw new</span> <span class="cl">Error</span>(<span class="str">`Invalid JSON format: ${err.message}`</span>);
+  }
+
+  <span class="kw">try</span> {
+    <span class="cm">// Layer 2: Data validation</span>
+    <span class="kw">if</span> (<span class="op">!</span>user.name) <span class="kw">throw new</span> <span class="cl">Error</span>(<span class="str">"name field আবশ্যিক"</span>);
+    <span class="kw">if</span> (<span class="op">!</span>user.email.<span class="fn">includes</span>(<span class="str">"@"</span>)) <span class="kw">throw new</span> <span class="cl">Error</span>(<span class="str">"Email ভুল"</span>);
+
+    console.<span class="fn">log</span>(<span class="str">`✅ User valid: ${user.name}`</span>);
+    <span class="kw">return</span> user;
+  } <span class="kw">catch</span> (err) {
+    <span class="kw">throw new</span> <span class="cl">Error</span>(<span class="str">`Validation failed: ${err.message}`</span>);
+  }
+}
+
+<span class="kw">try</span> {
+  <span class="fn">processUserData</span>(<span class="str">'{"name":"Rakib","email":"rakib@test.com"}'</span>);
+  <span class="fn">processUserData</span>(<span class="str">'{"email":"no-at-sign"}'</span>);
+} <span class="kw">catch</span> (err) {
+  console.<span class="fn">log</span>(<span class="str">`❌ ${err.message}`</span>);
+}</code></pre>
+
+      <pre class="l1"><code><span class="cm">// ✅ Ex 4: async/await এ try-catch — Loader Pattern</span>
+<span class="kw">async function</span> <span class="fn">loadPage</span>(url) {
+  <span class="kw">let</span> isLoading <span class="op">=</span> <span class="num">true</span>;
+  console.<span class="fn">log</span>(<span class="str">"⏳ Loading..."</span>);
+
+  <span class="kw">try</span> {
+    <span class="kw">const</span> res  <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetch</span>(url);
+    <span class="kw">if</span> (<span class="op">!</span>res.ok) <span class="kw">throw new</span> <span class="cl">Error</span>(<span class="str">`HTTP ${res.status}: ${res.statusText}`</span>);
+
+    <span class="kw">const</span> data <span class="op">=</span> <span class="kw">await</span> res.<span class="fn">json</span>();
+    console.<span class="fn">log</span>(<span class="str">"✅ Data loaded:"</span>, data);
+    <span class="kw">return</span> data;
+
+  } <span class="kw">catch</span> (err) {
+    console.<span class="fn">log</span>(<span class="str">`❌ Load failed: ${err.message}`</span>);
+    <span class="kw">return</span> <span class="kw">null</span>;
+
+  } <span class="kw">finally</span> {
+    isLoading <span class="op">=</span> <span class="num">false</span>;
+    console.<span class="fn">log</span>(<span class="str">"✅ Loader বন্ধ হলো"</span>); <span class="cm">// সবসময় চলবে!</span>
+  }
+}
+
+<span class="fn">loadPage</span>(<span class="str">"https://jsonplaceholder.typicode.com/posts/1"</span>);</code></pre>
+    </div>
+  </div>
+
+  <!-- VIVA -->
+  <div class="card">
+    <div class="card-hd h-viva">🎤 VIVA GUIDE</div>
+    <div class="card-body">
+      <div class="viva">
+        <div class="vq">finally ব্লক কখন কাজে লাগে?</div>
+        <div class="va">Cleanup কাজের জন্য — যেটা error হোক বা না হোক চালাতে হবে। যেমন: <strong>Loading spinner বন্ধ করা, Database connection close করা, File handle release করা, Analytics event পাঠানো।</strong> try বা catch-এ return থাকলেও finally চলে।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">try-catch কি performance slow করে?</div>
+        <div class="va">Empty try-catch বা সামান্য overhead আছে, কিন্তু modern JS engine-এ negligible। তবে <strong>loop-এর ভেতরে</strong> try-catch রাখা avoid করো — loop-এর বাইরে রাখলে ভালো। Performance-critical code-এ guard clause দিয়ে আগেই চেক করো।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">catch ছাড়া try-finally লেখা যায়?</div>
+        <div class="va">হ্যাঁ — <code>try { } finally { }</code> valid। এটি error propagate করতে দেয় কিন্তু finally-র cleanup নিশ্চিত করে। যখন error handle করতে চাও না কিন্তু cleanup দরকার তখন ব্যবহার হয়।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">finally-তে return করলে কি হয়?</div>
+        <div class="va">finally-তে return থাকলে try বা catch-এর return/throw override হয়ে যায়। এটি একটি সূক্ষ্ম bug-এর কারণ হতে পারে, তাই finally-তে return না রাখাই best practice।</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHALLENGE -->
+  <div class="card">
+    <div class="card-hd h-chal">💪 CODING CHALLENGES</div>
+    <div class="card-body">
+      <div class="chal">
+        <div class="chal-hd">⚡ CHALLENGE 01 — Safe JSON Parser</div>
+        <div class="chal-body">
+          <p>একটি <code>safeParseJSON(str)</code> function বানাও। Valid JSON হলে parsed object, invalid হলে <code>null</code> এবং error message দেখাও।</p>
+          <pre class="l1"><code><span class="cm">// 🎯 Solution</span>
+<span class="kw">function</span> <span class="fn">safeParseJSON</span>(str) {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> parsed <span class="op">=</span> <span class="fn">JSON</span>.<span class="fn">parse</span>(str);
+    console.<span class="fn">log</span>(<span class="str">"✅ Valid JSON:"</span>, parsed);
+    <span class="kw">return</span> parsed;
+  } <span class="kw">catch</span> (err) {
+    console.<span class="fn">log</span>(<span class="str">`❌ Invalid JSON: ${err.message}`</span>);
+    <span class="kw">return</span> <span class="kw">null</span>;
+  }
+}
+
+<span class="fn">safeParseJSON</span>(<span class="str">'{"name":"Rakib","age":25}'</span>); <span class="cm">// ✅ Object</span>
+<span class="fn">safeParseJSON</span>(<span class="str">'{ bad json'</span>);               <span class="cm">// ❌ null</span>
+<span class="fn">safeParseJSON</span>(<span class="str">'"hello"'</span>);                  <span class="cm">// ✅ "hello"</span>
+<span class="fn">safeParseJSON</span>(<span class="str">''</span>);                          <span class="cm">// ❌ null</span></code></pre>
+        </div>
+      </div>
+
+      <div class="chal">
+        <div class="chal-hd">⚡ CHALLENGE 02 — ATM Machine</div>
+        <div class="chal-body">
+          <p>ATM function বানাও। PIN ভুল হলে, balance কম হলে, amount ≤ 0 হলে আলাদা error throw করো। finally তে "Transaction ended" দেখাও।</p>
+          <pre class="l1"><code><span class="cm">// 🎯 Solution</span>
+<span class="kw">function</span> <span class="fn">atm</span>(pin, amount) {
+  <span class="kw">const</span> CORRECT_PIN <span class="op">=</span> <span class="str">"1234"</span>;
+  <span class="kw">const</span> balance     <span class="op">=</span> <span class="num">5000</span>;
+
+  <span class="kw">try</span> {
+    <span class="kw">if</span> (pin <span class="op">!==</span> CORRECT_PIN)    <span class="kw">throw new</span> <span class="cl">Error</span>(<span class="str">"❌ ভুল PIN!"</span>);
+    <span class="kw">if</span> (amount <span class="op"><=</span> <span class="num">0</span>)           <span class="kw">throw new</span> <span class="cl">Error</span>(<span class="str">"❌ পরিমাণ ০ এর বেশি হতে হবে"</span>);
+    <span class="kw">if</span> (amount <span class="op">></span> balance)      <span class="kw">throw new</span> <span class="cl">Error</span>(<span class="str">`❌ অপর্যাপ্ত ব্যালেন্স! আছে: ${balance}৳`</span>);
+    <span class="kw">if</span> (amount <span class="op">%</span> <span class="num">500</span> <span class="op">!==</span> <span class="num">0</span>)   <span class="kw">throw new</span> <span class="cl">Error</span>(<span class="str">"❌ ৫০০ এর গুণিতকে তুলতে হবে"</span>);
+
+    console.<span class="fn">log</span>(<span class="str">`✅ ${amount}৳ সফলভাবে তোলা হয়েছে।`</span>);
+    console.<span class="fn">log</span>(<span class="str">`   বাকি ব্যালেন্স: ${balance - amount}৳`</span>);
+
+  } <span class="kw">catch</span> (err) {
+    console.<span class="fn">log</span>(err.message);
+  } <span class="kw">finally</span> {
+    console.<span class="fn">log</span>(<span class="str">"🏦 Transaction শেষ হয়েছে\n"</span>);
+  }
+}
+
+<span class="fn">atm</span>(<span class="str">"1234"</span>, <span class="num">2000</span>); <span class="cm">// ✅</span>
+<span class="fn">atm</span>(<span class="str">"0000"</span>, <span class="num">1000</span>); <span class="cm">// ❌ ভুল PIN</span>
+<span class="fn">atm</span>(<span class="str">"1234"</span>, <span class="num">9999</span>); <span class="cm">// ❌ অপর্যাপ্ত</span>
+<span class="fn">atm</span>(<span class="str">"1234"</span>, <span class="num">300</span>);  <span class="cm">// ❌ 500 এর গুণিতক নয়</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FUTURE -->
+  <div class="card">
+    <div class="card-hd h-fut">🚀 FUTURE IMPLEMENTATION</div>
+    <div class="card-body">
+      <div class="fg">
+        <div class="fc"><div class="fi">🌐</div><div class="ft">API Error Handling</div><div class="fd">fetch() → try-catch দিয়ে network error, HTTP error আলাদা handle করা।</div></div>
+        <div class="fc"><div class="fi">🗄️</div><div class="ft">DB Transactions</div><div class="fd">DB operation fail হলে rollback — finally-তে connection close।</div></div>
+        <div class="fc"><div class="fi">⏳</div><div class="ft">Loading State</div><div class="fd">finally দিয়ে isLoading=false — error হলেও spinner বন্ধ নিশ্চিত।</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="div">ERROR · HANDLING · MASTERY</div>
+
+<!-- ═══════════════════════════════
+     02 — Custom Errors
+═══════════════════════════════ -->
+<div id="s2" class="sec s2">
+  <div class="sec-hd">
+    <div class="sec-n">02</div>
+    <div class="sec-info">
+      <h2>Custom Errors নিজে বানানো</h2>
+      <sub>// Error class extend করে meaningful error types তৈরি</sub>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd h-c2">📖 CONCEPT &amp; EXAMPLES</div>
+    <div class="card-body prose">
+
+      <div class="info i2">
+        Generic <code>Error</code> দিয়ে সব handle করলে কোন layer থেকে কি error এলো বোঝা কঠিন। <strong>Custom Error</strong> বানালে error-এর ধরন specific হয়, আলাদাভাবে catch করা যায়, এবং extra data রাখা যায়।
+      </div>
+
+      <pre class="l2"><code><span class="cm">// ✅ Ex 1: Basic Custom Error</span>
+<span class="kw">class</span> <span class="cl">ValidationError</span> <span class="kw">extends</span> <span class="cl">Error</span> {
+  <span class="fn">constructor</span>(message, field) {
+    <span class="kw">super</span>(message);          <span class="cm">// parent Error এর message set</span>
+    <span class="kw">this</span>.name  <span class="op">=</span> <span class="str">"ValidationError"</span>; <span class="cm">// error name override</span>
+    <span class="kw">this</span>.field <span class="op">=</span> field;       <span class="cm">// extra info!</span>
+  }
+}
+
+<span class="kw">class</span> <span class="cl">NetworkError</span> <span class="kw">extends</span> <span class="cl">Error</span> {
+  <span class="fn">constructor</span>(message, statusCode) {
+    <span class="kw">super</span>(message);
+    <span class="kw">this</span>.name       <span class="op">=</span> <span class="str">"NetworkError"</span>;
+    <span class="kw">this</span>.statusCode <span class="op">=</span> statusCode;
+  }
+}
+
+<span class="kw">class</span> <span class="cl">AuthError</span> <span class="kw">extends</span> <span class="cl">Error</span> {
+  <span class="fn">constructor</span>(message) {
+    <span class="kw">super</span>(message);
+    <span class="kw">this</span>.name <span class="op">=</span> <span class="str">"AuthError"</span>;
+  }
+}
+
+<span class="cm">// ব্যবহার — instanceof দিয়ে আলাদা handle!</span>
+<span class="kw">function</span> <span class="fn">handleError</span>(err) {
+  <span class="kw">if</span> (err <span class="kw">instanceof</span> <span class="cl">ValidationError</span>) {
+    console.<span class="fn">log</span>(<span class="str">`⚠️ Validation: "${err.field}" — ${err.message}`</span>);
+  } <span class="kw">else if</span> (err <span class="kw">instanceof</span> <span class="cl">NetworkError</span>) {
+    console.<span class="fn">log</span>(<span class="str">`🌐 Network ${err.statusCode}: ${err.message}`</span>);
+  } <span class="kw">else if</span> (err <span class="kw">instanceof</span> <span class="cl">AuthError</span>) {
+    console.<span class="fn">log</span>(<span class="str">`🔐 Auth: ${err.message}`</span>);
+  } <span class="kw">else</span> {
+    console.<span class="fn">log</span>(<span class="str">`❌ Unknown: ${err.message}`</span>);
+  }
+}
+
+<span class="kw">try</span> {
+  <span class="kw">throw new</span> <span class="cl">ValidationError</span>(<span class="str">"Email ফাঁকা থাকতে পারবে না"</span>, <span class="str">"email"</span>);
+} <span class="kw">catch</span> (err) { <span class="fn">handleError</span>(err); }
+
+<span class="kw">try</span> {
+  <span class="kw">throw new</span> <span class="cl">NetworkError</span>(<span class="str">"Server পাওয়া যায়নি"</span>, <span class="num">503</span>);
+} <span class="kw">catch</span> (err) { <span class="fn">handleError</span>(err); }</code></pre>
+
+      <pre class="l2"><code><span class="cm">// ✅ Ex 2: Error Hierarchy — parent class দিয়ে group করা</span>
+<span class="kw">class</span> <span class="cl">AppError</span> <span class="kw">extends</span> <span class="cl">Error</span> {
+  <span class="fn">constructor</span>(message, code) {
+    <span class="kw">super</span>(message);
+    <span class="kw">this</span>.name      <span class="op">=</span> <span class="str">"AppError"</span>;
+    <span class="kw">this</span>.code      <span class="op">=</span> code;
+    <span class="kw">this</span>.timestamp <span class="op">=</span> <span class="kw">new</span> <span class="cl">Date</span>().<span class="fn">toISOString</span>();
+  }
+
+  <span class="fn">toJSON</span>() {
+    <span class="kw">return</span> {
+      name:      <span class="kw">this</span>.name,
+      code:      <span class="kw">this</span>.code,
+      message:   <span class="kw">this</span>.message,
+      timestamp: <span class="kw">this</span>.timestamp
+    };
+  }
+}
+
+<span class="kw">class</span> <span class="cl">DatabaseError</span> <span class="kw">extends</span> <span class="cl">AppError</span> {
+  <span class="fn">constructor</span>(message, query) {
+    <span class="kw">super</span>(message, <span class="str">"DB_ERROR"</span>);
+    <span class="kw">this</span>.name  <span class="op">=</span> <span class="str">"DatabaseError"</span>;
+    <span class="kw">this</span>.query <span class="op">=</span> query;
+  }
+}
+
+<span class="kw">class</span> <span class="cl">NotFoundError</span> <span class="kw">extends</span> <span class="cl">AppError</span> {
+  <span class="fn">constructor</span>(resource, id) {
+    <span class="kw">super</span>(<span class="str">`${resource} ID=${id} পাওয়া যায়নি`</span>, <span class="str">"NOT_FOUND"</span>);
+    <span class="kw">this</span>.name     <span class="op">=</span> <span class="str">"NotFoundError"</span>;
+    <span class="kw">this</span>.resource <span class="op">=</span> resource;
+    <span class="kw">this</span>.id       <span class="op">=</span> id;
+  }
+}
+
+<span class="kw">try</span> {
+  <span class="kw">throw new</span> <span class="cl">NotFoundError</span>(<span class="str">"User"</span>, <span class="num">42</span>);
+} <span class="kw">catch</span> (err) {
+  console.<span class="fn">log</span>(err.message);         <span class="cm">// User ID=42 পাওয়া যায়নি</span>
+  console.<span class="fn">log</span>(err.code);            <span class="cm">// NOT_FOUND</span>
+  console.<span class="fn">log</span>(<span class="fn">JSON</span>.<span class="fn">stringify</span>(err.<span class="fn">toJSON</span>(), <span class="kw">null</span>, <span class="num">2</span>));
+  console.<span class="fn">log</span>(err <span class="kw">instanceof</span> <span class="cl">AppError</span>); <span class="cm">// true — parent চেক!</span>
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd h-viva">🎤 VIVA GUIDE</div>
+    <div class="card-body">
+      <div class="viva">
+        <div class="vq">Custom Error কেন বানাই — শুধু Error দিলে হয় না?</div>
+        <div class="va">Custom Error দিয়ে: (১) <strong>instanceof</strong> দিয়ে specific error আলাদা catch করা যায়, (২) extra data রাখা যায় (field, statusCode, query), (৩) error log করতে সুবিধা, (৪) API response-এ structured error দেওয়া যায়। Production app-এ এটি অপরিহার্য।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">constructor-এ super() না ডাকলে কি হয়?</div>
+        <div class="va">ReferenceError হবে — Error extend করলে super(message) আবশ্যিক। এটি parent Error class-এর constructor call করে message property সেট করে এবং stack trace তৈরি করে।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">Error এর name property কেন override করি?</div>
+        <div class="va">Default-এ সব extended error-এর name "Error" হয়। Override করলে console-এ, log-এ "ValidationError", "NetworkError" দেখা যায় — debugging অনেক সহজ হয়।</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd h-chal">💪 CODING CHALLENGES</div>
+    <div class="card-body">
+      <div class="chal">
+        <div class="chal-hd">⚡ CHALLENGE 03 — Form Validator with Custom Errors</div>
+        <div class="chal-body">
+          <p>User registration form validate করো। Name, Email, Password-এর জন্য আলাদা custom error বানাও।</p>
+          <pre class="l2"><code><span class="cm">// 🎯 Solution</span>
+<span class="kw">class</span> <span class="cl">FormError</span> <span class="kw">extends</span> <span class="cl">Error</span> {
+  <span class="fn">constructor</span>(message, field, rule) {
+    <span class="kw">super</span>(message);
+    <span class="kw">this</span>.name  <span class="op">=</span> <span class="str">"FormError"</span>;
+    <span class="kw">this</span>.field <span class="op">=</span> field;
+    <span class="kw">this</span>.rule  <span class="op">=</span> rule;
+  }
+}
+
+<span class="kw">function</span> <span class="fn">validateUser</span>({ name, email, password }) {
+  <span class="kw">const</span> errors <span class="op">=</span> [];
+
+  <span class="kw">if</span> (<span class="op">!</span>name <span class="op">||</span> name.<span class="fn">length</span> <span class="op"><</span> <span class="num">3</span>)
+    errors.<span class="fn">push</span>(<span class="kw">new</span> <span class="cl">FormError</span>(<span class="str">"নাম কমপক্ষে ৩ অক্ষর"</span>,       <span class="str">"name"</span>,  <span class="str">"minLength"</span>));
+
+  <span class="kw">if</span> (<span class="op">!</span>email<span class="op">?.</span><span class="fn">includes</span>(<span class="str">"@"</span>))
+    errors.<span class="fn">push</span>(<span class="kw">new</span> <span class="cl">FormError</span>(<span class="str">"সঠিক Email দিন"</span>,              <span class="str">"email"</span>, <span class="str">"format"</span>));
+
+  <span class="kw">if</span> (<span class="op">!</span>password <span class="op">||</span> password.<span class="fn">length</span> <span class="op"><</span> <span class="num">6</span>)
+    errors.<span class="fn">push</span>(<span class="kw">new</span> <span class="cl">FormError</span>(<span class="str">"Password কমপক্ষে ৬ অক্ষর"</span>,  <span class="str">"password"</span>, <span class="str">"minLength"</span>));
+
+  <span class="kw">if</span> (<span class="op">!</span><span class="str">/[A-Z]/</span>.<span class="fn">test</span>(password))
+    errors.<span class="fn">push</span>(<span class="kw">new</span> <span class="cl">FormError</span>(<span class="str">"একটি uppercase letter লাগবে"</span>, <span class="str">"password"</span>, <span class="str">"uppercase"</span>));
+
+  <span class="kw">return</span> errors;
+}
+
+<span class="kw">const</span> errs <span class="op">=</span> <span class="fn">validateUser</span>({ name: <span class="str">"R"</span>, email: <span class="str">"bad"</span>, password: <span class="str">"abc"</span> });
+<span class="kw">if</span> (errs.length) {
+  console.<span class="fn">log</span>(<span class="str">"❌ Validation Errors:"</span>);
+  errs.<span class="fn">forEach</span>(e <span class="op">=></span> console.<span class="fn">log</span>(<span class="str">`  [${e.field}] ${e.message}`</span>));
+} <span class="kw">else</span> {
+  console.<span class="fn">log</span>(<span class="str">"✅ সব ঠিক আছে!"</span>);
+}</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd h-fut">🚀 FUTURE IMPLEMENTATION</div>
+    <div class="card-body">
+      <div class="fg">
+        <div class="fc"><div class="fi">🟢</div><div class="ft">Express API</div><div class="fd">Custom Error class থেকে HTTP status code বের করে response পাঠানো।</div></div>
+        <div class="fc"><div class="fi">📋</div><div class="ft">Form Libraries</div><div class="fd">React Hook Form, Yup — সব custom error system এর উপর দাঁড়িয়ে।</div></div>
+        <div class="fc"><div class="fi">📊</div><div class="ft">Error Monitoring</div><div class="fd">Sentry, Datadog-এ custom error type দিয়ে filter করা যায়।</div></div>
+        <div class="fc"><div class="fi">🔌</div><div class="ft">SDK Design</div><div class="fd">Public library-তে user-friendly custom error দিলে developer experience ভালো হয়।</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="div">ERROR · HANDLING · MASTERY</div>
+
+<!-- ═══════════════════════════════
+     03 — Error Types
+═══════════════════════════════ -->
+<div id="s3" class="sec s3">
+  <div class="sec-hd">
+    <div class="sec-n">03</div>
+    <div class="sec-info">
+      <h2>JavaScript Error Types</h2>
+      <sub>// JavaScript-এর built-in error গুলো চেনো</sub>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd h-c3">📖 CONCEPT &amp; EXAMPLES</div>
+    <div class="card-body prose">
+
+      <div class="info i3">
+        JavaScript-এ <strong>৬টি</strong> প্রধান built-in Error type আছে। প্রতিটি আলাদা পরিস্থিতিতে throw হয়। Error-এর <code>name</code> property দেখে কোন ধরন বোঝা যায়।
+      </div>
+
+      <div class="err-grid">
+        <div class="err-card">
+          <div class="err-name">SyntaxError</div>
+          <div class="err-desc">Code parse করার সময় ভুল syntax পেলে</div>
+          <div class="err-ex">JSON.parse("bad")</div>
+        </div>
+        <div class="err-card">
+          <div class="err-name">ReferenceError</div>
+          <div class="err-desc">অঘোষিত variable access করলে</div>
+          <div class="err-ex">console.log(notDefined)</div>
+        </div>
+        <div class="err-card">
+          <div class="err-name">TypeError</div>
+          <div class="err-desc">Wrong type-এ operation করলে</div>
+          <div class="err-ex">null.property</div>
+        </div>
+        <div class="err-card">
+          <div class="err-name">RangeError</div>
+          <div class="err-desc">Value valid range-এর বাইরে গেলে</div>
+          <div class="err-ex">new Array(-1)</div>
+        </div>
+        <div class="err-card">
+          <div class="err-name">URIError</div>
+          <div class="err-desc">URI function-এ ভুল character</div>
+          <div class="err-ex">decodeURI("%")</div>
+        </div>
+        <div class="err-card">
+          <div class="err-name">EvalError</div>
+          <div class="err-desc">eval() function ব্যবহারে (rare)</div>
+          <div class="err-ex">eval("invalid...")</div>
+        </div>
+      </div>
+
+      <pre class="l3"><code><span class="cm">// ✅ Ex 1: সব Error type চেনা ও catch করা</span>
+
+<span class="cm">// 1. TypeError — সবচেয়ে common</span>
+<span class="kw">try</span> {
+  <span class="kw">const</span> user <span class="op">=</span> <span class="kw">null</span>;
+  console.<span class="fn">log</span>(user.name); <span class="cm">// ❌ Cannot read property of null</span>
+} <span class="kw">catch</span> (err) {
+  console.<span class="fn">log</span>(<span class="str">`[${err.name}] ${err.message}`</span>);
+}
+
+<span class="cm">// 2. ReferenceError</span>
+<span class="kw">try</span> {
+  console.<span class="fn">log</span>(notDeclared); <span class="cm">// ❌ notDeclared is not defined</span>
+} <span class="kw">catch</span> (err) {
+  console.<span class="fn">log</span>(<span class="str">`[${err.name}] ${err.message}`</span>);
+}
+
+<span class="cm">// 3. RangeError</span>
+<span class="kw">try</span> {
+  <span class="kw">const</span> arr <span class="op">=</span> <span class="kw">new</span> <span class="cl">Array</span>(<span class="op">-</span><span class="num">1</span>); <span class="cm">// ❌ Invalid array length</span>
+} <span class="kw">catch</span> (err) {
+  console.<span class="fn">log</span>(<span class="str">`[${err.name}] ${err.message}`</span>);
+}
+
+<span class="cm">// 4. SyntaxError</span>
+<span class="kw">try</span> {
+  <span class="fn">JSON</span>.<span class="fn">parse</span>(<span class="str">"{ name: Rakib }"</span>); <span class="cm">// ❌ property names must be strings</span>
+} <span class="kw">catch</span> (err) {
+  console.<span class="fn">log</span>(<span class="str">`[${err.name}] ${err.message}`</span>);
+}</code></pre>
+
+      <pre class="l3"><code><span class="cm">// ✅ Ex 2: Error type অনুযায়ী আলাদা handling</span>
+<span class="kw">function</span> <span class="fn">processData</span>(data) {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> parsed <span class="op">=</span> <span class="fn">JSON</span>.<span class="fn">parse</span>(data);
+    <span class="kw">const</span> name   <span class="op">=</span> parsed.user.profile.name; <span class="cm">// potentially TypeError</span>
+    <span class="kw">return</span> name.<span class="fn">toUpperCase</span>();
+
+  } <span class="kw">catch</span> (err) {
+    <span class="kw">switch</span> (err.name) {
+      <span class="kw">case</span> <span class="str">"SyntaxError"</span>:
+        console.<span class="fn">log</span>(<span class="str">"📋 Invalid JSON format!"</span>);
+        <span class="kw">break</span>;
+      <span class="kw">case</span> <span class="str">"TypeError"</span>:
+        console.<span class="fn">log</span>(<span class="str">"🔍 Missing nested property!"</span>);
+        <span class="kw">break</span>;
+      <span class="kw">default</span>:
+        console.<span class="fn">log</span>(<span class="str">`❌ Unknown error: ${err.name}`</span>);
+    }
+    <span class="kw">return</span> <span class="kw">null</span>;
+  }
+}
+
+<span class="fn">processData</span>(<span class="str">'{"user":{"profile":{"name":"Rakib"}}}'</span>); <span class="cm">// RAKIB</span>
+<span class="fn">processData</span>(<span class="str">'bad json'</span>);                             <span class="cm">// SyntaxError</span>
+<span class="fn">processData</span>(<span class="str">'{"user":{}}'</span>);                          <span class="cm">// TypeError</span></code></pre>
+
+      <pre class="l3"><code><span class="cm">// ✅ Ex 3: Error.cause — ES2022, error chain</span>
+<span class="kw">async function</span> <span class="fn">loadConfig</span>() {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> res <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">"/config.json"</span>);
+    <span class="kw">return</span> <span class="kw">await</span> res.<span class="fn">json</span>();
+  } <span class="kw">catch</span> (originalError) {
+    <span class="kw">throw new</span> <span class="cl">Error</span>(<span class="str">"Config load করতে ব্যর্থ"</span>, {
+      cause: originalError  <span class="cm">// Original error সংরক্ষণ</span>
+    });
+  }
+}
+
+<span class="kw">try</span> {
+  <span class="kw">await</span> <span class="fn">loadConfig</span>();
+} <span class="kw">catch</span> (err) {
+  console.<span class="fn">log</span>(err.message);       <span class="cm">// Config load করতে ব্যর্থ</span>
+  console.<span class="fn">log</span>(err.cause.message);  <span class="cm">// Original error</span>
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd h-viva">🎤 VIVA GUIDE</div>
+    <div class="card-body">
+      <div class="viva">
+        <div class="vq">TypeError কবে হয়? সবচেয়ে common কারণ কি?</div>
+        <div class="va">null বা undefined-এ property access (<code>null.name</code>), wrong type-এ method call (<code>(5).map()</code>), function না হলে call (<code>undefined()</code>)। সবচেয়ে common: <strong>API response আসার আগে বা null check না করে nested property access।</strong></div>
+      </div>
+      <div class="viva">
+        <div class="vq">Stack Overflow কি কোনো error?</div>
+        <div class="va">হ্যাঁ — <strong>RangeError: Maximum call stack size exceeded</strong>। Infinite recursion-এ হয়। যেমন: function-এ base case ছাড়া নিজেকে নিজে call করা।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">Error.cause কেন দরকার?</div>
+        <div class="va">Error re-throw করার সময় original error হারিয়ে যায়। cause দিয়ে original error সংরক্ষণ করা যায়, ফলে debug করতে পুরো error chain দেখা যায়। ES2022-এ যোগ হয়েছে।</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd h-chal">💪 CODING CHALLENGES</div>
+    <div class="card-body">
+      <div class="chal">
+        <div class="chal-hd">⚡ CHALLENGE 04 — Error Classifier</div>
+        <div class="chal-body">
+          <p>বিভিন্ন ধরনের risky operation চালাও এবং প্রতিটির error type চিহ্নিত করে বাংলায় বর্ণনা দেখাও।</p>
+          <pre class="l3"><code><span class="cm">// 🎯 Solution</span>
+<span class="kw">const</span> riskyCodes <span class="op">=</span> [
+  { desc: <span class="str">"Null access"</span>,    fn: () <span class="op">=></span> <span class="kw">null</span>.property },
+  { desc: <span class="str">"Bad JSON"</span>,       fn: () <span class="op">=></span> <span class="fn">JSON</span>.<span class="fn">parse</span>(<span class="str">"bad"</span>) },
+  { desc: <span class="str">"Undefined var"</span>, fn: () <span class="op">=></span> notDefined <span class="op">+</span> <span class="num">1</span> },
+  { desc: <span class="str">"Bad array size"</span>, fn: () <span class="op">=></span> <span class="kw">new</span> <span class="cl">Array</span>(<span class="num">1e309</span>) },
+  { desc: <span class="str">"Not a function"</span>, fn: () <span class="op">=></span> (<span class="num">42</span>)() },
+];
+
+<span class="kw">const</span> descriptions <span class="op">=</span> {
+  TypeError:     <span class="str">"ভুল ধরনের মানে operation করা হয়েছে"</span>,
+  SyntaxError:   <span class="str">"ভুল format-এ data দেওয়া হয়েছে"</span>,
+  ReferenceError: <span class="str">"অঘোষিত variable ব্যবহার করা হয়েছে"</span>,
+  RangeError:    <span class="str">"সীমার বাইরের মান ব্যবহার হয়েছে"</span>,
+};
+
+riskyCodes.<span class="fn">forEach</span>(({ desc, fn }) <span class="op">=></span> {
+  <span class="kw">try</span> { <span class="fn">fn</span>(); }
+  <span class="kw">catch</span> (err) {
+    <span class="kw">const</span> explain <span class="op">=</span> descriptions[err.name] <span class="op">??</span> <span class="str">"অজানা error"</span>;
+    console.<span class="fn">log</span>(<span class="str">`[${desc}]`</span>);
+    console.<span class="fn">log</span>(<span class="str">`  Type: ${err.name}`</span>);
+    console.<span class="fn">log</span>(<span class="str">`  কারণ: ${explain}\n`</span>);
+  }
+});</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd h-fut">🚀 FUTURE IMPLEMENTATION</div>
+    <div class="card-body">
+      <div class="fg">
+        <div class="fc"><div class="fi">🔍</div><div class="ft">Error Monitoring</div><div class="fd">Sentry, Bugsnag-এ error.name দিয়ে filter করে বিভিন্ন error আলাদা track করা।</div></div>
+        <div class="fc"><div class="fi">🛡️</div><div class="ft">Input Validation</div><div class="fd">Type check করে TypeError prevent করা — TypeScript এই কাজ compile time-এ করে।</div></div>
+        <div class="fc"><div class="fi">📝</div><div class="ft">Error Logging</div><div class="fd">Production-এ error type, message, stack, timestamp সব log করা হয়।</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="div">ERROR · HANDLING · MASTERY</div>
+
+<!-- ═══════════════════════════════
+     04 — Debugging Techniques
+═══════════════════════════════ -->
+<div id="s4" class="sec s4">
+  <div class="sec-hd">
+    <div class="sec-n">04</div>
+    <div class="sec-info">
+      <h2>Debugging Techniques</h2>
+      <sub>// bug খুঁজে বের করার professional পদ্ধতি</sub>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd h-c4">📖 CONCEPT &amp; EXAMPLES</div>
+    <div class="card-body prose">
+
+      <!-- STEP BY STEP DEBUG -->
+      <div class="debug-steps">
+        <div class="ds">
+          <div class="ds-num">1</div>
+          <div class="ds-content">
+            <h4>console methods — সবচেয়ে দ্রুত debug পদ্ধতি</h4>
+            <p><code>console.log()</code> সাধারণ output। <code>console.error()</code> লাল error। <code>console.warn()</code> হলুদ warning। <code>console.table()</code> array/object সুন্দরভাবে দেখায়। <code>console.group()</code> grouped output।</p>
+          </div>
+        </div>
+        <div class="ds">
+          <div class="ds-num">2</div>
+          <div class="ds-content">
+            <h4>debugger statement — code pause করা</h4>
+            <p>Code-এ <code>debugger;</code> লিখলে Browser DevTools খোলা থাকলে সেই line-এ execution থেমে যায়। Step through করে প্রতিটি line দেখা যায়।</p>
+          </div>
+        </div>
+        <div class="ds">
+          <div class="ds-num">3</div>
+          <div class="ds-content">
+            <h4>console.trace() — কোথা থেকে call এলো</h4>
+            <p>Function call chain দেখতে <code>console.trace()</code>। কোন function কোথা থেকে call হলো পুরো stack দেখায়।</p>
+          </div>
+        </div>
+        <div class="ds">
+          <div class="ds-num">4</div>
+          <div class="ds-content">
+            <h4>console.time() — performance measure</h4>
+            <p><code>console.time("label")</code> এবং <code>console.timeEnd("label")</code> দিয়ে code-এর কত সময় লাগছে মাপা যায়।</p>
+          </div>
+        </div>
+      </div>
+
+      <pre class="l4"><code><span class="cm">// ✅ Ex 1: Console Methods — Complete Guide</span>
+<span class="kw">const</span> users <span class="op">=</span> [
+  { id: <span class="num">1</span>, name: <span class="str">"Rakib"</span>, score: <span class="num">85</span> },
+  { id: <span class="num">2</span>, name: <span class="str">"Nila"</span>,  score: <span class="num">92</span> },
+  { id: <span class="num">3</span>, name: <span class="str">"Siam"</span>,  score: <span class="num">78</span> },
+];
+
+<span class="cm">// সাধারণ log</span>
+console.<span class="fn">log</span>(<span class="str">"Users:"</span>, users);
+
+<span class="cm">// Table format — array/object debug-এর সেরা উপায়</span>
+console.<span class="fn">table</span>(users);
+
+<span class="cm">// Grouped output</span>
+console.<span class="fn">group</span>(<span class="str">"📊 Score Analysis"</span>);
+  users.<span class="fn">forEach</span>(u <span class="op">=></span> {
+    u.score <span class="op">>=</span> <span class="num">90</span>
+      ? console.<span class="fn">log</span>(<span class="str">`✅ ${u.name}: ${u.score}`</span>)
+      : console.<span class="fn">warn</span>(<span class="str">`⚠️ ${u.name}: ${u.score}`</span>);
+  });
+console.<span class="fn">groupEnd</span>();
+
+<span class="cm">// Error style</span>
+console.<span class="fn">error</span>(<span class="str">"❌ Critical error occurred!"</span>);</code></pre>
+
+      <pre class="l4"><code><span class="cm">// ✅ Ex 2: Performance Measurement</span>
+console.<span class="fn">time</span>(<span class="str">"array-loop"</span>);
+<span class="kw">const</span> bigArr <span class="op">=</span> <span class="cl">Array</span>.<span class="fn">from</span>({ length: <span class="num">1_000_000</span> }, (_, i) <span class="op">=></span> i);
+<span class="kw">const</span> sum <span class="op">=</span> bigArr.<span class="fn">reduce</span>((s, n) <span class="op">=></span> s <span class="op">+</span> n, <span class="num">0</span>);
+console.<span class="fn">timeEnd</span>(<span class="str">"array-loop"</span>);  <span class="cm">// array-loop: 12.5ms</span>
+console.<span class="fn">log</span>(<span class="str">"Sum:"</span>, sum);</code></pre>
+
+      <pre class="l4"><code><span class="cm">// ✅ Ex 3: Custom Debug Logger</span>
+<span class="kw">class</span> <span class="cl">Logger</span> {
+  <span class="kw">static</span> DEBUG <span class="op">=</span> <span class="num">true</span>; <span class="cm">// Production-এ false করো</span>
+
+  <span class="kw">static</span> <span class="fn">log</span>(msg, data <span class="op">=</span> <span class="str">""</span>) {
+    <span class="kw">if</span> (<span class="a4">this</span>.DEBUG) {
+      console.<span class="fn">log</span>(<span class="str">`[${new Date().toLocaleTimeString()}] ℹ️ ${msg}`</span>, data);
+    }
+  }
+
+  <span class="kw">static</span> <span class="fn">error</span>(msg, err) {
+    console.<span class="fn">error</span>(<span class="str">`[ERROR] ❌ ${msg}`</span>);
+    <span class="kw">if</span> (err) console.<span class="fn">error</span>(<span class="str">"  Stack:"</span>, err.stack);
+  }
+
+  <span class="kw">static</span> <span class="fn">warn</span>(msg) {
+    console.<span class="fn">warn</span>(<span class="str">`[WARN] ⚠️ ${msg}`</span>);
+  }
+
+  <span class="kw">static</span> <span class="fn">table</span>(label, data) {
+    <span class="kw">if</span> (<span class="a4">this</span>.DEBUG) {
+      console.<span class="fn">group</span>(label);
+      console.<span class="fn">table</span>(data);
+      console.<span class="fn">groupEnd</span>();
+    }
+  }
+}
+
+<span class="cm">// ব্যবহার</span>
+<span class="cl">Logger</span>.<span class="fn">log</span>(<span class="str">"App শুরু হচ্ছে"</span>);
+<span class="cl">Logger</span>.<span class="fn">table</span>(<span class="str">"User List"</span>, users);
+
+<span class="kw">try</span> {
+  <span class="kw">throw new</span> <span class="cl">Error</span>(<span class="str">"Test error"</span>);
+} <span class="kw">catch</span>(err) {
+  <span class="cl">Logger</span>.<span class="fn">error</span>(<span class="str">"Something went wrong"</span>, err);
+}</code></pre>
+
+      <pre class="l4"><code><span class="cm">// ✅ Ex 4: debugger statement</span>
+<span class="kw">function</span> <span class="fn">calculateDiscount</span>(price, discountPercent) {
+  <span class="kw">debugger</span>; <span class="cm">// ← DevTools খোলা থাকলে এখানে pause হবে!</span>
+
+  <span class="kw">const</span> discount <span class="op">=</span> price <span class="op">*</span> (discountPercent <span class="op">/</span> <span class="num">100</span>);
+  <span class="kw">const</span> final    <span class="op">=</span> price <span class="op">-</span> discount;
+
+  <span class="cm">// DevTools-এ এখানে variables দেখা যাবে: price, discountPercent, discount, final</span>
+  <span class="kw">return</span> final;
+}
+
+<span class="fn">calculateDiscount</span>(<span class="num">1000</span>, <span class="num">20</span>); <span class="cm">// 800</span>
+
+<span class="cm">// console.assert — condition false হলেই error দেখায়</span>
+console.<span class="fn">assert</span>(<span class="num">2</span> <span class="op">+</span> <span class="num">2</span> <span class="op">===</span> <span class="num">4</span>, <span class="str">"Math ভুল!"</span>);       <span class="cm">// কিছু হবে না</span>
+console.<span class="fn">assert</span>(<span class="num">2</span> <span class="op">+</span> <span class="num">2</span> <span class="op">===</span> <span class="num">5</span>, <span class="str">"Math ভুল! 2+2≠5"</span>); <span class="cm">// ❌ Error দেখাবে</span></code></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd h-viva">🎤 VIVA GUIDE</div>
+    <div class="card-body">
+      <div class="viva">
+        <div class="vq">console.log vs debugger — কোনটা কখন?</div>
+        <div class="va"><strong>console.log:</strong> Quick check, value দেখতে — সহজ ও দ্রুত। Production-এ রাখা যায় না। <strong>debugger:</strong> Complex logic step-by-step দেখতে — browser DevTools লাগে। সময় বেশি লাগে কিন্তু বেশি তথ্য পাওয়া যায়। Quick fix-এ log, deep bug-এ debugger।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">Error এর stack trace কিভাবে পড়তে হয়?</div>
+        <div class="va">Stack trace নিচ থেকে উপরে পড়তে হয়। সবার নিচে প্রথম call, সবার উপরে যেখানে error হয়েছে। নিজের code-এর line number দেখো (node_modules বাদ দিয়ে)। সেখানেই bug।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">Production-এ console.log কি রাখা উচিত?</div>
+        <div class="va">না — performance hit করে এবং sensitive data leak হতে পারে। Custom Logger class বানাও যেখানে DEBUG flag দিয়ে production-এ সব log বন্ধ করা যায়। অথবা Webpack/Vite দিয়ে build-এ automatically remove করো।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">Unhandled Promise Rejection কি?</div>
+        <div class="va">async function-এ reject হওয়া Promise যদি catch না করা হয় তাহলে UnhandledPromiseRejection হয়। Node.js-এ এটি process crash করতে পারে। সবসময় async code-এ try-catch বা .catch() রাখো।</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd h-chal">💪 CODING CHALLENGES</div>
+    <div class="card-body">
+      <div class="chal">
+        <div class="chal-hd">⚡ CHALLENGE 05 — Production Error Handler</div>
+        <div class="chal-body">
+          <p>একটি complete error handling system বানাও যেখানে: Custom errors, try-catch, logging এবং user-friendly message সব একসাথে থাকবে।</p>
+          <pre class="l4"><code><span class="cm">// 🎯 Solution — Production-ready Error System</span>
+<span class="kw">class</span> <span class="cl">AppError</span> <span class="kw">extends</span> <span class="cl">Error</span> {
+  <span class="fn">constructor</span>(message, code, statusCode <span class="op">=</span> <span class="num">500</span>) {
+    <span class="kw">super</span>(message);
+    <span class="kw">this</span>.name       <span class="op">=</span> <span class="str">"AppError"</span>;
+    <span class="kw">this</span>.code       <span class="op">=</span> code;
+    <span class="kw">this</span>.statusCode <span class="op">=</span> statusCode;
+    <span class="kw">this</span>.timestamp  <span class="op">=</span> <span class="kw">new</span> <span class="cl">Date</span>().<span class="fn">toISOString</span>();
+  }
+}
+
+<span class="kw">const</span> UserMessages <span class="op">=</span> {
+  NOT_FOUND:    <span class="str">"তথ্য পাওয়া যায়নি। আবার চেষ্টা করুন।"</span>,
+  UNAUTHORIZED: <span class="str">"অনুমতি নেই। আবার লগইন করুন।"</span>,
+  VALIDATION:   <span class="str">"দেওয়া তথ্য সঠিক নয়।"</span>,
+  SERVER:       <span class="str">"সার্ভারে সমস্যা হয়েছে। কিছুক্ষণ পরে চেষ্টা করুন।"</span>,
+};
+
+<span class="kw">function</span> <span class="fn">handleError</span>(err) {
+  <span class="cm">// ১. Log করো (developer দেখবে)</span>
+  console.<span class="fn">error</span>(<span class="str">`[${new Date().toISOString()}]`</span>, {
+    name: err.name, code: err.code, message: err.message
+  });
+
+  <span class="cm">// ২. User-friendly message দাও</span>
+  <span class="kw">const</span> userMsg <span class="op">=</span> err <span class="kw">instanceof</span> <span class="cl">AppError</span>
+    ? (UserMessages[err.code] <span class="op">??</span> UserMessages.SERVER)
+    : UserMessages.SERVER;
+
+  console.<span class="fn">log</span>(<span class="str">`\n👤 User দেখবে: "${userMsg}"\n`</span>);
+  <span class="kw">return</span> { success: <span class="num">false</span>, message: userMsg };
+}
+
+<span class="cm">// API simulation</span>
+<span class="kw">async function</span> <span class="fn">getUser</span>(id) {
+  <span class="kw">try</span> {
+    <span class="kw">if</span> (<span class="op">!</span>id)              <span class="kw">throw new</span> <span class="cl">AppError</span>(<span class="str">"ID missing"</span>,       <span class="str">"VALIDATION"</span>,   <span class="num">400</span>);
+    <span class="kw">if</span> (id <span class="op">===</span> <span class="num">999</span>)       <span class="kw">throw new</span> <span class="cl">AppError</span>(<span class="str">"User not found"</span>,  <span class="str">"NOT_FOUND"</span>,    <span class="num">404</span>);
+    <span class="kw">if</span> (id <span class="op"><</span> <span class="num">0</span>)           <span class="kw">throw new</span> <span class="cl">AppError</span>(<span class="str">"No permission"</span>,   <span class="str">"UNAUTHORIZED"</span>, <span class="num">401</span>);
+
+    <span class="kw">return</span> { success: <span class="num">true</span>, data: { id, name: <span class="str">"Rakib"</span> } };
+  } <span class="kw">catch</span> (err) {
+    <span class="kw">return</span> <span class="fn">handleError</span>(err);
+  }
+}
+
+<span class="kw">await</span> <span class="fn">getUser</span>(<span class="kw">null</span>); <span class="cm">// VALIDATION</span>
+<span class="kw">await</span> <span class="fn">getUser</span>(<span class="num">999</span>);  <span class="cm">// NOT_FOUND</span>
+<span class="kw">await</span> <span class="fn">getUser</span>(<span class="op">-</span><span class="num">1</span>);   <span class="cm">// UNAUTHORIZED</span>
+<span class="kw">await</span> <span class="fn">getUser</span>(<span class="num">1</span>);    <span class="cm">// ✅ Success</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd h-fut">🚀 FUTURE IMPLEMENTATION</div>
+    <div class="card-body">
+      <div class="fg">
+        <div class="fc"><div class="fi">🔴</div><div class="ft">Sentry Integration</div><div class="fd">Production-এ Sentry.captureException(err) দিয়ে real-time error tracking।</div></div>
+        <div class="fc"><div class="fi">⚛️</div><div class="ft">React Error Boundary</div><div class="fd">Component crash হলে fallback UI দেখানো — class component-এ componentDidCatch।</div></div>
+        <div class="fc"><div class="fi">🌐</div><div class="ft">Express Middleware</div><div class="fd">Global error handler middleware — (err, req, res, next) সব route এর error catch।</div></div>
+        <div class="fc"><div class="fi">📱</div><div class="ft">window.onerror</div><div class="fd">Browser-এ uncaught error গুলো window.onerror দিয়ে global handle করা।</div></div>
+        <div class="fc"><div class="fi">🤖</div><div class="ft">DevOps Alerting</div><div class="fd">Critical error হলে Slack, email alert — error monitoring system-এ।</div></div>
+        <div class="fc"><div class="fi">🧪</div><div class="ft">Test Coverage</div><div class="fd">Jest-এ expect().toThrow() দিয়ে error case test করা।</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FINAL -->
+<div class="final">
+  <div class="final-title">পর্যায় ১৭ — <span>সম্পন্ন!</span> 🛡️</div>
+  <p style="color:var(--muted);font-size:14px;margin-top:8px;">পরের পর্যায়ে যাওয়ার আগে নিশ্চিত করো:</p>
+  <div class="cl">
+    <span class="ci">✅ try-catch-finally সঠিক ব্যবহার</span>
+    <span class="ci">✅ Custom Error class বানাতে পারি</span>
+    <span class="ci">✅ instanceof দিয়ে error type check</span>
+    <span class="ci">✅ ৬টি Error type চিনি</span>
+    <span class="ci">✅ Error hierarchy বানাতে পারি</span>
+    <span class="ci">✅ console methods জানি</span>
+    <span class="ci">✅ Production error system বুঝি</span>
+  </div>
+  <p class="nxt">পরের পর্যায়ের জন্য <strong>Next</strong> বাটন ক্লিক করো ➜ পর্যায় ১৮: <strong>Local Storage &amp; Session Storage</strong> 💾</p>
+  <nav class="toc">
+    <a href="https://anawarhossain.github.io/Javascript-prcatice/18-Local-Storage-And-Session-Storage/">Next</a>
+  </nav>
+</div>
+
+</div><!-- /wrap -->
+<footer>JS BOS MISSION &nbsp;·&nbsp; STAGE 17 &nbsp;·&nbsp; ERROR HANDLING MASTERED 🛡️</footer>
+</body>
+</html>

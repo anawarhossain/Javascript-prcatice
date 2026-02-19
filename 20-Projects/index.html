@@ -1,0 +1,2615 @@
+<!doctype html>
+<html lang="bn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>পর্যায় ২০ — Projects & Practice</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&family=Nunito:wght@400;600;700;800&display=swap");
+
+      :root {
+        --ink: #1a1410;
+        --paper: #faf7f2;
+        --warm: #f5efe6;
+        --cream: #ede8df;
+        --rust: #c0392b;
+        --amber: #d97706;
+        --forest: #166534;
+        --navy: #1e3a5f;
+        --gold: #b7791f;
+        --muted: #78716c;
+        --border: #d6cfc4;
+        --code-bg: #1c1917;
+        --code-text: #e7e5e4;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Nunito", sans-serif;
+        background: var(--paper);
+        color: var(--ink);
+        min-height: 100vh;
+        position: relative;
+      }
+
+      /* Paper texture overlay */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .page {
+        position: relative;
+        z-index: 1;
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+
+      /* ── MASTHEAD ── */
+      .masthead {
+        border-bottom: 3px double var(--border);
+        padding: 32px 0 20px;
+        margin-bottom: 32px;
+        position: relative;
+      }
+
+      .issue-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: "DM Mono", monospace;
+        font-size: 0.68rem;
+        color: var(--muted);
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 14px;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 10px;
+      }
+
+      .masthead h1 {
+        font-family: "Playfair Display", serif;
+        font-size: clamp(2.2rem, 6vw, 4.2rem);
+        font-weight: 900;
+        line-height: 1;
+        color: var(--ink);
+        letter-spacing: -1px;
+      }
+
+      .masthead .subtitle {
+        font-family: "DM Mono", monospace;
+        font-size: 0.78rem;
+        color: var(--muted);
+        margin-top: 8px;
+        letter-spacing: 1px;
+      }
+
+      .stage-tag {
+        display: inline-block;
+        background: var(--ink);
+        color: var(--paper);
+        font-family: "DM Mono", monospace;
+        font-size: 0.65rem;
+        font-weight: 500;
+        padding: 3px 10px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
+
+      /* ── PROJECT NAV ── */
+      .project-nav {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 36px;
+      }
+
+      @media (min-width: 600px) {
+        .project-nav {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+
+      .proj-nav-btn {
+        background: var(--warm);
+        border: 1.5px solid var(--border);
+        color: var(--muted);
+        padding: 12px 10px;
+        cursor: pointer;
+        font-family: "Nunito", sans-serif;
+        font-size: 0.8rem;
+        font-weight: 700;
+        transition: all 0.2s;
+        text-align: center;
+        position: relative;
+      }
+
+      .proj-nav-btn:hover {
+        border-color: var(--ink);
+        color: var(--ink);
+      }
+      .proj-nav-btn.active {
+        background: var(--ink);
+        color: var(--paper);
+        border-color: var(--ink);
+      }
+
+      .proj-nav-btn .pnum {
+        display: block;
+        font-family: "Playfair Display", serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 4px;
+      }
+
+      /* ── TOPIC SECTIONS ── */
+      .topic-section {
+        display: none;
+      }
+      .topic-section.active {
+        display: block;
+      }
+
+      /* ── TABS ── */
+      .tab-bar {
+        display: flex;
+        border-bottom: 2px solid var(--border);
+        margin-bottom: 28px;
+        gap: 0;
+        overflow-x: auto;
+      }
+
+      .tab-btn {
+        padding: 10px 20px;
+        border: none;
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+        font-family: "Nunito", sans-serif;
+        font-size: 0.82rem;
+        font-weight: 700;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -2px;
+        white-space: nowrap;
+        transition: all 0.15s;
+      }
+
+      .tab-btn:hover {
+        color: var(--ink);
+      }
+      .tab-btn.active {
+        color: var(--ink);
+        border-bottom-color: var(--ink);
+      }
+
+      .panel {
+        display: none;
+      }
+      .panel.active {
+        display: block;
+      }
+
+      /* ── CARDS ── */
+      .card {
+        background: var(--warm);
+        border: 1.5px solid var(--border);
+        padding: 22px 24px;
+        margin-bottom: 20px;
+      }
+
+      .card-title {
+        font-family: "Playfair Display", serif;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .card p,
+      .card li {
+        font-size: 0.87rem;
+        line-height: 1.85;
+        color: #44403c;
+      }
+
+      .card ul {
+        padding-left: 18px;
+      }
+
+      /* pull quote style */
+      .insight {
+        border-left: 4px solid var(--amber);
+        padding: 14px 18px;
+        background: #fffbeb;
+        margin: 16px 0;
+        font-size: 0.85rem;
+        color: #78350f;
+        line-height: 1.7;
+      }
+
+      /* ── CODE BLOCKS ── */
+      pre {
+        background: var(--code-bg);
+        border-left: 4px solid var(--rust);
+        padding: 20px;
+        overflow-x: auto;
+        margin: 16px 0;
+        position: relative;
+        font-size: 0;
+      }
+
+      pre::after {
+        content: attr(data-lang);
+        position: absolute;
+        top: 8px;
+        right: 14px;
+        font-family: "DM Mono", monospace;
+        font-size: 0.62rem;
+        color: #57534e;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+      }
+
+      code {
+        font-family: "DM Mono", monospace;
+        font-size: 0.8rem;
+        line-height: 2;
+        color: var(--code-text);
+      }
+
+      .kw {
+        color: #fb923c;
+      }
+      .fn {
+        color: #67e8f9;
+      }
+      .str {
+        color: #86efac;
+      }
+      .cm {
+        color: #57534e;
+      }
+      .num {
+        color: #fde68a;
+      }
+      .prop {
+        color: #93c5fd;
+      }
+      .tag {
+        color: #f9a8d4;
+      }
+
+      /* ── VIVA Q&A ── */
+      .qa {
+        border: 1.5px solid var(--border);
+        margin-bottom: 14px;
+        overflow: hidden;
+      }
+
+      .qa .q {
+        background: var(--cream);
+        padding: 13px 18px;
+        font-size: 0.87rem;
+        font-weight: 700;
+        color: var(--navy);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .qa .a {
+        padding: 13px 18px;
+        font-size: 0.83rem;
+        color: #44403c;
+        line-height: 1.8;
+        background: var(--warm);
+      }
+
+      /* ── CHALLENGES ── */
+      .challenge {
+        border: 1.5px solid var(--border);
+        margin-bottom: 18px;
+      }
+
+      .challenge-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 18px;
+        background: var(--cream);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .challenge-head .ctitle {
+        font-size: 0.88rem;
+        font-weight: 800;
+        color: var(--ink);
+        flex: 1;
+      }
+
+      .badge {
+        font-family: "DM Mono", monospace;
+        font-size: 0.6rem;
+        font-weight: 500;
+        padding: 2px 8px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .easy {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .medium {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .hard {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      .challenge-body {
+        padding: 14px 18px;
+        background: var(--warm);
+      }
+
+      .challenge-body p {
+        font-size: 0.83rem;
+        color: #57534e;
+        margin-bottom: 12px;
+        line-height: 1.7;
+      }
+
+      /* ── PROJECT CARDS ── */
+      .project-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 14px;
+        margin-top: 12px;
+      }
+
+      .project-tile {
+        background: var(--warm);
+        border: 1.5px solid var(--border);
+        padding: 16px;
+        transition: border-color 0.2s;
+      }
+
+      .project-tile:hover {
+        border-color: var(--ink);
+      }
+
+      .project-tile .icon {
+        font-size: 1.4rem;
+        margin-bottom: 8px;
+      }
+      .project-tile h4 {
+        font-family: "Playfair Display", serif;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 6px;
+      }
+
+      .project-tile p {
+        font-size: 0.77rem;
+        color: var(--muted);
+        line-height: 1.65;
+      }
+
+      /* ── LIVE DEMO AREA ── */
+      .demo-wrap {
+        background: var(--cream);
+        border: 1.5px solid var(--border);
+        border-top: 4px solid var(--ink);
+        padding: 24px;
+        margin: 20px 0;
+      }
+
+      .demo-wrap h4 {
+        font-family: "DM Mono", monospace;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--muted);
+        margin-bottom: 18px;
+      }
+
+      /* TODO APP */
+      .todo-container {
+        max-width: 480px;
+      }
+
+      .todo-input-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      .todo-input {
+        flex: 1;
+        padding: 10px 14px;
+        border: 1.5px solid var(--border);
+        background: var(--paper);
+        font-family: "Nunito", sans-serif;
+        font-size: 0.85rem;
+        outline: none;
+        color: var(--ink);
+        transition: border-color 0.2s;
+      }
+
+      .todo-input:focus {
+        border-color: var(--ink);
+      }
+
+      .todo-select {
+        padding: 10px 10px;
+        border: 1.5px solid var(--border);
+        background: var(--paper);
+        font-family: "Nunito", sans-serif;
+        font-size: 0.82rem;
+        color: var(--ink);
+        outline: none;
+        cursor: pointer;
+      }
+
+      .btn {
+        padding: 10px 18px;
+        border: none;
+        cursor: pointer;
+        font-family: "Nunito", sans-serif;
+        font-size: 0.82rem;
+        font-weight: 700;
+        transition: all 0.15s;
+      }
+
+      .btn-dark {
+        background: var(--ink);
+        color: var(--paper);
+      }
+      .btn-dark:hover {
+        background: #2c2420;
+      }
+      .btn-sm {
+        padding: 5px 12px;
+        font-size: 0.75rem;
+      }
+      .btn-red {
+        background: #fee2e2;
+        color: var(--rust);
+      }
+      .btn-green {
+        background: #dcfce7;
+        color: var(--forest);
+      }
+
+      .filter-row {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+      }
+
+      .filter-btn {
+        padding: 5px 12px;
+        border: 1.5px solid var(--border);
+        background: transparent;
+        font-family: "Nunito", sans-serif;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--muted);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+
+      .filter-btn.active {
+        background: var(--ink);
+        color: var(--paper);
+        border-color: var(--ink);
+      }
+
+      .todo-list {
+        max-height: 280px;
+        overflow-y: auto;
+      }
+
+      .todo-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        background: var(--paper);
+        border: 1px solid var(--border);
+        margin-bottom: 6px;
+        transition: opacity 0.2s;
+      }
+
+      .todo-item.done .todo-text {
+        text-decoration: line-through;
+        color: var(--muted);
+      }
+
+      .todo-checkbox {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: var(--ink);
+        flex-shrink: 0;
+      }
+
+      .todo-text {
+        flex: 1;
+        font-size: 0.83rem;
+        color: var(--ink);
+      }
+
+      .priority-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .p-high {
+        background: var(--rust);
+      }
+      .p-medium {
+        background: var(--amber);
+      }
+      .p-low {
+        background: var(--forest);
+      }
+
+      .todo-stats {
+        font-family: "DM Mono", monospace;
+        font-size: 0.72rem;
+        color: var(--muted);
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid var(--border);
+      }
+
+      /* QUIZ APP */
+      .quiz-container {
+        max-width: 520px;
+      }
+
+      .quiz-progress {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+
+      .progress-track {
+        flex: 1;
+        height: 6px;
+        background: var(--border);
+        position: relative;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: var(--ink);
+        transition: width 0.3s ease;
+      }
+
+      .quiz-q-num {
+        font-family: "DM Mono", monospace;
+        font-size: 0.72rem;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+
+      .quiz-question {
+        font-family: "Playfair Display", serif;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--ink);
+        line-height: 1.5;
+        margin-bottom: 18px;
+        padding: 16px;
+        background: var(--paper);
+        border-left: 4px solid var(--amber);
+      }
+
+      .quiz-options {
+        display: grid;
+        gap: 8px;
+      }
+
+      .quiz-opt {
+        padding: 12px 16px;
+        border: 1.5px solid var(--border);
+        background: var(--paper);
+        cursor: pointer;
+        font-family: "Nunito", sans-serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--ink);
+        text-align: left;
+        transition: all 0.15s;
+      }
+
+      .quiz-opt:hover:not(:disabled) {
+        border-color: var(--ink);
+        background: var(--warm);
+      }
+      .quiz-opt.correct {
+        background: #dcfce7;
+        border-color: var(--forest);
+        color: var(--forest);
+      }
+      .quiz-opt.wrong {
+        background: #fee2e2;
+        border-color: var(--rust);
+        color: var(--rust);
+      }
+
+      .quiz-feedback {
+        margin-top: 12px;
+        padding: 10px 14px;
+        font-size: 0.83rem;
+        font-weight: 700;
+        min-height: 36px;
+      }
+
+      .quiz-score {
+        font-family: "DM Mono", monospace;
+        font-size: 0.72rem;
+        color: var(--muted);
+        margin-bottom: 16px;
+        display: flex;
+        gap: 16px;
+      }
+
+      .quiz-score span {
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      /* CALC */
+      .calc-container {
+        max-width: 300px;
+      }
+
+      .calc-display {
+        background: var(--ink);
+        color: var(--paper);
+        text-align: right;
+        padding: 18px 20px;
+        margin-bottom: 4px;
+      }
+
+      .calc-expr {
+        font-family: "DM Mono", monospace;
+        font-size: 0.75rem;
+        color: var(--muted);
+        min-height: 18px;
+        margin-bottom: 4px;
+      }
+
+      .calc-val {
+        font-family: "Playfair Display", serif;
+        font-size: 2rem;
+        font-weight: 700;
+      }
+
+      .calc-btns {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 3px;
+      }
+
+      .calc-btn {
+        padding: 16px 8px;
+        border: none;
+        font-family: "DM Mono", monospace;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: filter 0.1s;
+        color: var(--ink);
+      }
+
+      .calc-btn:hover {
+        filter: brightness(0.92);
+      }
+      .calc-btn:active {
+        filter: brightness(0.82);
+      }
+      .calc-num {
+        background: var(--cream);
+      }
+      .calc-op {
+        background: #fef3c7;
+        color: var(--amber);
+      }
+      .calc-eq {
+        background: var(--ink);
+        color: var(--paper);
+      }
+      .calc-clr {
+        background: #fee2e2;
+        color: var(--rust);
+      }
+
+      /* Portfolio interactive */
+      .portfolio-demo {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 16px;
+        max-width: 560px;
+      }
+
+      .skill-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .skill-btn-item {
+        padding: 10px 14px;
+        border: 1.5px solid var(--border);
+        background: var(--paper);
+        cursor: pointer;
+        font-family: "Nunito", sans-serif;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--muted);
+        text-align: left;
+        transition: all 0.15s;
+      }
+
+      .skill-btn-item:hover {
+        border-color: var(--ink);
+        color: var(--ink);
+      }
+      .skill-btn-item.active {
+        background: var(--ink);
+        color: var(--paper);
+        border-color: var(--ink);
+      }
+
+      .skill-detail {
+        background: var(--paper);
+        border: 1.5px solid var(--border);
+        padding: 16px;
+      }
+
+      .skill-detail .skill-name {
+        font-family: "Playfair Display", serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 10px;
+      }
+
+      .skill-bar-wrap {
+        margin-bottom: 8px;
+      }
+
+      .skill-bar-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-bottom: 4px;
+        font-family: "DM Mono", monospace;
+      }
+
+      .skill-bar-track {
+        height: 8px;
+        background: var(--border);
+        position: relative;
+      }
+
+      .skill-bar-fill {
+        height: 100%;
+        background: var(--ink);
+        transition: width 0.7s ease;
+        width: 0;
+      }
+
+      .skill-desc {
+        font-size: 0.78rem;
+        color: var(--muted);
+        margin-top: 12px;
+        line-height: 1.7;
+        border-top: 1px solid var(--border);
+        padding-top: 10px;
+      }
+
+      /* ── ROADMAP SUMMARY ── */
+      .roadmap-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 10px;
+        margin: 20px 0;
+      }
+
+      .rm-card {
+        background: var(--warm);
+        border: 1.5px solid var(--border);
+        padding: 14px;
+      }
+
+      .rm-card .rm-num {
+        font-family: "Playfair Display", serif;
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: var(--border);
+        line-height: 1;
+        margin-bottom: 4px;
+      }
+
+      .rm-card .rm-title {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 4px;
+      }
+
+      .rm-card .rm-check {
+        font-size: 0.72rem;
+        color: var(--forest);
+        font-family: "DM Mono", monospace;
+      }
+
+      .rm-card.done {
+        border-color: var(--forest);
+      }
+      .rm-card.done .rm-num {
+        color: var(--forest);
+      }
+
+      /* Footer */
+      footer {
+        text-align: center;
+        padding: 40px 0 30px;
+        border-top: 3px double var(--border);
+        margin-top: 60px;
+      }
+
+      .footer-title {
+        font-family: "Playfair Display", serif;
+        font-size: 1.1rem;
+        font-weight: 900;
+        color: var(--ink);
+        margin-bottom: 8px;
+      }
+
+      footer p {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+
+      .completion-badge {
+        display: inline-block;
+        background: var(--ink);
+        color: var(--paper);
+        font-family: "DM Mono", monospace;
+        font-size: 0.7rem;
+        padding: 6px 18px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin: 12px 0;
+      }
+
+      hr.divider {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 24px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <!-- MASTHEAD -->
+      <div class="masthead">
+        <div class="issue-line">
+          <span>JavaScript Mastery Journal</span>
+          <span>চূড়ান্ত পর্যায় — ২০ / ২০</span>
+          <span>Vol. XX</span>
+        </div>
+        <div class="stage-tag">পর্যায় ২০ — সম্পূর্ণ রোডম্যাপ</div>
+        <h1>Projects<br />&amp; Practice</h1>
+        <p class="subtitle">
+          Todo App · Weather App · Quiz App · Portfolio — চারটি সম্পূর্ণ
+          প্রজেক্ট
+        </p>
+      </div>
+
+      <!-- NAV -->
+      <div class="project-nav">
+        <button class="proj-nav-btn active" onclick="showTopic('todo', this)">
+          <span class="pnum">01</span>Todo App
+        </button>
+        <button class="proj-nav-btn" onclick="showTopic('weather', this)">
+          <span class="pnum">02</span>Weather App
+        </button>
+        <button class="proj-nav-btn" onclick="showTopic('quiz', this)">
+          <span class="pnum">03</span>Quiz App
+        </button>
+        <button class="proj-nav-btn" onclick="showTopic('portfolio', this)">
+          <span class="pnum">04</span>Portfolio
+        </button>
+      </div>
+
+      <!-- ═══════════════════════════════════════════
+       PROJECT 1: TODO APP
+  ═══════════════════════════════════════════ -->
+      <div class="topic-section active" id="topic-todo">
+        <div class="tab-bar" id="tabbar-todo">
+          <button
+            class="tab-btn active"
+            onclick="showPanel('todo', 'concept', this)"
+          >
+            📖 কনসেপ্ট ও কোড
+          </button>
+          <button class="tab-btn" onclick="showPanel('todo', 'viva', this)">
+            🎤 ভাইবা গাইড
+          </button>
+          <button
+            class="tab-btn"
+            onclick="showPanel('todo', 'challenge', this)"
+          >
+            💻 চ্যালেঞ্জ
+          </button>
+          <button class="tab-btn" onclick="showPanel('todo', 'project', this)">
+            🚀 ফিউচার
+          </button>
+        </div>
+
+        <!-- CONCEPT -->
+        <div class="panel active" id="panel-todo-concept">
+          <div class="card">
+            <div class="card-title">📋 Todo App — কী শিখব?</div>
+            <p>
+              Todo App হলো JavaScript-এর সবচেয়ে popular beginner project। এতে
+              DOM manipulation, event handling, CRUD operations, array methods,
+              এবং localStorage — সব একসাথে প্র্যাক্টিস হয়।
+            </p>
+            <div class="insight">
+              💡 <strong>CRUD = Create, Read, Update, Delete</strong> — এই চারটি
+              অপারেশন প্রায় প্রতিটি ওয়েব অ্যাপের ভিত্তি। Todo App এই চারটিই
+              cover করে।
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">🏗️ Data Structure ডিজাইন</div>
+            <pre
+              data-lang="JavaScript"
+            ><code><span class="cm">// প্রতিটি todo item এভাবে দেখাবে:</span>
+<span class="kw">const</span> todoItem = {
+  id: <span class="fn">Date</span>.now(),          <span class="cm">// unique ID</span>
+  text: <span class="str">"JavaScript শিখব"</span>, <span class="cm">// task text</span>
+  completed: <span class="kw">false</span>,       <span class="cm">// done কিনা</span>
+  priority: <span class="str">"high"</span>,       <span class="cm">// high/medium/low</span>
+  createdAt: <span class="kw">new</span> <span class="fn">Date</span>()    <span class="cm">// কখন তৈরি</span>
+};
+
+<span class="cm">// সব todos একটি array-এ:</span>
+<span class="kw">let</span> todos = []; <span class="cm">// localStorage থেকে load হবে</span></code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">➕ Add Todo</div>
+            <pre
+              data-lang="JavaScript"
+            ><code><span class="kw">function</span> <span class="fn">addTodo</span>(text, priority = <span class="str">'medium'</span>) {
+  <span class="kw">if</span> (text.trim() === <span class="str">''</span>) <span class="kw">return</span>; <span class="cm">// খালি হলে add করব না</span>
+
+  <span class="kw">const</span> newTodo = {
+    id: <span class="fn">Date</span>.now(),
+    text: text.trim(),
+    completed: <span class="kw">false</span>,
+    priority,
+    createdAt: <span class="kw">new</span> <span class="fn">Date</span>().toISOString()
+  };
+
+  todos.<span class="fn">push</span>(newTodo);
+  <span class="fn">saveToStorage</span>();
+  <span class="fn">renderTodos</span>();
+}
+
+<span class="kw">function</span> <span class="fn">saveToStorage</span>() {
+  localStorage.<span class="fn">setItem</span>(<span class="str">'todos'</span>, <span class="fn">JSON.stringify</span>(todos));
+}
+
+<span class="kw">function</span> <span class="fn">loadFromStorage</span>() {
+  <span class="kw">const</span> saved = localStorage.<span class="fn">getItem</span>(<span class="str">'todos'</span>);
+  todos = saved ? <span class="fn">JSON.parse</span>(saved) : [];
+}</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">🎨 Render + Toggle + Delete</div>
+            <pre
+              data-lang="JavaScript"
+            ><code><span class="kw">function</span> <span class="fn">renderTodos</span>(filter = <span class="str">'all'</span>) {
+  <span class="kw">const</span> filtered = todos.<span class="fn">filter</span>(t => {
+    <span class="kw">if</span> (filter === <span class="str">'active'</span>)    <span class="kw">return</span> !t.completed;
+    <span class="kw">if</span> (filter === <span class="str">'completed'</span>) <span class="kw">return</span>  t.completed;
+    <span class="kw">return</span> <span class="kw">true</span>;
+  });
+
+  list.innerHTML = filtered.<span class="fn">map</span>(todo => <span class="str">`
+    &lt;div class="todo-item </span><span class="kw">${todo.completed ? 'done' : ''}</span><span class="str">" 
+         data-id="</span><span class="kw">${todo.id}</span><span class="str">"&gt;
+      &lt;input type="checkbox" 
+             </span><span class="kw">${todo.completed ? 'checked' : ''}</span><span class="str">
+             onchange="toggleTodo(</span><span class="kw">${todo.id}</span><span class="str">)"&gt;
+      &lt;span&gt;</span><span class="kw">${todo.text}</span><span class="str">&lt;/span&gt;
+      &lt;span class="priority-dot p-</span><span class="kw">${todo.priority}</span><span class="str">"&gt;&lt;/span&gt;
+      &lt;button onclick="deleteTodo(</span><span class="kw">${todo.id}</span><span class="str">)"&gt;🗑️&lt;/button&gt;
+    &lt;/div&gt;
+  `</span>).<span class="fn">join</span>(<span class="str">''</span>);
+}
+
+<span class="kw">function</span> <span class="fn">toggleTodo</span>(id) {
+  todos = todos.<span class="fn">map</span>(t =>
+    t.id === id ? {...t, completed: !t.completed} : t
+  );
+  <span class="fn">saveToStorage</span>(); <span class="fn">renderTodos</span>();
+}
+
+<span class="kw">function</span> <span class="fn">deleteTodo</span>(id) {
+  todos = todos.<span class="fn">filter</span>(t => t.id !== id);
+  <span class="fn">saveToStorage</span>(); <span class="fn">renderTodos</span>();
+}</code></pre>
+          </div>
+
+          <!-- LIVE DEMO TODO -->
+          <div class="demo-wrap">
+            <h4>🧪 লাইভ ডেমো — Todo App (CRUD সহ)</h4>
+            <div class="todo-container">
+              <div class="todo-input-row">
+                <input
+                  class="todo-input"
+                  id="todo-input"
+                  placeholder="নতুন task লিখুন..."
+                  onkeydown="if (event.key === 'Enter') addTodoDemo();"
+                />
+                <select class="todo-select" id="todo-priority">
+                  <option value="high">🔴 High</option>
+                  <option value="medium" selected>🟡 Medium</option>
+                  <option value="low">🟢 Low</option>
+                </select>
+                <button class="btn btn-dark" onclick="addTodoDemo()">
+                  Add
+                </button>
+              </div>
+              <div class="filter-row">
+                <button
+                  class="filter-btn active"
+                  onclick="filterTodosDemo('all', this)"
+                >
+                  সব
+                </button>
+                <button
+                  class="filter-btn"
+                  onclick="filterTodosDemo('active', this)"
+                >
+                  বাকি
+                </button>
+                <button
+                  class="filter-btn"
+                  onclick="filterTodosDemo('completed', this)"
+                >
+                  সম্পন্ন
+                </button>
+                <button
+                  class="filter-btn"
+                  onclick="clearCompleted()"
+                  style="margin-left: auto"
+                >
+                  সম্পন্ন মুছুন
+                </button>
+              </div>
+              <div class="todo-list" id="todo-list-demo"></div>
+              <div class="todo-stats" id="todo-stats">কোনো task নেই।</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIVA -->
+        <div class="panel" id="panel-todo-viva">
+          <div class="qa">
+            <div class="q">Q1. todo update করতে map() কেন ব্যবহার করি?</div>
+            <div class="a">
+              map() নতুন array return করে — original array mutate করে না।
+              Immutability maintain করলে bug কম হয়। যেমন:
+              <code
+                >todos = todos.map(t => t.id === id ? {...t, completed:
+                !t.completed} : t)</code
+              >
+              — spread operator দিয়ে নতুন object তৈরি করা হয়।
+            </div>
+          </div>
+          <div class="qa">
+            <div class="q">Q2. Date.now() দিয়ে ID কি safe?</div>
+            <div class="a">
+              Mostly হ্যাঁ, কিন্তু millisecond-এ দুটো item একসাথে add হলে same
+              ID পাবে। Production-এ <code>crypto.randomUUID()</code> বা
+              <code>Math.random().toString(36).slice(2)</code> ব্যবহার করা ভালো।
+            </div>
+          </div>
+          <div class="qa">
+            <div class="q">
+              Q3. re-render প্রতিবার পুরো list delete করে নতুন বানায় — এটা কি
+              performance problem?
+            </div>
+            <div class="a">
+              ছোট list-এ কোনো সমস্যা নেই। বড় list-এ "virtual DOM diffing" দরকার
+              হয় (React যা করে)। Vanilla JS-এ optimization: শুধু changed item
+              update করা বা DocumentFragment ব্যবহার।
+            </div>
+          </div>
+          <div class="qa">
+            <div class="q">Q4. Edit feature কীভাবে যোগ করব?</div>
+            <div class="a">
+              Double-click করলে text span কে input-এ convert করব। Input-এ Enter
+              বা blur event-এ নতুন text দিয়ে map() করে update করব। এটা "inline
+              editing" pattern।
+            </div>
+          </div>
+          <div class="qa">
+            <div class="q">Q5. localStorage-এর limit কত?</div>
+            <div class="a">
+              সাধারণত 5-10 MB per domain। Todo app-এর জন্য যথেষ্ট। বড় data-র
+              জন্য IndexedDB ব্যবহার করা উচিত।
+            </div>
+          </div>
+        </div>
+
+        <!-- CHALLENGE -->
+        <div class="panel" id="panel-todo-challenge">
+          <div class="challenge">
+            <div class="challenge-head">
+              <div class="ctitle">চ্যালেঞ্জ ১ — Drag & Drop Reorder</div>
+              <span class="badge medium">Medium</span>
+            </div>
+            <div class="challenge-body">
+              <p>
+                Todo items drag করে reorder করার সুবিধা যোগ করো। HTML5 Drag and
+                Drop API ব্যবহার করো।
+              </p>
+              <pre
+                data-lang="Solution"
+              ><code><span class="cm">// item drag শুরু</span>
+item.<span class="fn">addEventListener</span>(<span class="str">'dragstart'</span>, e => {
+  dragId = item.dataset.id;
+  item.style.opacity = <span class="str">'0.5'</span>;
+});
+
+<span class="cm">// drop zone-এ</span>
+item.<span class="fn">addEventListener</span>(<span class="str">'dragover'</span>, e => {
+  e.<span class="fn">preventDefault</span>(); <span class="cm">// drop allow করতে</span>
+});
+
+item.<span class="fn">addEventListener</span>(<span class="str">'drop'</span>, e => {
+  <span class="kw">const</span> fromIdx = todos.<span class="fn">findIndex</span>(t => t.id == dragId);
+  <span class="kw">const</span> toIdx   = todos.<span class="fn">findIndex</span>(t => t.id == item.dataset.id);
+  <span class="cm">// array-এ swap করো</span>
+  [todos[fromIdx], todos[toIdx]] = [todos[toIdx], todos[fromIdx]];
+  <span class="fn">saveToStorage</span>(); <span class="fn">renderTodos</span>();
+});</code></pre>
+            </div>
+          </div>
+
+          <div class="challenge">
+            <div class="challenge-head">
+              <div class="ctitle">চ্যালেঞ্জ ২ — Due Date & Sorting</div>
+              <span class="badge medium">Medium</span>
+            </div>
+            <div class="challenge-body">
+              <p>
+                প্রতিটি todo-তে due date যোগ করো। Overdue items লাল হবে।
+                Priority বা date অনুযায়ী sort করার option দাও।
+              </p>
+              <pre
+                data-lang="Solution"
+              ><code><span class="kw">function</span> <span class="fn">sortTodos</span>(by) {
+  <span class="kw">const</span> order = { high: <span class="num">0</span>, medium: <span class="num">1</span>, low: <span class="num">2</span> };
+  
+  <span class="kw">if</span> (by === <span class="str">'priority'</span>) {
+    todos.<span class="fn">sort</span>((a, b) => order[a.priority] - order[b.priority]);
+  } <span class="kw">else if</span> (by === <span class="str">'dueDate'</span>) {
+    todos.<span class="fn">sort</span>((a, b) => <span class="kw">new</span> <span class="fn">Date</span>(a.dueDate) - <span class="kw">new</span> <span class="fn">Date</span>(b.dueDate));
+  }
+  
+  <span class="fn">renderTodos</span>();
+}
+
+<span class="cm">// Overdue check</span>
+<span class="kw">const</span> isOverdue = todo => 
+  todo.dueDate && <span class="kw">new</span> <span class="fn">Date</span>(todo.dueDate) < <span class="kw">new</span> <span class="fn">Date</span>() && !todo.completed;</code></pre>
+            </div>
+          </div>
+
+          <div class="challenge">
+            <div class="challenge-head">
+              <div class="ctitle">চ্যালেঞ্জ ৩ — Categories & Search</div>
+              <span class="badge hard">Hard</span>
+            </div>
+            <div class="challenge-body">
+              <p>
+                Category (Work, Personal, Study) যোগ করো। Real-time search বার
+                বানাও যা text দিয়ে filter করে।
+              </p>
+              <pre
+                data-lang="Solution"
+              ><code>searchInput.<span class="fn">addEventListener</span>(<span class="str">'input'</span>, <span class="kw">function</span>() {
+  <span class="kw">const</span> query = <span class="kw">this</span>.value.toLowerCase();
+  
+  <span class="kw">const</span> filtered = todos.<span class="fn">filter</span>(t =>
+    t.text.toLowerCase().<span class="fn">includes</span>(query) ||
+    t.category.toLowerCase().<span class="fn">includes</span>(query)
+  );
+  
+  <span class="fn">renderFilteredTodos</span>(filtered);
+});</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- PROJECT -->
+        <div class="panel" id="panel-todo-project">
+          <div class="card">
+            <div class="card-title">🚀 Todo App থেকে কোথায় যাবে?</div>
+            <p>Todo App এর concepts সব project management tool-এ আছে।</p>
+          </div>
+          <div class="project-grid">
+            <div class="project-tile">
+              <div class="icon">📋</div>
+              <h4>Trello / Jira Clone</h4>
+              <p>
+                Kanban board — todo, in progress, done columns। Drag & Drop।
+              </p>
+            </div>
+            <div class="project-tile">
+              <div class="icon">🗓️</div>
+              <h4>Google Tasks</h4>
+              <p>Google Calendar-এর সাথে integrated task management।</p>
+            </div>
+            <div class="project-tile">
+              <div class="icon">🛒</div>
+              <h4>Shopping List App</h4>
+              <p>গ্রোসারি list — category, quantity, price সহ।</p>
+            </div>
+            <div class="project-tile">
+              <div class="icon">📚</div>
+              <h4>Reading List</h4>
+              <p>বই বা article track করার app।</p>
+            </div>
+            <div class="project-tile">
+              <div class="icon">💰</div>
+              <h4>Expense Tracker</h4>
+              <p>Daily খরচ track — todo-র মতোই CRUD, কিন্তু chart সহ।</p>
+            </div>
+            <div class="project-tile">
+              <div class="icon">🏋️</div>
+              <h4>Workout Planner</h4>
+              <p>Exercise list — sets, reps, done status।</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════
+       PROJECT 2: WEATHER APP
+  ═══════════════════════════════════════════ -->
+      <div class="topic-section" id="topic-weather">
+        <div class="tab-bar" id="tabbar-weather">
+          <button
+            class="tab-btn active"
+            onclick="showPanel('weather', 'concept', this)"
+          >
+            📖 কনসেপ্ট ও কোড
+          </button>
+          <button class="tab-btn" onclick="showPanel('weather', 'viva', this)">
+            🎤 ভাইবা গাইড
+          </button>
+          <button
+            class="tab-btn"
+            onclick="showPanel('weather', 'challenge', this)"
+          >
+            💻 চ্যালেঞ্জ
+          </button>
+          <button
+            class="tab-btn"
+            onclick="showPanel('weather', 'project', this)"
+          >
+            🚀 ফিউচার
+          </button>
+        </div>
+
+        <div class="panel active" id="panel-weather-concept">
+          <div class="card">
+            <div class="card-title">🌦️ Weather App — কী শিখব?</div>
+            <p>
+              Weather App-এ শিখব: Fetch API দিয়ে real API call করা,
+              async/await, error handling, JSON data parse করা, এবং dynamic UI
+              update। OpenWeatherMap API (free) ব্যবহার করব।
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-title">🔑 API Key ও Base URL</div>
+            <pre
+              data-lang="JavaScript"
+            ><code><span class="cm">// OpenWeatherMap (free tier — 60 calls/min)</span>
+<span class="kw">const</span> API_KEY = <span class="str">'তোমার_api_key_এখানে'</span>; <span class="cm">// openweathermap.org-এ free signup</span>
+<span class="kw">const</span> BASE_URL = <span class="str">'https://api.openweathermap.org/data/2.5'</span>;
+
+<span class="cm">// Current weather URL:</span>
+<span class="cm">// {BASE_URL}/weather?q={city}&appid={API_KEY}&units=metric&lang=bn</span>
+
+<span class="cm">// 5-day forecast URL:</span>
+<span class="cm">// {BASE_URL}/forecast?q={city}&appid={API_KEY}&units=metric</span></code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">⛅ Weather Fetch Function</div>
+            <pre
+              data-lang="JavaScript"
+            ><code><span class="kw">async function</span> <span class="fn">getWeather</span>(city) {
+  <span class="kw">const</span> url = <span class="str">`</span><span class="kw">${BASE_URL}</span><span class="str">/weather?q=</span><span class="kw">${city}</span><span class="str">&appid=</span><span class="kw">${API_KEY}</span><span class="str">&units=metric`</span>;
+  
+  <span class="fn">showLoading</span>(); <span class="cm">// loading spinner দেখাও</span>
+  
+  <span class="kw">try</span> {
+    <span class="kw">const</span> response = <span class="kw">await</span> <span class="fn">fetch</span>(url);
+    
+    <span class="kw">if</span> (!response.ok) {
+      <span class="kw">if</span> (response.status === <span class="num">404</span>) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'শহর খুঁজে পাওয়া যায়নি!'</span>);
+      <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'API Error: '</span> + response.status);
+    }
+    
+    <span class="kw">const</span> data = <span class="kw">await</span> response.<span class="fn">json</span>();
+    <span class="fn">displayWeather</span>(data);
+    <span class="fn">saveRecentSearch</span>(city); <span class="cm">// localStorage-এ save</span>
+    
+  } <span class="kw">catch</span> (error) {
+    <span class="fn">showError</span>(error.message);
+  } <span class="kw">finally</span> {
+    <span class="fn">hideLoading</span>(); <span class="cm">// loading সবসময় বন্ধ করো</span>
+  }
+}</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">🎨 Data Display করা</div>
+            <pre
+              data-lang="JavaScript"
+            ><code><span class="kw">function</span> <span class="fn">displayWeather</span>(data) {
+  <span class="cm">// API response structure:</span>
+  <span class="kw">const</span> {
+    name,                          <span class="cm">// "Dhaka"</span>
+    main: { temp, feels_like,
+            humidity, pressure },  <span class="cm">// তাপমাত্রা, আর্দ্রতা</span>
+    weather: [{ description,
+                icon }],           <span class="cm">// আবহাওয়ার বিবরণ</span>
+    wind: { speed },               <span class="cm">// বাতাসের গতি</span>
+    sys: { country, sunrise,
+           sunset }                <span class="cm">// দেশ, সূর্যোদয়/অস্ত</span>
+  } = data;
+
+  <span class="cm">// Icon URL</span>
+  <span class="kw">const</span> iconUrl = <span class="str">`https://openweathermap.org/img/wn/</span><span class="kw">${icon}</span><span class="str">@2x.png`</span>;
+  
+  <span class="cm">// Time convert করা</span>
+  <span class="kw">const</span> <span class="fn">toTime</span> = (unix) => <span class="kw">new</span> <span class="fn">Date</span>(unix * <span class="num">1000</span>)
+    .<span class="fn">toLocaleTimeString</span>(<span class="str">'bn-BD'</span>, { hour: <span class="str">'2-digit'</span>, minute: <span class="str">'2-digit'</span> });
+
+  <span class="cm">// UI update</span>
+  cityEl.textContent = <span class="str">`</span><span class="kw">${name}</span><span class="str">, </span><span class="kw">${country}</span><span class="str">`</span>;
+  tempEl.textContent = <span class="str">`</span><span class="kw">${Math.round(temp)}</span><span class="str">°C`</span>;
+  descEl.textContent = description;
+  humidityEl.textContent = <span class="str">`</span><span class="kw">${humidity}</span><span class="str">%`</span>;
+  windEl.textContent = <span class="str">`</span><span class="kw">${speed}</span><span class="str"> m/s`</span>;
+  sunriseEl.textContent = <span class="fn">toTime</span>(sunrise);
+  sunsetEl.textContent = <span class="fn">toTime</span>(sunset);
+}</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">📅 5-Day Forecast</div>
+            <pre
+              data-lang="JavaScript"
+            ><code><span class="kw">async function</span> <span class="fn">getForecast</span>(city) {
+  <span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(
+    <span class="str">`</span><span class="kw">${BASE_URL}</span><span class="str">/forecast?q=</span><span class="kw">${city}</span><span class="str">&appid=</span><span class="kw">${API_KEY}</span><span class="str">&units=metric`</span>
+  );
+  <span class="kw">const</span> data = <span class="kw">await</span> res.<span class="fn">json</span>();
+
+  <span class="cm">// API 3ঘণ্টা পর পর দেয় = 40টি entry</span>
+  <span class="cm">// প্রতিদিনের noon (12:00) এর data নেব</span>
+  <span class="kw">const</span> dailyForecasts = data.list.<span class="fn">filter</span>(item =>
+    item.dt_txt.<span class="fn">includes</span>(<span class="str">'12:00:00'</span>)
+  );
+
+  forecastEl.innerHTML = dailyForecasts.<span class="fn">map</span>(day => <span class="str">`
+    &lt;div class="forecast-card"&gt;
+      &lt;div&gt;</span><span class="kw">${new Date(day.dt_txt).toLocaleDateString('bn-BD', {weekday:'short'})}</span><span class="str">&lt;/div&gt;
+      &lt;img src="https://openweathermap.org/img/wn/</span><span class="kw">${day.weather[0].icon}</span><span class="str">.png"&gt;
+      &lt;div&gt;</span><span class="kw">${Math.round(day.main.temp)}</span><span class="str">°C&lt;/div&gt;
+    &lt;/div&gt;
+  `</span>).<span class="fn">join</span>(<span class="str">''</span>);
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-weather-viva">
+          <div class="qa">
+            <div class="q">
+              Q1. response.ok কী? response.status check করলেই হতো না?
+            </div>
+            <div class="a">
+              <code>fetch()</code> 404 বা 500 error-এও Promise resolve করে
+              (reject হয় না)! শুধু network failure-এ reject হয়। তাই
+              <code>response.ok</code> (status 200-299) বা
+              <code>response.status</code> manually check করতে হয়।
+            </div>
+          </div>
+          <div class="qa">
+            <div class="q">Q2. API Key browser-এ রাখা কি safe?</div>
+            <div class="a">
+              না! Client-side code-এ API key expose হয়ে যায় — যে কেউ DevTools
+              থেকে দেখতে পারে। Production-এ API call সবসময় server (backend)
+              দিয়ে করতে হবে। Development-এ .env file ব্যবহার করো।
+            </div>
+          </div>
+          <div class="qa">
+            <div class="q">Q3. CORS error কী এবং কীভাবে handle করব?</div>
+            <div class="a">
+              Browser security policy — অন্য domain-এর API call করলে server যদি
+              CORS header না দেয় তাহলে block হয়। OpenWeatherMap CORS allow
+              করে। নিজের API-তে server-side তে
+              <code>Access-Control-Allow-Origin</code> header যোগ করতে হয়।
+            </div>
+          </div>
+          <div class="qa">
+            <div class="q">Q4. API rate limit কী?</div>
+            <div class="a">
+              Free tier-এ OpenWeatherMap 60 calls/min বা 1000/day দেয়। Rate
+              limit exceed করলে 429 status আসে। Cache strategy দিয়ে unnecessary
+              calls কমানো উচিত।
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-weather-challenge">
+          <div class="challenge">
+            <div class="challenge-head">
+              <div class="ctitle">চ্যালেঞ্জ ১ — Unit Toggle (°C/°F)</div>
+              <span class="badge easy">Easy</span>
+            </div>
+            <div class="challenge-body">
+              <p>
+                Button click করলে °C থেকে °F বা উল্টো convert করো — নতুন API
+                call ছাড়াই।
+              </p>
+              <pre
+                data-lang="Solution"
+              ><code><span class="kw">let</span> unit = <span class="str">'C'</span>;
+<span class="kw">let</span> currentTempC = <span class="num">0</span>; <span class="cm">// Celsius save রাখো</span>
+
+<span class="kw">function</span> <span class="fn">toggleUnit</span>() {
+  unit = unit === <span class="str">'C'</span> ? <span class="str">'F'</span> : <span class="str">'C'</span>;
+  <span class="kw">const</span> display = unit === <span class="str">'C'</span>
+    ? currentTempC
+    : (currentTempC * <span class="num">9</span>/<span class="num">5</span>) + <span class="num">32</span>;
+  tempEl.textContent = <span class="str">`</span><span class="kw">${Math.round(display)}</span><span class="str">°</span><span class="kw">${unit}</span><span class="str">`</span>;
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="challenge">
+            <div class="challenge-head">
+              <div class="ctitle">চ্যালেঞ্জ ২ — Recent Searches</div>
+              <span class="badge medium">Medium</span>
+            </div>
+            <div class="challenge-body">
+              <p>
+                শেষ ৫টি search করা শহর localStorage-এ save করো। Click করলে সেই
+                শহরের weather load হবে।
+              </p>
+              <pre
+                data-lang="Solution"
+              ><code><span class="kw">function</span> <span class="fn">saveRecentSearch</span>(city) {
+  <span class="kw">let</span> recents = <span class="fn">JSON.parse</span>(
+    localStorage.<span class="fn">getItem</span>(<span class="str">'recent_cities'</span>) || <span class="str">'[]'</span>
+  );
+  recents = [city, ...recents.<span class="fn">filter</span>(c => c !== city)]
+    .<span class="fn">slice</span>(<span class="num">0</span>, <span class="num">5</span>); <span class="cm">// max 5</span>
+  localStorage.<span class="fn">setItem</span>(<span class="str">'recent_cities'</span>, <span class="fn">JSON.stringify</span>(recents));
+  <span class="fn">renderRecents</span>(recents);
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="challenge">
+            <div class="challenge-head">
+              <div class="ctitle">চ্যালেঞ্জ ৩ — Background Weather Theme</div>
+              <span class="badge hard">Hard</span>
+            </div>
+            <div class="challenge-body">
+              <p>
+                আবহাওয়ার condition অনুযায়ী background পরিবর্তন হবে: ☀️ sunny →
+                হলুদ, 🌧️ rain → নীল, ❄️ snow → সাদা।
+              </p>
+              <pre
+                data-lang="Solution"
+              ><code><span class="kw">const</span> weatherThemes = {
+  Clear:        { bg: <span class="str">'linear-gradient(135deg, #f6d365, #fda085)'</span>, emoji: <span class="str">'☀️'</span> },
+  Rain:         { bg: <span class="str">'linear-gradient(135deg, #4facfe, #00f2fe)'</span>, emoji: <span class="str">'🌧️'</span> },
+  Snow:         { bg: <span class="str">'linear-gradient(135deg, #e0eafc, #cfdef3)'</span>, emoji: <span class="str">'❄️'</span> },
+  Thunderstorm: { bg: <span class="str">'linear-gradient(135deg, #373b44, #4286f4)'</span>, emoji: <span class="str">'⛈️'</span> },
+  Clouds:       { bg: <span class="str">'linear-gradient(135deg, #bdc3c7, #2c3e50)'</span>, emoji: <span class="str">'☁️'</span> }
+};
+
+<span class="kw">const</span> theme = weatherThemes[data.weather[<span class="num">0</span>].main] || weatherThemes.Clouds;
+document.body.style.background = theme.bg;</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-weather-project">
+          <div class="card">
+            <div class="card-title">🚀 Weather App থেকে কোথায় যাবে?</div>
+          </div>
+          <div class="project-grid">
+            <div class="project-tile">
+              <div class="icon">✈️</div>
+              <h4>Travel Planner</h4>
+              <p>গন্তব্যের আবহাওয়া দেখে কখন যাওয়া ভালো।</p>
+            </div>
+            <div class="project-tile">
+              <div class="icon">👨‍🌾</div>
+              <h4>Agriculture App</h4>
+              <p>কৃষকদের জন্য আবহাওয়া সতর্কতা।</p>
+            </div>
+            <div class="project-tile">
+              <div class="icon">🚌</div>
+              <h4>Commute Helper</h4>
+              <p>বৃষ্টির দিনে alternative route সাজেস্ট করা।</p>
+            </div>
+            <div class="project-tile">
+              <div class="icon">📊</div>
+              <h4>Climate Dashboard</h4>
+              <p>Multiple cities-এর তুলনামূলক weather।</p>
+            </div>
+            <div class="project-tile">
+              <div class="icon">🏃</div>
+              <h4>Outdoor Activity App</h4>
+              <p>Weather ভালো থাকলে run/cycle suggest করা।</p>
+            </div>
+            <div class="project-tile">
+              <div class="icon">💡</div>
+              <h4>Smart Home</h4>
+              <p>বৃষ্টি আসলে window বন্ধের notification।</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════
+       PROJECT 3: QUIZ APP
+  ═══════════════════════════════════════════ -->
+      <div class="topic-section" id="topic-quiz">
+        <div class="tab-bar" id="tabbar-quiz">
+          <button
+            class="tab-btn active"
+            onclick="showPanel('quiz', 'concept', this)"
+          >
+            📖 কনসেপ্ট ও কোড
+          </button>
+          <button class="tab-btn" onclick="showPanel('quiz', 'viva', this)">
+            🎤 ভাইবা গাইড
+          </button>
+          <button
+            class="tab-btn"
+            onclick="showPanel('quiz', 'challenge', this)"
+          >
+            💻 চ্যালেঞ্জ
+          </button>
+          <button class="tab-btn" onclick="showPanel('quiz', 'project', this)">
+            🚀 ফিউচার
+          </button>
+        </div>
+
+        <div class="panel active" id="panel-quiz-concept">
+          <div class="card">
+            <div class="card-title">🧠 Quiz App — কী শিখব?</div>
+            <p>
+              Quiz App-এ শিখব: array shuffle, timer, state management, score
+              calculation। Object data থেকে dynamic UI তৈরি করার excellent
+              practice।
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-title">📦 Questions Data Structure</div>
+            <pre
+              data-lang="JavaScript"
+            ><code><span class="kw">const</span> questions = [
+  {
+    id: <span class="num">1</span>,
+    question: <span class="str">"JavaScript-এ typeof null কী return করে?"</span>,
+    options: [<span class="str">"null"</span>, <span class="str">"undefined"</span>, <span class="str">"object"</span>, <span class="str">"string"</span>],
+    correct: <span class="num">2</span>,      <span class="cm">// index 2 = "object" (এটি JS-এর famous bug!)</span>
+    explanation: <span class="str">"এটি JavaScript-এর একটি historical bug।"</span>
+  },
+  {
+    id: <span class="num">2</span>,
+    question: <span class="str">"=== এবং == এর পার্থক্য কী?"</span>,
+    options: [
+      <span class="str">"কোনো পার্থক্য নেই"</span>,
+      <span class="str">"=== type ও value উভয়ই check করে"</span>,
+      <span class="str">"== বেশি accurate"</span>,
+      <span class="str">"=== শুধু string-এর জন্য"</span>
+    ],
+    correct: <span class="num">1</span>,
+    explanation: <span class="str">"=== strict equality, == coercive equality।"</span>
+  }
+];</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">🔀 Fisher-Yates Shuffle</div>
+            <pre
+              data-lang="JavaScript"
+            ><code><span class="cm">// Array shuffle — quiz প্রতিবার ভিন্ন order-এ দেখাবে</span>
+<span class="kw">function</span> <span class="fn">shuffleArray</span>(arr) {
+  <span class="kw">const</span> shuffled = [...arr]; <span class="cm">// original copy</span>
+  <span class="kw">for</span> (<span class="kw">let</span> i = shuffled.length - <span class="num">1</span>; i > <span class="num">0</span>; i--) {
+    <span class="kw">const</span> j = <span class="fn">Math.floor</span>(Math.<span class="fn">random</span>() * (i + <span class="num">1</span>));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  <span class="kw">return</span> shuffled;
+}
+
+<span class="kw">let</span> quizQuestions = <span class="fn">shuffleArray</span>(questions).<span class="fn">slice</span>(<span class="num">0</span>, <span class="num">10</span>); <span class="cm">// ১০টি random</span>
+<span class="kw">let</span> currentIndex = <span class="num">0</span>;
+<span class="kw">let</span> score = <span class="num">0</span>;
+<span class="kw">let</span> timer; <span class="cm">// countdown timer</span></code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">⏱️ Timer + Answer Check</div>
+            <pre
+              data-lang="JavaScript"
+            ><code><span class="kw">function</span> <span class="fn">startTimer</span>(seconds = <span class="num">30</span>) {
+  <span class="kw">let</span> timeLeft = seconds;
+  <span class="fn">updateTimerUI</span>(timeLeft);
+  
+  timer = <span class="fn">setInterval</span>(() => {
+    timeLeft--;
+    <span class="fn">updateTimerUI</span>(timeLeft);
+    
+    <span class="kw">if</span> (timeLeft === <span class="num">0</span>) {
+      <span class="fn">clearInterval</span>(timer);
+      <span class="fn">autoSkip</span>(); <span class="cm">// সময় শেষ — skip</span>
+    }
+  }, <span class="num">1000</span>);
+}
+
+<span class="kw">function</span> <span class="fn">checkAnswer</span>(selectedIndex) {
+  <span class="fn">clearInterval</span>(timer); <span class="cm">// timer বন্ধ</span>
+  <span class="kw">const</span> current = quizQuestions[currentIndex];
+  <span class="kw">const</span> isCorrect = selectedIndex === current.correct;
+  
+  <span class="kw">if</span> (isCorrect) {
+    score++;
+    <span class="fn">showFeedback</span>(<span class="str">'✅ সঠিক!'</span>, <span class="str">'correct'</span>);
+  } <span class="kw">else</span> {
+    <span class="fn">showFeedback</span>(<span class="str">`❌ ভুল! সঠিক: </span><span class="kw">${current.options[current.correct]}</span><span class="str">`</span>, <span class="str">'wrong'</span>);
+  }
+  
+  <span class="cm">// button disable করো</span>
+  document.<span class="fn">querySelectorAll</span>(<span class="str">'.option-btn'</span>).<span class="fn">forEach</span>(btn => {
+    btn.disabled = <span class="kw">true</span>;
+    <span class="kw">if</span> (+btn.dataset.index === current.correct) btn.classList.<span class="fn">add</span>(<span class="str">'correct'</span>);
+    <span class="kw">else if</span> (+btn.dataset.index === selectedIndex) btn.classList.<span class="fn">add</span>(<span class="str">'wrong'</span>);
+  });
+  
+  <span class="fn">setTimeout</span>(<span class="fn">nextQuestion</span>, <span class="num">1500</span>); <span class="cm">// ১.৫ সেকেন্ড পর next</span>
+}</code></pre>
+          </div>
+
+          <!-- LIVE QUIZ DEMO -->
+          <div class="demo-wrap">
+            <h4>🧪 লাইভ ডেমো — JavaScript Quiz</h4>
+            <div class="quiz-container">
+              <div class="quiz-score" id="quiz-stats">
+                স্কোর: <span id="score-val">০</span> | প্রশ্ন:
+                <span id="q-val">১ / ৫</span>
+              </div>
+              <div class="quiz-progress">
+                <div class="progress-track">
+                  <div
+                    class="progress-fill"
+                    id="quiz-progress"
+                    style="width: 20%"
+                  ></div>
+                </div>
+                <div class="quiz-q-num" id="quiz-q-num">১/৫</div>
+              </div>
+              <div class="quiz-question" id="quiz-question">লোড হচ্ছে...</div>
+              <div class="quiz-options" id="quiz-options"></div>
+              <div class="quiz-feedback" id="quiz-feedback"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-quiz-viva">
+          <div class="qa">
+            <div class="q">Q1. options shuffle করব কীভাবে?</div>
+            <div class="a">
+              প্রতিটি question-এর options array-কে shuffle করতে হবে। কিন্তু
+              correct answer-এর index বদলে যাবে। তাই shuffle করার আগে correct
+              option-এর text save করো, shuffle-এর পরে
+              <code>indexOf()</code> দিয়ে নতুন index খোঁজো।
+            </div>
+          </div>
+          <div class="qa">
+            <div class="q">Q2. High score localStorage-এ কীভাবে save করব?</div>
+            <div class="a">
+              <code>localStorage.getItem('highScore')</code> দিয়ে পুরনো score
+              নেব। নতুন score বেশি হলেই শুধু update করব:
+              <code
+                >if (newScore > highScore) localStorage.setItem('highScore',
+                newScore)</code
+              >
+            </div>
+          </div>
+          <div class="qa">
+            <div class="q">Q3. Open Trivia DB API কী?</div>
+            <div class="a">
+              Free API যা হাজার হাজার trivia question দেয়।
+              <code
+                >https://opentdb.com/api.php?amount=10&category=18&type=multiple</code
+              >
+              — category 18 = Computers। কোনো API key লাগে না!
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-quiz-challenge">
+          <div class="challenge">
+            <div class="challenge-head">
+              <div class="ctitle">চ্যালেঞ্জ ১ — Lifelines যোগ করো</div>
+              <span class="badge medium">Medium</span>
+            </div>
+            <div class="challenge-body">
+              <p>
+                KBC-র মতো lifeline: "50:50" (২টি wrong option সরিয়ে দেবে) এবং
+                "Skip" (current question skip করবে)। প্রতিটি lifeline একবারই
+                ব্যবহার করা যাবে।
+              </p>
+              <pre
+                data-lang="Solution"
+              ><code><span class="kw">let</span> lifelines = { fiftyFifty: <span class="kw">true</span>, skip: <span class="kw">true</span> };
+
+<span class="kw">function</span> <span class="fn">useFiftyFifty</span>() {
+  <span class="kw">if</span> (!lifelines.fiftyFifty) <span class="kw">return</span>;
+  lifelines.fiftyFifty = <span class="kw">false</span>;
+  
+  <span class="kw">const</span> correct = quizQuestions[currentIndex].correct;
+  <span class="kw">let</span> removed = <span class="num">0</span>;
+  
+  document.<span class="fn">querySelectorAll</span>(<span class="str">'.option-btn'</span>).<span class="fn">forEach</span>((btn, i) => {
+    <span class="kw">if</span> (i !== correct && removed < <span class="num">2</span>) {
+      btn.disabled = <span class="kw">true</span>;
+      btn.style.opacity = <span class="str">'0.2'</span>;
+      removed++;
+    }
+  });
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="challenge">
+            <div class="challenge-head">
+              <div class="ctitle">চ্যালেঞ্জ ২ — Category-based Quiz</div>
+              <span class="badge hard">Hard</span>
+            </div>
+            <div class="challenge-body">
+              <p>
+                Open Trivia DB API থেকে category select করে quiz শুরু করো।
+                Science, History, Geography — আলাদা আলাদা।
+              </p>
+              <pre
+                data-lang="Solution"
+              ><code><span class="kw">async function</span> <span class="fn">fetchQuestions</span>(category, difficulty) {
+  <span class="kw">const</span> url = <span class="str">`https://opentdb.com/api.php`</span> +
+    <span class="str">`?amount=10&category=</span><span class="kw">${category}</span><span class="str">`</span> +
+    <span class="str">`&difficulty=</span><span class="kw">${difficulty}</span><span class="str">&type=multiple`</span>;
+    
+  <span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(url);
+  <span class="kw">const</span> data = <span class="kw">await</span> res.<span class="fn">json</span>();
+  
+  <span class="cm">// HTML entities decode করতে হবে</span>
+  <span class="kw">return</span> data.results.<span class="fn">map</span>(q => ({
+    question: <span class="fn">decodeHTML</span>(q.question),
+    options: <span class="fn">shuffleArray</span>([
+      ...q.incorrect_answers, q.correct_answer
+    ].<span class="fn">map</span>(<span class="fn">decodeHTML</span>)),
+    correct: q.correct_answer
+  }));
+}</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-quiz-project">
+          <div class="card">
+            <div class="card-title">🚀 Quiz App থেকে কোথায় যাবে?</div>
+          </div>
+          <div class="project-grid">
+            <div class="project-tile">
+              <div class="icon">🎓</div>
+              <h4>E-Learning Platform</h4>
+              <p>Coursera/Khan Academy — lesson শেষে quiz।</p>
+            </div>
+            <div class="project-tile">
+              <div class="icon">🏆</div>
+              <h4>Competitive Exam Prep</h4>
+              <p>BCS, bank exam — MCQ practice।</p>
+            </div>
+            <div class="project-tile">
+              <div class="icon">🎮</div>
+              <h4>Trivia Game</h4>
+              <p>Multiplayer quiz — WebSocket দিয়ে।</p>
+            </div>
+            <div class="project-tile">
+              <div class="icon">🏢</div>
+              <h4>HR Assessment</h4>
+              <p>Job interview — technical screening।</p>
+            </div>
+            <div class="project-tile">
+              <div class="icon">🧪</div>
+              <h4>Personality Quiz</h4>
+              <p>"কোন Harry Potter চরিত্র তুমি?" ধরনের।</p>
+            </div>
+            <div class="project-tile">
+              <div class="icon">📈</div>
+              <h4>Certification Test</h4>
+              <p>Google, AWS certification mock exam।</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════
+       PROJECT 4: PORTFOLIO
+  ═══════════════════════════════════════════ -->
+      <div class="topic-section" id="topic-portfolio">
+        <div class="tab-bar" id="tabbar-portfolio">
+          <button
+            class="tab-btn active"
+            onclick="showPanel('portfolio', 'concept', this)"
+          >
+            📖 কনসেপ্ট ও কোড
+          </button>
+          <button
+            class="tab-btn"
+            onclick="showPanel('portfolio', 'viva', this)"
+          >
+            🎤 ভাইবা গাইড
+          </button>
+          <button
+            class="tab-btn"
+            onclick="showPanel('portfolio', 'challenge', this)"
+          >
+            💻 চ্যালেঞ্জ
+          </button>
+          <button
+            class="tab-btn"
+            onclick="showPanel('portfolio', 'project', this)"
+          >
+            🚀 ফিউচার
+          </button>
+        </div>
+
+        <div class="panel active" id="panel-portfolio-concept">
+          <div class="card">
+            <div class="card-title">
+              🎨 Portfolio Interactive Features — কী যোগ করব?
+            </div>
+            <p>
+              একটি static portfolio-কে interactive করার জন্য: smooth scrolling,
+              animated skill bars, typing effect, project filter, এবং contact
+              form validation যোগ করব।
+            </p>
+            <div class="insight">
+              💡 Portfolio-ই হলো তোমার সবচেয়ে গুরুত্বপূর্ণ project। এখানে শেখা
+              সব technique একসাথে দেখানোর সুযোগ।
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">🔤 Typing Effect (Typewriter)</div>
+            <pre
+              data-lang="JavaScript"
+            ><code><span class="kw">function</span> <span class="fn">typeWriter</span>(element, texts, speed = <span class="num">100</span>) {
+  <span class="kw">let</span> textIdx = <span class="num">0</span>, charIdx = <span class="num">0</span>, deleting = <span class="kw">false</span>;
+
+  <span class="kw">function</span> <span class="fn">type</span>() {
+    <span class="kw">const</span> current = texts[textIdx];
+
+    <span class="kw">if</span> (!deleting) {
+      element.textContent = current.<span class="fn">slice</span>(<span class="num">0</span>, ++charIdx);
+      <span class="kw">if</span> (charIdx === current.length) {
+        deleting = <span class="kw">true</span>;
+        <span class="kw">return</span> <span class="fn">setTimeout</span>(type, <span class="num">2000</span>); <span class="cm">// ২s পর delete</span>
+      }
+    } <span class="kw">else</span> {
+      element.textContent = current.<span class="fn">slice</span>(<span class="num">0</span>, --charIdx);
+      <span class="kw">if</span> (charIdx === <span class="num">0</span>) {
+        deleting = <span class="kw">false</span>;
+        textIdx = (textIdx + <span class="num">1</span>) % texts.length; <span class="cm">// পরের text</span>
+      }
+    }
+
+    <span class="fn">setTimeout</span>(type, deleting ? speed / <span class="num">2</span> : speed);
+  }
+
+  <span class="fn">type</span>();
+}
+
+<span class="cm">// ব্যবহার:</span>
+<span class="fn">typeWriter</span>(
+  document.<span class="fn">getElementById</span>(<span class="str">'role'</span>),
+  [<span class="str">'Frontend Developer'</span>, <span class="str">'JavaScript Enthusiast'</span>, <span class="str">'Problem Solver'</span>]
+);</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">
+              📊 Animated Skill Bars (Intersection Observer)
+            </div>
+            <pre
+              data-lang="JavaScript"
+            ><code><span class="kw">const</span> skills = [
+  { name: <span class="str">'JavaScript'</span>, level: <span class="num">85</span> },
+  { name: <span class="str">'React'</span>,      level: <span class="num">70</span> },
+  { name: <span class="str">'CSS'</span>,        level: <span class="num">80</span> },
+];
+
+<span class="cm">// render skill bars</span>
+skillsEl.innerHTML = skills.<span class="fn">map</span>(s => <span class="str">`
+  &lt;div class="skill-item"&gt;
+    &lt;span&gt;</span><span class="kw">${s.name}</span><span class="str">&lt;/span&gt; &lt;span&gt;</span><span class="kw">${s.level}</span><span class="str">%&lt;/span&gt;
+    &lt;div class="bar-track"&gt;
+      &lt;div class="bar-fill" data-level="</span><span class="kw">${s.level}</span><span class="str">" style="width:0%"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+`</span>).<span class="fn">join</span>(<span class="str">''</span>);
+
+<span class="cm">// viewport-এ এলে animate করো</span>
+<span class="kw">const</span> obs = <span class="kw">new</span> <span class="fn">IntersectionObserver</span>(entries => {
+  entries.<span class="fn">forEach</span>(entry => {
+    <span class="kw">if</span> (entry.isIntersecting) {
+      entry.target.<span class="fn">querySelectorAll</span>(<span class="str">'.bar-fill'</span>).<span class="fn">forEach</span>(bar => {
+        bar.style.width = bar.dataset.level + <span class="str">'%'</span>;
+      });
+    }
+  });
+});
+
+obs.<span class="fn">observe</span>(skillsEl);</code></pre>
+          </div>
+
+          <div class="card">
+            <div class="card-title">🔍 Project Filter</div>
+            <pre
+              data-lang="JavaScript"
+            ><code><span class="kw">const</span> projects = [
+  { title: <span class="str">'Todo App'</span>,     category: <span class="str">'javascript'</span>, tech: [<span class="str">'JS', 'CSS'</span>] },
+  { title: <span class="str">'Weather App'</span>,  category: <span class="str">'javascript'</span>, tech: [<span class="str">'JS', 'API'</span>] },
+  { title: <span class="str">'Blog Website'</span>, category: <span class="str">'html-css'</span>,   tech: [<span class="str">'HTML', 'CSS'</span>] },
+];
+
+<span class="kw">function</span> <span class="fn">filterProjects</span>(category) {
+  <span class="kw">const</span> filtered = category === <span class="str">'all'</span>
+    ? projects
+    : projects.<span class="fn">filter</span>(p => p.category === category);
+
+  projectsEl.innerHTML = filtered.<span class="fn">map</span>(p => <span class="str">`
+    &lt;div class="project-card"&gt;
+      &lt;h3&gt;</span><span class="kw">${p.title}</span><span class="str">&lt;/h3&gt;
+      &lt;div class="tags"&gt;</span><span class="kw">${p.tech.map(t => `&lt;span&gt;${t}&lt;/span&gt;`).join('')}</span><span class="str">&lt;/div&gt;
+    &lt;/div&gt;
+  `</span>).<span class="fn">join</span>(<span class="str">''</span>);
+}</code></pre>
+          </div>
+
+          <!-- LIVE PORTFOLIO DEMO -->
+          <div class="demo-wrap">
+            <h4>🧪 লাইভ ডেমো — Animated Skill Bars</h4>
+            <div class="portfolio-demo">
+              <div class="skill-list">
+                <button
+                  class="skill-btn-item active"
+                  onclick="showSkill('js', this)"
+                >
+                  JavaScript
+                </button>
+                <button
+                  class="skill-btn-item"
+                  onclick="showSkill('react', this)"
+                >
+                  React
+                </button>
+                <button class="skill-btn-item" onclick="showSkill('css', this)">
+                  CSS
+                </button>
+                <button
+                  class="skill-btn-item"
+                  onclick="showSkill('node', this)"
+                >
+                  Node.js
+                </button>
+              </div>
+              <div class="skill-detail" id="skill-detail-area">
+                <div class="skill-name" id="skill-name">JavaScript</div>
+                <div id="skill-bars"></div>
+                <div class="skill-desc" id="skill-desc"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-portfolio-viva">
+          <div class="qa">
+            <div class="q">
+              Q1. SPA (Single Page Application) কীভাবে portfolio-তে করব?
+            </div>
+            <div class="a">
+              Sections দেখানো/লুকানো দিয়ে page reload ছাড়াই navigation করা।
+              <code>History API</code> (<code>pushState</code>) দিয়ে URL
+              পরিবর্তন করা যায়। এটাই React Router-এর মূল ধারণা।
+            </div>
+          </div>
+          <div class="qa">
+            <div class="q">Q2. Performance-এর জন্য কী করব?</div>
+            <div class="a">
+              Images lazy loading, CSS/JS minify, critical CSS inline করা, font
+              preload। Lighthouse দিয়ে score check করো। 90+ score হলে ভালো।
+            </div>
+          </div>
+          <div class="qa">
+            <div class="q">Q3. Contact form submit হলে কোথায় যাবে?</div>
+            <div class="a">
+              Backend ছাড়া: Formspree, EmailJS, Web3Forms — free services। Form
+              submit করলে email আসে। Production-এ: Node.js backend + Nodemailer।
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-portfolio-challenge">
+          <div class="challenge">
+            <div class="challenge-head">
+              <div class="ctitle">চ্যালেঞ্জ ১ — Smooth Scroll Navigation</div>
+              <span class="badge easy">Easy</span>
+            </div>
+            <div class="challenge-body">
+              <p>
+                Navbar links click করলে smooth scroll হবে। Active section
+                highlight হবে।
+              </p>
+              <pre
+                data-lang="Solution"
+              ><code><span class="cm">// Smooth scroll</span>
+document.<span class="fn">querySelectorAll</span>(<span class="str">'a[href^="#"]'</span>).<span class="fn">forEach</span>(link => {
+  link.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, e => {
+    e.<span class="fn">preventDefault</span>();
+    <span class="kw">const</span> target = document.<span class="fn">querySelector</span>(link.getAttribute(<span class="str">'href'</span>));
+    target?.<span class="fn">scrollIntoView</span>({ behavior: <span class="str">'smooth'</span> });
+  });
+});
+
+<span class="cm">// Active link highlight via IntersectionObserver</span>
+<span class="kw">const</span> sections = document.<span class="fn">querySelectorAll</span>(<span class="str">'section[id]'</span>);
+<span class="kw">const</span> navObs = <span class="kw">new</span> <span class="fn">IntersectionObserver</span>(entries => {
+  entries.<span class="fn">forEach</span>(e => {
+    <span class="kw">const</span> link = document.<span class="fn">querySelector</span>(<span class="str">`a[href="#</span><span class="kw">${e.target.id}</span><span class="str">"]`</span>);
+    link?.classList.<span class="fn">toggle</span>(<span class="str">'active'</span>, e.isIntersecting);
+  });
+}, { threshold: <span class="num">0.5</span> });
+sections.<span class="fn">forEach</span>(s => navObs.<span class="fn">observe</span>(s));</code></pre>
+            </div>
+          </div>
+
+          <div class="challenge">
+            <div class="challenge-head">
+              <div class="ctitle">চ্যালেঞ্জ ২ — Counter Animation</div>
+              <span class="badge medium">Medium</span>
+            </div>
+            <div class="challenge-body">
+              <p>
+                Stats section: "৫০+ Projects", "২ বছর Experience" — viewport-এ
+                আসলে 0 থেকে count করবে।
+              </p>
+              <pre
+                data-lang="Solution"
+              ><code><span class="kw">function</span> <span class="fn">animateCounter</span>(el, target, duration = <span class="num">2000</span>) {
+  <span class="kw">let</span> start = <span class="num">0</span>;
+  <span class="kw">const</span> step = target / (duration / <span class="num">16</span>); <span class="cm">// ~60fps</span>
+  
+  <span class="kw">function</span> <span class="fn">update</span>() {
+    start += step;
+    el.textContent = <span class="fn">Math.floor</span>(start);
+    <span class="kw">if</span> (start < target) <span class="fn">requestAnimationFrame</span>(update);
+    <span class="kw">else</span> el.textContent = target;
+  }
+  
+  <span class="fn">requestAnimationFrame</span>(update);
+}
+
+<span class="cm">// Intersection Observer দিয়ে trigger করো</span>
+<span class="cm">// requestAnimationFrame > setInterval for animation</span></code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-portfolio-project">
+          <div class="card">
+            <div class="card-title">🚀 Portfolio-এ যা যা যোগ করতে পারো</div>
+          </div>
+          <div class="project-grid">
+            <div class="project-tile">
+              <div class="icon">🌙</div>
+              <h4>Dark Mode</h4>
+              <p>localStorage দিয়ে user preference save।</p>
+            </div>
+            <div class="project-tile">
+              <div class="icon">🌐</div>
+              <h4>Multi-language</h4>
+              <p>বাংলা ও English toggle।</p>
+            </div>
+            <div class="project-tile">
+              <div class="icon">🖱️</div>
+              <h4>Custom Cursor</h4>
+              <p>Branded cursor — follower effect।</p>
+            </div>
+            <div class="project-tile">
+              <div class="icon">🎵</div>
+              <h4>Background Music</h4>
+              <p>Web Audio API — subtle ambient sound।</p>
+            </div>
+            <div class="project-tile">
+              <div class="icon">📊</div>
+              <h4>GitHub Stats</h4>
+              <p>GitHub API দিয়ে real repo stats।</p>
+            </div>
+            <div class="project-tile">
+              <div class="icon">🎆</div>
+              <h4>Particle Effect</h4>
+              <p>Canvas API দিয়ে hero section animation।</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ ROADMAP COMPLETION SECTION ══ -->
+      <hr class="divider" style="margin-top: 50px" />
+      <div class="card" style="border-color: var(--forest)">
+        <div class="card-title" style="color: var(--forest)">
+          🎉 সম্পূর্ণ JavaScript Roadmap — ২০টি পর্যায় সম্পন্ন!
+        </div>
+        <p style="margin-bottom: 16px">তুমি যা যা শিখেছ একনজরে:</p>
+        <div class="roadmap-summary">
+          <div class="rm-card done">
+            <div class="rm-num">০১</div>
+            <div class="rm-title">Foundation</div>
+            <div class="rm-check">✓ সম্পন্ন</div>
+          </div>
+          <div class="rm-card done">
+            <div class="rm-num">০২</div>
+            <div class="rm-title">Control Flow</div>
+            <div class="rm-check">✓ সম্পন্ন</div>
+          </div>
+          <div class="rm-card done">
+            <div class="rm-num">০৩</div>
+            <div class="rm-title">Loops</div>
+            <div class="rm-check">✓ সম্পন্ন</div>
+          </div>
+          <div class="rm-card done">
+            <div class="rm-num">০৪</div>
+            <div class="rm-title">Functions</div>
+            <div class="rm-check">✓ সম্পন্ন</div>
+          </div>
+          <div class="rm-card done">
+            <div class="rm-num">০৫</div>
+            <div class="rm-title">Arrays</div>
+            <div class="rm-check">✓ সম্পন্ন</div>
+          </div>
+          <div class="rm-card done">
+            <div class="rm-num">০৬</div>
+            <div class="rm-title">Objects</div>
+            <div class="rm-check">✓ সম্পন্ন</div>
+          </div>
+          <div class="rm-card done">
+            <div class="rm-num">০৭</div>
+            <div class="rm-title">Adv. Arrays</div>
+            <div class="rm-check">✓ সম্পন্ন</div>
+          </div>
+          <div class="rm-card done">
+            <div class="rm-num">০৮</div>
+            <div class="rm-title">Strings</div>
+            <div class="rm-check">✓ সম্পন্ন</div>
+          </div>
+          <div class="rm-card done">
+            <div class="rm-num">০৯</div>
+            <div class="rm-title">DOM</div>
+            <div class="rm-check">✓ সম্পন্ন</div>
+          </div>
+          <div class="rm-card done">
+            <div class="rm-num">১০</div>
+            <div class="rm-title">Events</div>
+            <div class="rm-check">✓ সম্পন্ন</div>
+          </div>
+          <div class="rm-card done">
+            <div class="rm-num">১১</div>
+            <div class="rm-title">Adv. Functions</div>
+            <div class="rm-check">✓ সম্পন্ন</div>
+          </div>
+          <div class="rm-card done">
+            <div class="rm-num">১২</div>
+            <div class="rm-title">Async Pt.1</div>
+            <div class="rm-check">✓ সম্পন্ন</div>
+          </div>
+          <div class="rm-card done">
+            <div class="rm-num">১৩</div>
+            <div class="rm-title">Promises</div>
+            <div class="rm-check">✓ সম্পন্ন</div>
+          </div>
+          <div class="rm-card done">
+            <div class="rm-num">১৪</div>
+            <div class="rm-title">Async/Await</div>
+            <div class="rm-check">✓ সম্পন্ন</div>
+          </div>
+          <div class="rm-card done">
+            <div class="rm-num">১৫</div>
+            <div class="rm-title">ES6+</div>
+            <div class="rm-check">✓ সম্পন্ন</div>
+          </div>
+          <div class="rm-card done">
+            <div class="rm-num">১৬</div>
+            <div class="rm-title">OOP / Classes</div>
+            <div class="rm-check">✓ সম্পন্ন</div>
+          </div>
+          <div class="rm-card done">
+            <div class="rm-num">১৭</div>
+            <div class="rm-title">Error Handling</div>
+            <div class="rm-check">✓ সম্পন্ন</div>
+          </div>
+          <div class="rm-card done">
+            <div class="rm-num">১৮</div>
+            <div class="rm-title">Storage</div>
+            <div class="rm-check">✓ সম্পন্ন</div>
+          </div>
+          <div class="rm-card done">
+            <div class="rm-num">১৯</div>
+            <div class="rm-title">Browser APIs</div>
+            <div class="rm-check">✓ সম্পন্ন</div>
+          </div>
+          <div class="rm-card done">
+            <div class="rm-num">২০</div>
+            <div class="rm-title">Projects</div>
+            <div class="rm-check">✓ সম্পন্ন</div>
+          </div>
+        </div>
+        <div class="insight" style="margin-top: 0">
+          🚀 <strong>পরবর্তী পদক্ষেপ:</strong> React.js শেখা শুরু করো — তুমি এখন
+          পুরোপুরি প্রস্তুত! Vanilla JS-এর এই solid foundation দিয়ে React অনেক
+          সহজ মনে হবে।
+        </div>
+      </div>
+
+      <footer>
+        <div class="completion-badge">
+          🏆 JavaScript Roadmap — ২০ / ২০ সম্পন্ন
+        </div>
+        <div class="footer-title">JavaScript-এর বস হওয়ার মিশন সফল!</div>
+        <p>Vanilla JS → React → Next.js — এই পথেই এগিয়ে যাও।</p>
+        <p style="margin-top: 6px; font-size: 0.72rem">
+          Build করো · Break করো · শেখো · Repeat করো 🔁
+        </p>
+      </footer>
+    </div>
+
+    <script>
+      // ══ NAVIGATION ══
+      function showTopic(name, btn) {
+        document
+          .querySelectorAll(".topic-section")
+          .forEach((s) => s.classList.remove("active"));
+        document
+          .querySelectorAll(".proj-nav-btn")
+          .forEach((b) => b.classList.remove("active"));
+        document.getElementById("topic-" + name).classList.add("active");
+        btn.classList.add("active");
+      }
+
+      function showPanel(topic, panel, btn) {
+        const section = document.getElementById("topic-" + topic);
+        section
+          .querySelectorAll(".panel")
+          .forEach((p) => p.classList.remove("active"));
+        document
+          .getElementById("panel-" + topic + "-" + panel)
+          .classList.add("active");
+        const tabBar = document.getElementById("tabbar-" + topic);
+        tabBar
+          .querySelectorAll(".tab-btn")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+      }
+
+      // ══ TODO APP DEMO ══
+      let todos = JSON.parse(localStorage.getItem("demo-todos") || "[]");
+      let todoFilter = "all";
+
+      function addTodoDemo() {
+        const input = document.getElementById("todo-input");
+        const priority = document.getElementById("todo-priority").value;
+        const text = input.value.trim();
+        if (!text) return;
+        todos.push({ id: Date.now(), text, priority, completed: false });
+        localStorage.setItem("demo-todos", JSON.stringify(todos));
+        input.value = "";
+        renderTodosDemo();
+      }
+
+      function renderTodosDemo() {
+        const list = document.getElementById("todo-list-demo");
+        const stats = document.getElementById("todo-stats");
+        const filtered = todos.filter((t) => {
+          if (todoFilter === "active") return !t.completed;
+          if (todoFilter === "completed") return t.completed;
+          return true;
+        });
+        list.innerHTML =
+          filtered.length === 0
+            ? '<div style="text-align:center;padding:20px;color:#78716c;font-size:0.8rem">কোনো task নেই</div>'
+            : filtered
+                .map(
+                  (t) => `
+        <div class="todo-item ${t.completed ? "done" : ""}">
+          <input type="checkbox" class="todo-checkbox" ${t.completed ? "checked" : ""} onchange="toggleTodoDemo(${t.id})">
+          <span class="todo-text">${t.text}</span>
+          <span class="priority-dot p-${t.priority}"></span>
+          <button class="btn btn-red btn-sm" onclick="deleteTodoDemo(${t.id})">✕</button>
+        </div>`,
+                )
+                .join("");
+        const done = todos.filter((t) => t.completed).length;
+        stats.textContent = `মোট: ${todos.length} | সম্পন্ন: ${done} | বাকি: ${todos.length - done}`;
+      }
+
+      function toggleTodoDemo(id) {
+        todos = todos.map((t) =>
+          t.id === id ? { ...t, completed: !t.completed } : t,
+        );
+        localStorage.setItem("demo-todos", JSON.stringify(todos));
+        renderTodosDemo();
+      }
+
+      function deleteTodoDemo(id) {
+        todos = todos.filter((t) => t.id !== id);
+        localStorage.setItem("demo-todos", JSON.stringify(todos));
+        renderTodosDemo();
+      }
+
+      function filterTodosDemo(f, btn) {
+        todoFilter = f;
+        document
+          .querySelectorAll(".filter-btn")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        renderTodosDemo();
+      }
+
+      function clearCompleted() {
+        todos = todos.filter((t) => !t.completed);
+        localStorage.setItem("demo-todos", JSON.stringify(todos));
+        renderTodosDemo();
+      }
+
+      renderTodosDemo();
+
+      // ══ QUIZ DEMO ══
+      const quizData = [
+        {
+          q: "typeof null এর মান কী?",
+          opts: ["null", "undefined", "object", "string"],
+          correct: 2,
+        },
+        {
+          q: "=== এবং == এর পার্থক্য কী?",
+          opts: [
+            "কোনো পার্থক্য নেই",
+            "=== type ও value চেক করে",
+            "== বেশি নির্ভুল",
+            "=== শুধু number-এর জন্য",
+          ],
+          correct: 1,
+        },
+        {
+          q: "Array.map() কী return করে?",
+          opts: [
+            "undefined",
+            "Boolean",
+            "নতুন array",
+            "মূল array পরিবর্তন করে",
+          ],
+          correct: 2,
+        },
+        {
+          q: "localStorage.getItem() কখন null return করে?",
+          opts: [
+            "সব সময়",
+            "Key না থাকলে",
+            "Empty string হলে",
+            "Browser বন্ধ হলে",
+          ],
+          correct: 1,
+        },
+        {
+          q: "async function সবসময় কী return করে?",
+          opts: ["undefined", "নির্দিষ্ট value", "Promise", "Array"],
+          correct: 2,
+        },
+      ];
+
+      let qIdx = 0,
+        qScore = 0,
+        answered = false;
+
+      function renderQuiz() {
+        const q = quizData[qIdx];
+        document.getElementById("quiz-question").textContent = q.q;
+        document.getElementById("quiz-q-num").textContent = `${qIdx + 1}/৫`;
+        document.getElementById("q-val").textContent = `${qIdx + 1} / ৫`;
+        document.getElementById("score-val").textContent = qScore;
+        document.getElementById("quiz-progress").style.width =
+          `${((qIdx + 1) / 5) * 100}%`;
+        document.getElementById("quiz-feedback").textContent = "";
+        answered = false;
+        document.getElementById("quiz-options").innerHTML = q.opts
+          .map(
+            (o, i) =>
+              `<button class="quiz-opt" onclick="answerQuiz(${i})">${o}</button>`,
+          )
+          .join("");
+      }
+
+      function answerQuiz(selected) {
+        if (answered) return;
+        answered = true;
+        const q = quizData[qIdx];
+        const btns = document.querySelectorAll(".quiz-opt");
+        btns.forEach((b) => (b.disabled = true));
+        btns[q.correct].classList.add("correct");
+        const fb = document.getElementById("quiz-feedback");
+        if (selected === q.correct) {
+          qScore++;
+          document.getElementById("score-val").textContent = qScore;
+          fb.textContent = "✅ দারুণ! সঠিক উত্তর।";
+          fb.style.color = "#166534";
+        } else {
+          btns[selected].classList.add("wrong");
+          fb.textContent = `❌ ভুল। সঠিক: "${q.opts[q.correct]}"`;
+          fb.style.color = "#991b1b";
+        }
+        setTimeout(() => {
+          qIdx++;
+          if (qIdx < quizData.length) {
+            renderQuiz();
+          } else {
+            document.getElementById("quiz-question").textContent =
+              `🎉 Quiz শেষ! স্কোর: ${qScore}/৫`;
+            document.getElementById("quiz-options").innerHTML =
+              `<button class="quiz-opt" onclick="restartQuiz()">🔄 আবার শুরু করো</button>`;
+            document.getElementById("quiz-feedback").textContent = "";
+          }
+        }, 1500);
+      }
+
+      function restartQuiz() {
+        qIdx = 0;
+        qScore = 0;
+        renderQuiz();
+      }
+      renderQuiz();
+
+      // ══ PORTFOLIO SKILL DEMO ══
+      const skillsData = {
+        js: {
+          name: "JavaScript",
+          bars: [
+            { label: "Syntax & Basics", val: 90 },
+            { label: "Async/Promises", val: 80 },
+            { label: "DOM Manipulation", val: 85 },
+          ],
+          desc: "Vanilla JS থেকে modern ES6+, async/await পর্যন্ত — solid foundation তৈরি হয়েছে এই রোডম্যাপ থেকে।",
+        },
+        react: {
+          name: "React",
+          bars: [
+            { label: "Components", val: 65 },
+            { label: "Hooks", val: 60 },
+            { label: "State Management", val: 55 },
+          ],
+          desc: "পরবর্তী শেখার লক্ষ্য। JS-এর strong foundation থাকলে React অনেক সহজ।",
+        },
+        css: {
+          name: "CSS / Styling",
+          bars: [
+            { label: "Flexbox", val: 85 },
+            { label: "Grid", val: 75 },
+            { label: "Animations", val: 70 },
+          ],
+          desc: "CSS Variables, animations, responsive design — সব portfolio-তে কাজে লাগবে।",
+        },
+        node: {
+          name: "Node.js",
+          bars: [
+            { label: "Express", val: 50 },
+            { label: "REST API", val: 45 },
+            { label: "Database", val: 40 },
+          ],
+          desc: "JS শেখার পরের ধাপ। একই language দিয়ে backend করা যায়!",
+        },
+      };
+
+      function showSkill(key, btn) {
+        const data = skillsData[key];
+        document
+          .querySelectorAll(".skill-btn-item")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById("skill-name").textContent = data.name;
+        document.getElementById("skill-desc").textContent = data.desc;
+        document.getElementById("skill-bars").innerHTML = data.bars
+          .map(
+            (b) => `
+    <div class="skill-bar-wrap">
+      <div class="skill-bar-label"><span>${b.label}</span><span>${b.val}%</span></div>
+      <div class="skill-bar-track"><div class="skill-bar-fill" style="width:0%" data-val="${b.val}"></div></div>
+    </div>`,
+          )
+          .join("");
+        // animate
+        setTimeout(() => {
+          document.querySelectorAll(".skill-bar-fill").forEach((bar) => {
+            bar.style.width = bar.dataset.val + "%";
+          });
+        }, 50);
+      }
+
+      showSkill("js", document.querySelector(".skill-btn-item"));
+    </script>
+  </body>
+</html>

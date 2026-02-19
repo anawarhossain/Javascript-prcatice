@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>পর্যায় ১৫ — ES6+ Features | JS বস মিশন</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+Bengali:wght@400;600;700;800&family=Syne:wght@700;800&display=swap');
+
+  :root {
+    --bg:      #0b0b0f;
+    --surface: #111116;
+    --card:    #16161d;
+    --border:  #222230;
+    --acc1:    #e879f9;   /* spread/rest  — magenta */
+    --acc2:    #34d399;   /* default param — emerald */
+    --acc3:    #fb923c;   /* optional chain — orange */
+    --acc4:    #60a5fa;   /* nullish — blue */
+    --text:    #dde1ec;
+    --muted:   #5a5a78;
+    --code-bg: #080810;
+  }
+
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans Bengali', sans-serif;
+    line-height: 1.75;
+    min-height: 100vh;
+  }
+
+  /* ═══ HERO ═══ */
+  .hero {
+    position: relative;
+    padding: 72px 40px 52px;
+    text-align: center;
+    overflow: hidden;
+    background: linear-gradient(160deg, #0b0b0f 60%, #130d1a 100%);
+    border-bottom: 1px solid #1e1e2e;
+  }
+  .hero-bg-txt {
+    position: absolute;
+    font-family: 'Syne', sans-serif;
+    font-size: 200px;
+    font-weight: 800;
+    color: rgba(232,121,249,.04);
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    white-space: nowrap;
+    pointer-events: none;
+    letter-spacing: -8px;
+  }
+  .badge-row { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:20px; }
+  .badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    border: 1px solid;
+  }
+  .b1 { color:var(--acc1); border-color:rgba(232,121,249,.35); background:rgba(232,121,249,.07); }
+  .b2 { color:var(--acc2); border-color:rgba(52,211,153,.35);  background:rgba(52,211,153,.07); }
+  .b3 { color:var(--acc3); border-color:rgba(251,146,60,.35);  background:rgba(251,146,60,.07); }
+  .b4 { color:var(--acc4); border-color:rgba(96,165,250,.35);  background:rgba(96,165,250,.07); }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(44px, 8vw, 84px);
+    font-weight: 800;
+    line-height: 1;
+    color: #fff;
+    margin-bottom: 10px;
+    letter-spacing: -2px;
+  }
+  .hero h1 em { color: var(--acc1); font-style: normal; }
+  .hero-sub { color: var(--muted); font-size: 14px; max-width: 520px; margin: 0 auto; }
+
+  /* ═══ STICKY NAV ═══ */
+  .toc {
+    display: flex; gap:6px; justify-content:center; flex-wrap:wrap;
+    padding: 14px 28px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(10px);
+  }
+  .toc a {
+    text-decoration: none;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    color: var(--muted);
+    padding: 5px 13px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    transition: all .2s;
+  }
+  .toc a:hover { color:#fff; border-color:#444; }
+
+  /* ═══ LAYOUT ═══ */
+  .container { max-width:1080px; margin:0 auto; padding:44px 24px 110px; }
+
+  /* ═══ SECTION HEADER ═══ */
+  .sec-wrap { margin-top: 68px; }
+  .sec-head {
+    display: flex; align-items: flex-end; gap: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 26px;
+    position: relative;
+  }
+  .sec-head::after {
+    content:'';
+    position:absolute; bottom:-1px; left:0;
+    height:2px; width:80px;
+    border-radius: 2px;
+  }
+  .s1 .sec-head::after { background: var(--acc1); }
+  .s2 .sec-head::after { background: var(--acc2); }
+  .s3 .sec-head::after { background: var(--acc3); }
+  .s4 .sec-head::after { background: var(--acc4); }
+
+  .sec-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 56px; font-weight: 800;
+    line-height: 1; opacity: .12; flex-shrink: 0;
+  }
+  .s1 .sec-num { color: var(--acc1); }
+  .s2 .sec-num { color: var(--acc2); }
+  .s3 .sec-num { color: var(--acc3); }
+  .s4 .sec-num { color: var(--acc4); }
+
+  .sec-info h2 { font-size: 21px; font-weight: 800; color: #fff; }
+  .sec-info p  { font-size: 12px; color: var(--muted); font-family:'Space Mono',monospace; margin-top:3px; }
+
+  /* ═══ CARD ═══ */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 22px;
+    overflow: hidden;
+  }
+  .card-hd {
+    padding: 12px 22px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; font-weight: 700; letter-spacing: 3px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .hd-c1 { background:rgba(232,121,249,.09); color:var(--acc1); border-bottom:1px solid rgba(232,121,249,.15); }
+  .hd-c2 { background:rgba(52,211,153,.07);  color:var(--acc2); border-bottom:1px solid rgba(52,211,153,.15); }
+  .hd-c3 { background:rgba(251,146,60,.07);  color:var(--acc3); border-bottom:1px solid rgba(251,146,60,.15); }
+  .hd-c4 { background:rgba(96,165,250,.07);  color:var(--acc4); border-bottom:1px solid rgba(96,165,250,.15); }
+
+  .hd-viva    { background:rgba(52,211,153,.07);  color:var(--acc2); border-bottom:1px solid rgba(52,211,153,.15); }
+  .hd-chal    { background:rgba(251,146,60,.07);  color:var(--acc3); border-bottom:1px solid rgba(251,146,60,.15); }
+  .hd-fut     { background:rgba(96,165,250,.07);  color:var(--acc4); border-bottom:1px solid rgba(96,165,250,.15); }
+
+  .card-body  { padding: 26px; }
+
+  /* ═══ CODE ═══ */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 22px;
+    overflow-x: auto;
+    margin: 14px 0;
+    position: relative;
+  }
+  pre.l1 { border-left: 3px solid var(--acc1); }
+  pre.l2 { border-left: 3px solid var(--acc2); }
+  pre.l3 { border-left: 3px solid var(--acc3); }
+  pre.l4 { border-left: 3px solid var(--acc4); }
+
+  code {
+    font-family: 'Space Mono', monospace;
+    font-size: 12.5px; line-height: 1.95;
+    color: #7a7a9a;
+  }
+  .kw  { color: #c792ea; }
+  .fn  { color: #82aaff; }
+  .str { color: #c3e88d; }
+  .cm  { color: #3d3d5c; font-style: italic; }
+  .num { color: #f78c6c; }
+  .op  { color: #89ddff; }
+  .acc1c { color: var(--acc1); font-weight:700; }
+  .acc2c { color: var(--acc2); font-weight:700; }
+  .acc3c { color: var(--acc3); font-weight:700; }
+  .acc4c { color: var(--acc4); font-weight:700; }
+
+  /* ═══ PROSE ═══ */
+  .prose p { font-size:15px; margin-bottom:14px; color:#b8bdd4; }
+  .prose p:last-child { margin-bottom:0; }
+  .hl1 { color:var(--acc1); font-weight:700; }
+  .hl2 { color:var(--acc2); font-weight:700; }
+  .hl3 { color:var(--acc3); font-weight:700; }
+  .hl4 { color:var(--acc4); font-weight:700; }
+
+  /* ═══ COMPARE ═══ */
+  .cmp { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:14px 0; }
+  @media(max-width:580px){ .cmp{grid-template-columns:1fr;} }
+  .cmp-box { border-radius:8px; overflow:hidden; }
+  .cmp-lbl { padding:7px 14px; font-family:'Space Mono',monospace; font-size:10px; font-weight:700; letter-spacing:2px; }
+  .cl-bad  { background:rgba(251,146,60,.12); color:var(--acc3); }
+  .cl-good { background:rgba(52,211,153,.1);  color:var(--acc2); }
+  .cmp-box pre { margin:0; border-radius:0; border-left:none; border-top:none; }
+
+  /* ═══ VIVA ═══ */
+  .viva { border:1px solid var(--border); border-radius:8px; margin-bottom:14px; overflow:hidden; }
+  .vq {
+    background:rgba(52,211,153,.06);
+    padding:13px 18px; font-size:14px; font-weight:700;
+    color:var(--acc2); display:flex; gap:10px; align-items:flex-start;
+  }
+  .vq::before { content:'Q'; font-family:'Space Mono',monospace; font-size:10px; opacity:.6; flex-shrink:0; padding-top:3px; }
+  .va {
+    padding:14px 18px; font-size:13.5px; color:#8a8aaa;
+    border-top:1px solid var(--border); background:var(--code-bg); line-height:1.75;
+  }
+  .va strong { color:var(--acc2); }
+
+  /* ═══ CHALLENGE ═══ */
+  .chal { border:1px solid rgba(251,146,60,.2); border-radius:10px; margin-bottom:20px; overflow:hidden; }
+  .chal-hd {
+    background:rgba(251,146,60,.07);
+    padding:11px 18px; font-family:'Space Mono',monospace;
+    font-size:10px; font-weight:700; letter-spacing:2px; color:var(--acc3);
+    display:flex; align-items:center; gap:8px;
+  }
+  .chal-body { padding:18px; font-size:14px; color:#8a8aaa; }
+  .chal-body p { margin-bottom:10px; }
+
+  /* ═══ FUTURE ═══ */
+  .fg { display:grid; grid-template-columns:repeat(auto-fill,minmax(215px,1fr)); gap:13px; margin-top:10px; }
+  .fc {
+    background:rgba(96,165,250,.05);
+    border:1px solid rgba(96,165,250,.16);
+    border-radius:10px; padding:17px;
+    transition:border-color .2s;
+  }
+  .fc:hover { border-color:var(--acc4); }
+  .fi { font-size:24px; margin-bottom:7px; }
+  .ft { font-size:13px; font-weight:800; color:var(--acc4); margin-bottom:5px; }
+  .fd { font-size:12px; color:var(--muted); line-height:1.6; }
+
+  /* ═══ INFO BOX ═══ */
+  .info {
+    border-radius:8px; padding:15px 20px; margin:14px 0;
+    font-size:13.5px; color:#8a8aaa; line-height:1.7;
+  }
+  .info strong { font-weight:700; }
+  .inf1 { background:rgba(232,121,249,.06); border:1px solid rgba(232,121,249,.2); }
+  .inf1 strong { color:var(--acc1); }
+  .inf2 { background:rgba(52,211,153,.06);  border:1px solid rgba(52,211,153,.2); }
+  .inf2 strong { color:var(--acc2); }
+  .inf3 { background:rgba(251,146,60,.06);  border:1px solid rgba(251,146,60,.2); }
+  .inf3 strong { color:var(--acc3); }
+  .inf4 { background:rgba(96,165,250,.06);  border:1px solid rgba(96,165,250,.2); }
+  .inf4 strong { color:var(--acc4); }
+
+  /* ═══ DIVIDER ═══ */
+  .div { text-align:center; color:var(--muted); font-size:10px; letter-spacing:6px; margin:48px 0; opacity:.3; font-family:'Space Mono',monospace; }
+
+  /* ═══ FINAL ═══ */
+  .final {
+    background:linear-gradient(135deg, rgba(232,121,249,.06), rgba(52,211,153,.04));
+    border:1px solid rgba(232,121,249,.25);
+    border-radius:16px; padding:38px; margin-top:68px; text-align:center;
+  }
+  .final-title { font-family:'Syne',sans-serif; font-size:24px; font-weight:800; color:var(--acc1); letter-spacing:1px; margin-bottom:10px; }
+  .cl { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:18px; }
+  .ci { background:rgba(52,211,153,.1); color:var(--acc2); padding:6px 16px; border-radius:20px; font-size:11px; font-weight:800; letter-spacing:1px; font-family:'Space Mono',monospace; }
+  .nxt { margin-top:22px; color:var(--muted); font-size:13px; }
+  .nxt strong { color:var(--acc1); font-family:'Space Mono',monospace; }
+
+  footer { text-align:center; padding:36px; color:var(--muted); font-size:10px; letter-spacing:4px; border-top:1px solid var(--border); font-family:'Space Mono',monospace; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg-txt">ES6+</div>
+  <div class="badge-row">
+    <span class="badge b1">...Spread & Rest</span>
+    <span class="badge b2">Default Params</span>
+    <span class="badge b3">?. Optional Chain</span>
+    <span class="badge b4">?? Nullish</span>
+  </div>
+  <h1>পর্যায় <em>১৫</em></h1>
+  <p style="font-family:'Syne',sans-serif;font-size:22px;color:#fff;font-weight:700;margin-bottom:8px;">ES6+ Modern Features</p>
+  <p class="hero-sub">JavaScript-কে আরও ছোট, পরিষ্কার ও শক্তিশালী করার আধুনিক অস্ত্র</p>
+</div>
+
+<!-- NAV -->
+<nav class="toc">
+  <a href="#s1">01 · Spread & Rest</a>
+  <a href="#s2">02 · Default Parameters</a>
+  <a href="#s3">03 · Optional Chaining</a>
+  <a href="#s4">04 · Nullish Coalescing</a>
+</nav>
+
+<div class="container">
+
+<!-- ══════════════════════════════
+     01 — Spread & Rest
+══════════════════════════════ -->
+<div id="s1" class="sec-wrap s1">
+  <div class="sec-head">
+    <div class="sec-num">01</div>
+    <div class="sec-info">
+      <h2>Spread &amp; Rest Operator <code style="font-size:18px;color:var(--acc1);">...</code></h2>
+      <p>// একই চিহ্ন, ভিন্ন দুটি শক্তি</p>
+    </div>
+  </div>
+
+  <!-- CONCEPT -->
+  <div class="card">
+    <div class="card-hd hd-c1">📖 CONCEPT &amp; EXAMPLES</div>
+    <div class="card-body prose">
+
+      <div class="info inf1">
+        <strong>Spread (ছড়িয়ে দেওয়া):</strong> Array বা Object-কে আলাদা elements-এ বিস্তার করে।<br>
+        <strong>Rest (জড়ো করা):</strong> একাধিক elements-কে একটি Array-তে সংগ্রহ করে।<br>
+        দুটোই <strong>...</strong> দিয়ে লেখা — context দিয়ে বোঝা যায় কোনটা কোনটা।
+      </div>
+
+      <pre class="l1"><code><span class="cm">// ═══ SPREAD OPERATOR ═══</span>
+
+<span class="cm">// ✅ Ex 1: Array copy & merge</span>
+<span class="kw">const</span> fruits  <span class="op">=</span> [<span class="str">"আম"</span>, <span class="str">"কলা"</span>];
+<span class="kw">const</span> veggies <span class="op">=</span> [<span class="str">"পটল"</span>, <span class="str">"বেগুন"</span>];
+
+<span class="kw">const</span> copy    <span class="op">=</span> [<span class="acc1c">...</span>fruits];               <span class="cm">// copy</span>
+<span class="kw">const</span> all     <span class="op">=</span> [<span class="acc1c">...</span>fruits, <span class="acc1c">...</span>veggies];    <span class="cm">// merge</span>
+<span class="kw">const</span> extra   <span class="op">=</span> [<span class="acc1c">...</span>fruits, <span class="str">"লিচু"</span>, <span class="str">"জাম"</span>]; <span class="cm">// add items</span>
+
+console.<span class="fn">log</span>(all);   <span class="cm">// ["আম","কলা","পটল","বেগুন"]</span>
+console.<span class="fn">log</span>(extra); <span class="cm">// ["আম","কলা","লিচু","জাম"]</span></code></pre>
+
+      <pre class="l1"><code><span class="cm">// ✅ Ex 2: Object spread — copy & merge</span>
+<span class="kw">const</span> user    <span class="op">=</span> { name: <span class="str">"Rakib"</span>, age: <span class="num">25</span> };
+<span class="kw">const</span> address <span class="op">=</span> { city: <span class="str">"Dhaka"</span>, zip: <span class="str">"1000"</span> };
+
+<span class="kw">const</span> profile <span class="op">=</span> { <span class="acc1c">...</span>user, <span class="acc1c">...</span>address, role: <span class="str">"admin"</span> };
+console.<span class="fn">log</span>(profile);
+<span class="cm">// { name:"Rakib", age:25, city:"Dhaka", zip:"1000", role:"admin" }</span>
+
+<span class="cm">// ✅ Object property override করা</span>
+<span class="kw">const</span> updated <span class="op">=</span> { <span class="acc1c">...</span>user, age: <span class="num">26</span> };  <span class="cm">// age পরিবর্তন</span>
+console.<span class="fn">log</span>(updated); <span class="cm">// { name:"Rakib", age:26 }</span></code></pre>
+
+      <pre class="l1"><code><span class="cm">// ✅ Ex 3: Function call এ spread</span>
+<span class="kw">function</span> <span class="fn">add</span>(a, b, c) {
+  <span class="kw">return</span> a <span class="op">+</span> b <span class="op">+</span> c;
+}
+<span class="kw">const</span> nums <span class="op">=</span> [<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>];
+console.<span class="fn">log</span>(<span class="fn">add</span>(<span class="acc1c">...</span>nums)); <span class="cm">// 60</span>
+
+<span class="cm">// Math.max এ spread</span>
+<span class="kw">const</span> scores <span class="op">=</span> [<span class="num">85</span>, <span class="num">92</span>, <span class="num">78</span>, <span class="num">96</span>, <span class="num">88</span>];
+console.<span class="fn">log</span>(Math.<span class="fn">max</span>(<span class="acc1c">...</span>scores)); <span class="cm">// 96</span>
+console.<span class="fn">log</span>(Math.<span class="fn">min</span>(<span class="acc1c">...</span>scores)); <span class="cm">// 78</span></code></pre>
+
+      <pre class="l1"><code><span class="cm">// ═══ REST PARAMETER ═══</span>
+
+<span class="cm">// ✅ Ex 4: Function এ rest — যতখুশি argument নাও</span>
+<span class="kw">function</span> <span class="fn">sum</span>(<span class="acc1c">...</span>numbers) {
+  <span class="kw">return</span> numbers.<span class="fn">reduce</span>((acc, n) <span class="op">=></span> acc <span class="op">+</span> n, <span class="num">0</span>);
+}
+console.<span class="fn">log</span>(<span class="fn">sum</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>));        <span class="cm">// 6</span>
+console.<span class="fn">log</span>(<span class="fn">sum</span>(<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>)); <span class="cm">// 100</span>
+
+<span class="cm">// ✅ Ex 5: Rest + normal parameter</span>
+<span class="kw">function</span> <span class="fn">introduce</span>(name, age, <span class="acc1c">...</span>hobbies) {
+  console.<span class="fn">log</span>(<span class="str">`নাম: ${name}, বয়স: ${age}`</span>);
+  console.<span class="fn">log</span>(<span class="str">`শখ: ${hobbies.<span class="fn">join</span>(", ")}`</span>);
+}
+<span class="fn">introduce</span>(<span class="str">"Rakib"</span>, <span class="num">25</span>, <span class="str">"coding"</span>, <span class="str">"reading"</span>, <span class="str">"gaming"</span>);
+<span class="cm">// নাম: Rakib, বয়স: 25
+// শখ: coding, reading, gaming</span></code></pre>
+
+      <pre class="l1"><code><span class="cm">// ✅ Ex 6: Array Destructuring + Rest</span>
+<span class="kw">const</span> [first, second, <span class="acc1c">...</span>rest] <span class="op">=</span> [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>];
+console.<span class="fn">log</span>(first);  <span class="cm">// 1</span>
+console.<span class="fn">log</span>(second); <span class="cm">// 2</span>
+console.<span class="fn">log</span>(rest);   <span class="cm">// [3, 4, 5]</span>
+
+<span class="cm">// Object Destructuring + Rest</span>
+<span class="kw">const</span> { name, <span class="acc1c">...</span>others } <span class="op">=</span> { name: <span class="str">"Rakib"</span>, age: <span class="num">25</span>, city: <span class="str">"Dhaka"</span> };
+console.<span class="fn">log</span>(name);   <span class="cm">// "Rakib"</span>
+console.<span class="fn">log</span>(others); <span class="cm">// { age: 25, city: "Dhaka" }</span></code></pre>
+    </div>
+  </div>
+
+  <!-- VIVA -->
+  <div class="card">
+    <div class="card-hd hd-viva">🎤 VIVA GUIDE</div>
+    <div class="card-body">
+      <div class="viva">
+        <div class="vq">Spread আর Rest operator এর পার্থক্য কি?</div>
+        <div class="va">দুটোই <code>...</code> ব্যবহার করে কিন্তু কাজ বিপরীত। <strong>Spread:</strong> iterable কে ছড়িয়ে দেয় (array/object unpack করে)। <strong>Rest:</strong> একাধিক values কে একটি array-তে জড়ো করে। Function parameter-এ থাকলে Rest, অন্যত্র Spread।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">Spread দিয়ে Array copy করলে কি deep copy হয়?</div>
+        <div class="va">না — Shallow copy হয়। Nested object বা array-এর ক্ষেত্রে reference copy হয়। Deep copy-র জন্য <strong>JSON.parse(JSON.stringify(obj))</strong> বা <strong>structuredClone()</strong> ব্যবহার করতে হয়।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">Rest parameter কি সবসময় শেষে থাকতে হয়?</div>
+        <div class="va">হ্যাঁ। Rest parameter সবসময় function-এর শেষ parameter হতে হবে — নইলে SyntaxError। এবং একটি function-এ শুধু একটিই rest parameter থাকতে পারে।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">arguments object আর rest parameter-এর পার্থক্য?</div>
+        <div class="va"><strong>arguments:</strong> পুরনো পদ্ধতি, Array-like কিন্তু আসল Array না, Arrow function-এ নেই। <strong>Rest:</strong> আসল Array, সব Array method কাজ করে, Arrow function-এও কাজ করে। Modern code-এ সবসময় rest ব্যবহার করা উচিত।</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHALLENGE -->
+  <div class="card">
+    <div class="card-hd hd-chal">💪 CODING CHALLENGES</div>
+    <div class="card-body">
+      <div class="chal">
+        <div class="chal-hd">⚡ CHALLENGE 01 — Merge & Update</div>
+        <div class="chal-body">
+          <p>দুটো user object merge করো। যদি একই property থাকে তাহলে দ্বিতীয়টা জিতবে।</p>
+          <pre class="l1"><code><span class="cm">// 🎯 Solution</span>
+<span class="kw">const</span> defaultUser <span class="op">=</span> { role: <span class="str">"user"</span>, theme: <span class="str">"light"</span>, lang: <span class="str">"bn"</span> };
+<span class="kw">const</span> loggedUser  <span class="op">=</span> { name: <span class="str">"Rakib"</span>, theme: <span class="str">"dark"</span> };
+
+<span class="kw">const</span> finalUser <span class="op">=</span> { <span class="acc1c">...</span>defaultUser, <span class="acc1c">...</span>loggedUser };
+console.<span class="fn">log</span>(finalUser);
+<span class="cm">// { role:"user", theme:"dark", lang:"bn", name:"Rakib" }</span>
+<span class="cm">// theme: "dark" জিতেছে (loggedUser এর)</span></code></pre>
+        </div>
+      </div>
+
+      <div class="chal">
+        <div class="chal-hd">⚡ CHALLENGE 02 — Variadic Calculator</div>
+        <div class="chal-body">
+          <p>Rest parameter ব্যবহার করে এমন একটি function বানাও যা যেকোনো সংখ্যক numbers-এর গড় (average) বের করে।</p>
+          <pre class="l1"><code><span class="cm">// 🎯 Solution</span>
+<span class="kw">function</span> <span class="fn">average</span>(<span class="acc1c">...</span>nums) {
+  <span class="kw">if</span> (nums.length <span class="op">===</span> <span class="num">0</span>) <span class="kw">return</span> <span class="num">0</span>;
+  <span class="kw">const</span> total <span class="op">=</span> nums.<span class="fn">reduce</span>((sum, n) <span class="op">=></span> sum <span class="op">+</span> n, <span class="num">0</span>);
+  <span class="kw">return</span> (total <span class="op">/</span> nums.length).<span class="fn">toFixed</span>(<span class="num">2</span>);
+}
+
+console.<span class="fn">log</span>(<span class="fn">average</span>(<span class="num">80</span>, <span class="num">90</span>, <span class="num">70</span>));           <span class="cm">// "80.00"</span>
+console.<span class="fn">log</span>(<span class="fn">average</span>(<span class="num">100</span>, <span class="num">85</span>, <span class="num">92</span>, <span class="num">78</span>, <span class="num">95</span>)); <span class="cm">// "90.00"</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FUTURE -->
+  <div class="card">
+    <div class="card-hd hd-fut">🚀 FUTURE IMPLEMENTATION</div>
+    <div class="card-body">
+      <div class="fg">
+        <div class="fc"><div class="fi">⚛️</div><div class="ft">React State Update</div><div class="fd"><code>setState({...prev, name: "new"})</code> — spread দিয়ে state immutably update করা হয়।</div></div>
+        <div class="fc"><div class="fi">🔗</div><div class="ft">API Merge</div><div class="fd">দুটো API response merge করতে <code>{...res1, ...res2}</code> সবচেয়ে সহজ উপায়।</div></div>
+        <div class="fc"><div class="fi">🛒</div><div class="ft">Redux Reducer</div><div class="fd">State immutably পরিবর্তন করতে spread অপরিহার্য — <code>return {...state, count: state.count+1}</code></div></div>
+        <div class="fc"><div class="fi">⚙️</div><div class="ft">Config Merge</div><div class="fd">Default config + user config merge করে final config তৈরি — real project-এ বহুল ব্যবহৃত।</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="div">━━━━━━ ✦ ━━━━━━</div>
+
+<!-- ══════════════════════════════
+     02 — Default Parameters
+══════════════════════════════ -->
+<div id="s2" class="sec-wrap s2">
+  <div class="sec-head">
+    <div class="sec-num">02</div>
+    <div class="sec-info">
+      <h2>Default Parameters</h2>
+      <p>// parameter না দিলেও function চলবে</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd hd-c2">📖 CONCEPT &amp; EXAMPLES</div>
+    <div class="card-body prose">
+
+      <div class="info inf2">
+        <strong>Default Parameter</strong> হলো function parameter-এ fallback value দেওয়ার আধুনিক পদ্ধতি। কোনো argument না পাঠালে বা <code>undefined</code> পাঠালে default মান ব্যবহার হয়।
+      </div>
+
+      <div class="cmp">
+        <div class="cmp-box">
+          <div class="cmp-lbl cl-bad">❌ ES5 পুরনো পদ্ধতি</div>
+          <pre><code><span class="kw">function</span> <span class="fn">greet</span>(name) {
+  name <span class="op">=</span> name <span class="op">||</span> <span class="str">"বন্ধু"</span>;
+  console.<span class="fn">log</span>(<span class="str">"হ্যালো, " + name);
+}</span></code></pre>
+        </div>
+        <div class="cmp-box">
+          <div class="cmp-lbl cl-good">✅ ES6 Default Parameter</div>
+          <pre><code><span class="kw">function</span> <span class="fn">greet</span>(name <span class="op">=</span> <span class="str">"বন্ধু"</span>) {
+  console.<span class="fn">log</span>(<span class="str">`হ্যালো, ${name}`</span>);
+}</code></pre>
+        </div>
+      </div>
+
+      <pre class="l2"><code><span class="cm">// ✅ Ex 1: Basic default parameters</span>
+<span class="kw">function</span> <span class="fn">createUser</span>(name <span class="op">=</span> <span class="str">"অজ্ঞাত"</span>, role <span class="op">=</span> <span class="str">"user"</span>, active <span class="op">=</span> <span class="num">true</span>) {
+  <span class="kw">return</span> { name, role, active };
+}
+
+console.<span class="fn">log</span>(<span class="fn">createUser</span>());                      <span class="cm">// {name:"অজ্ঞাত", role:"user", active:true}</span>
+console.<span class="fn">log</span>(<span class="fn">createUser</span>(<span class="str">"Rakib"</span>));              <span class="cm">// {name:"Rakib", role:"user", active:true}</span>
+console.<span class="fn">log</span>(<span class="fn">createUser</span>(<span class="str">"Siam"</span>, <span class="str">"admin"</span>));     <span class="cm">// {name:"Siam", role:"admin", active:true}</span>
+console.<span class="fn">log</span>(<span class="fn">createUser</span>(<span class="str">"Nila"</span>, <span class="str">"mod"</span>, <span class="num">false</span>)); <span class="cm">// {name:"Nila", role:"mod", active:false}</span></code></pre>
+
+      <pre class="l2"><code><span class="cm">// ✅ Ex 2: Expression এবং Function call as default</span>
+<span class="kw">function</span> <span class="fn">getDefaultScore</span>() { <span class="kw">return</span> <span class="num">50</span>; }
+
+<span class="kw">function</span> <span class="fn">addScore</span>(name, score <span class="op">=</span> <span class="fn">getDefaultScore</span>()) {
+  console.<span class="fn">log</span>(<span class="str">`${name}: ${score} পয়েন্ট`</span>);
+}
+<span class="fn">addScore</span>(<span class="str">"Rakib"</span>, <span class="num">85</span>); <span class="cm">// Rakib: 85 পয়েন্ট</span>
+<span class="fn">addScore</span>(<span class="str">"Nila"</span>);      <span class="cm">// Nila: 50 পয়েন্ট (default)</span>
+
+<span class="cm">// Date as default</span>
+<span class="kw">function</span> <span class="fn">createPost</span>(title, date <span class="op">=</span> <span class="kw">new</span> <span class="fn">Date</span>().<span class="fn">toLocaleDateString</span>()) {
+  <span class="kw">return</span> { title, date };
+}
+console.<span class="fn">log</span>(<span class="fn">createPost</span>(<span class="str">"JS শিখছি"</span>));
+<span class="cm">// { title:"JS শিখছি", date:"2/19/2026" }</span></code></pre>
+
+      <pre class="l2"><code><span class="cm">// ✅ Ex 3: null vs undefined — গুরুত্বপূর্ণ পার্থক্য</span>
+<span class="kw">function</span> <span class="fn">test</span>(val <span class="op">=</span> <span class="str">"default"</span>) {
+  console.<span class="fn">log</span>(val);
+}
+
+<span class="fn">test</span>();            <span class="cm">// "default" ✅ undefined হলে default চলে</span>
+<span class="fn">test</span>(<span class="num">undefined</span>);    <span class="cm">// "default" ✅ undefined হলে default চলে</span>
+<span class="fn">test</span>(<span class="num">null</span>);         <span class="cm">// null ⚠️  null হলে default চলে না!</span>
+<span class="fn">test</span>(<span class="str">""</span>);           <span class="cm">// ""   ⚠️  empty string-এও default চলে না!</span>
+<span class="fn">test</span>(<span class="num">0</span>);            <span class="cm">// 0    ⚠️  0-তেও default চলে না!</span></code></pre>
+
+      <pre class="l2"><code><span class="cm">// ✅ Ex 4: আগের parameter ব্যবহার করে পরের default</span>
+<span class="kw">function</span> <span class="fn">rectangle</span>(width <span class="op">=</span> <span class="num">10</span>, height <span class="op">=</span> width) {
+  <span class="kw">return</span> { width, height, area: width <span class="op">*</span> height };
+}
+
+console.<span class="fn">log</span>(<span class="fn">rectangle</span>());       <span class="cm">// {width:10, height:10, area:100} — বর্গ!</span>
+console.<span class="fn">log</span>(<span class="fn">rectangle</span>(<span class="num">5</span>));      <span class="cm">// {width:5, height:5, area:25}</span>
+console.<span class="fn">log</span>(<span class="fn">rectangle</span>(<span class="num">5</span>, <span class="num">8</span>));   <span class="cm">// {width:5, height:8, area:40}</span></code></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd hd-viva">🎤 VIVA GUIDE</div>
+    <div class="card-body">
+      <div class="viva">
+        <div class="vq">Default parameter কি null এর সাথে কাজ করে?</div>
+        <div class="va">না। Default শুধু <strong>undefined</strong> এর জন্য কাজ করে। null, 0, "", false পাঠালে default চলে না — সেই মানগুলো থাকে। এটি একটি সাধারণ interview ফাঁদ।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">Default parameter-এ আগের parameter ব্যবহার করা যায়?</div>
+        <div class="va">হ্যাঁ। Left-to-right order-এ আগে defined parameter পরের default-এ ব্যবহার করা যায়। যেমন: <code>function f(a=1, b=a*2)</code> — b এর default হলো a এর দ্বিগুণ।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">Default parameter আর || (OR) operator এর মধ্যে পার্থক্য কি?</div>
+        <div class="va">পুরনো পদ্ধতিতে <code>name = name || "default"</code> লেখা হতো, কিন্তু এটি 0, false, "" এর জন্যও default দিয়ে দেয় — যা ভুল। Default parameter শুধু undefined এর জন্য কাজ করে, তাই নির্ভরযোগ্য।</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd hd-chal">💪 CODING CHALLENGES</div>
+    <div class="card-body">
+      <div class="chal">
+        <div class="chal-hd">⚡ CHALLENGE 03 — Greeting Card Generator</div>
+        <div class="chal-body">
+          <p><code>generateCard(name, occasion, emoji)</code> function বানাও যেখানে occasion default "জন্মদিন" এবং emoji default "🎂"।</p>
+          <pre class="l2"><code><span class="cm">// 🎯 Solution</span>
+<span class="kw">function</span> <span class="fn">generateCard</span>(
+  name,
+  occasion <span class="op">=</span> <span class="str">"জন্মদিন"</span>,
+  emoji    <span class="op">=</span> <span class="str">"🎂"</span>
+) {
+  <span class="kw">return</span> <span class="str">`
+╔══════════════════════╗
+   ${emoji} শুভ ${occasion}! ${emoji}
+   প্রিয় ${name},
+   অনেক শুভেচ্ছা রইল!
+╚══════════════════════╝`</span>;
+}
+
+console.<span class="fn">log</span>(<span class="fn">generateCard</span>(<span class="str">"Rakib"</span>));
+console.<span class="fn">log</span>(<span class="fn">generateCard</span>(<span class="str">"Nila"</span>, <span class="str">"বিবাহবার্ষিকী"</span>, <span class="str">"💍"</span>));
+console.<span class="fn">log</span>(<span class="fn">generateCard</span>(<span class="str">"Siam"</span>, <span class="str">"ঈদ"</span>, <span class="str">"🌙"</span>));</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd hd-fut">🚀 FUTURE IMPLEMENTATION</div>
+    <div class="card-body">
+      <div class="fg">
+        <div class="fc"><div class="fi">🧩</div><div class="ft">Component Props</div><div class="fd">React-এ function component-এর default props দেওয়ার আধুনিক উপায়।</div></div>
+        <div class="fc"><div class="fi">⚙️</div><div class="ft">Config Object</div><div class="fd"><code>function connect(host="localhost", port=3000)</code> — library/SDK design-এ common।</div></div>
+        <div class="fc"><div class="fi">🛡️</div><div class="ft">Defensive Code</div><div class="fd">API response-এর missing field-এর জন্য safe default দেওয়া।</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="div">━━━━━━ ✦ ━━━━━━</div>
+
+<!-- ══════════════════════════════
+     03 — Optional Chaining
+══════════════════════════════ -->
+<div id="s3" class="sec-wrap s3">
+  <div class="sec-head">
+    <div class="sec-num">03</div>
+    <div class="sec-info">
+      <h2>Optional Chaining <code style="font-size:18px;color:var(--acc3);">?.</code></h2>
+      <p>// Cannot read property of undefined — আর না!</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd hd-c3">📖 CONCEPT &amp; EXAMPLES</div>
+    <div class="card-body prose">
+
+      <div class="info inf3">
+        <strong>Optional Chaining (?.):</strong> Nested object বা array-এর property access করতে গিয়ে যদি মাঝপথে কোনো value <code>null</code> বা <code>undefined</code> হয়, তাহলে error না দিয়ে চুপচাপ <code>undefined</code> return করে।
+      </div>
+
+      <div class="cmp">
+        <div class="cmp-box">
+          <div class="cmp-lbl cl-bad">❌ আগের ঝামেলার পদ্ধতি</div>
+          <pre><code><span class="kw">const</span> city <span class="op">=</span> user
+  <span class="op">&&</span> user.address
+  <span class="op">&&</span> user.address.city;
+
+<span class="cm">// অথবা:</span>
+<span class="kw">if</span> (user <span class="op">&&</span>
+    user.address <span class="op">&&</span>
+    user.address.city) {
+  console.<span class="fn">log</span>(user.address.city);
+}</span></code></pre>
+        </div>
+        <div class="cmp-box">
+          <div class="cmp-lbl cl-good">✅ Optional Chaining</div>
+          <pre><code><span class="kw">const</span> city <span class="op">=</span>
+  user<span class="acc3c">?.</span>address<span class="acc3c">?.</span>city;
+
+<span class="cm">// এতটুকুই যথেষ্ট!</span>
+console.<span class="fn">log</span>(
+  user<span class="acc3c">?.</span>address<span class="acc3c">?.</span>city
+);</code></pre>
+        </div>
+      </div>
+
+      <pre class="l3"><code><span class="cm">// ✅ Ex 1: Object property access</span>
+<span class="kw">const</span> user1 <span class="op">=</span> { name: <span class="str">"Rakib"</span>, address: { city: <span class="str">"Dhaka"</span>, zip: <span class="str">"1000"</span> } };
+<span class="kw">const</span> user2 <span class="op">=</span> { name: <span class="str">"Nila"</span> }; <span class="cm">// address নেই</span>
+<span class="kw">const</span> user3 <span class="op">=</span> <span class="kw">null</span>;              <span class="cm">// পুরোই null</span>
+
+console.<span class="fn">log</span>(user1<span class="acc3c">?.</span>address<span class="acc3c">?.</span>city); <span class="cm">// "Dhaka"</span>
+console.<span class="fn">log</span>(user2<span class="acc3c">?.</span>address<span class="acc3c">?.</span>city); <span class="cm">// undefined (error নয়!)</span>
+console.<span class="fn">log</span>(user3<span class="acc3c">?.</span>address<span class="acc3c">?.</span>city); <span class="cm">// undefined (error নয়!)</span></code></pre>
+
+      <pre class="l3"><code><span class="cm">// ✅ Ex 2: Array element access</span>
+<span class="kw">const</span> data1 <span class="op">=</span> { users: [<span class="str">"Rakib"</span>, <span class="str">"Nila"</span>] };
+<span class="kw">const</span> data2 <span class="op">=</span> { users: [] };
+<span class="kw">const</span> data3 <span class="op">=</span> {};
+
+console.<span class="fn">log</span>(data1.users<span class="acc3c">?.</span>[<span class="num">0</span>]); <span class="cm">// "Rakib"</span>
+console.<span class="fn">log</span>(data2.users<span class="acc3c">?.</span>[<span class="num">0</span>]); <span class="cm">// undefined</span>
+console.<span class="fn">log</span>(data3.users<span class="acc3c">?.</span>[<span class="num">0</span>]); <span class="cm">// undefined</span></code></pre>
+
+      <pre class="l3"><code><span class="cm">// ✅ Ex 3: Method call — method না থাকলেও error নেই</span>
+<span class="kw">const</span> obj1 <span class="op">=</span> { greet: () <span class="op">=></span> <span class="str">"হ্যালো!"</span> };
+<span class="kw">const</span> obj2 <span class="op">=</span> {};
+
+console.<span class="fn">log</span>(obj1.greet<span class="acc3c">?.()</span>); <span class="cm">// "হ্যালো!"</span>
+console.<span class="fn">log</span>(obj2.greet<span class="acc3c">?.()</span>); <span class="cm">// undefined (error নয়!)</span></code></pre>
+
+      <pre class="l3"><code><span class="cm">// ✅ Ex 4: Real-world API response handling</span>
+<span class="kw">const</span> apiResponse <span class="op">=</span> {
+  status: <span class="num">200</span>,
+  data: {
+    user: {
+      profile: {
+        avatar: <span class="str">"https://cdn.example.com/photo.jpg"</span>
+      }
+    }
+  }
+};
+
+<span class="cm">// Deep nested — আগে ৫ লাইন লাগতো, এখন ১ লাইন</span>
+<span class="kw">const</span> avatar  <span class="op">=</span> apiResponse<span class="acc3c">?.</span>data<span class="acc3c">?.</span>user<span class="acc3c">?.</span>profile<span class="acc3c">?.</span>avatar;
+<span class="kw">const</span> missing <span class="op">=</span> apiResponse<span class="acc3c">?.</span>data<span class="acc3c">?.</span>user<span class="acc3c">?.</span>settings<span class="acc3c">?.</span>theme;
+
+console.<span class="fn">log</span>(avatar);  <span class="cm">// "https://cdn.example.com/photo.jpg"</span>
+console.<span class="fn">log</span>(missing); <span class="cm">// undefined</span></code></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd hd-viva">🎤 VIVA GUIDE</div>
+    <div class="card-body">
+      <div class="viva">
+        <div class="vq">Optional chaining কখন undefined return করে?</div>
+        <div class="va">যখন chain-এর কোনো অংশ <strong>null</strong> বা <strong>undefined</strong> হয়। তখন বাকি chain evaluate না করে সরাসরি <strong>undefined</strong> return করে। TypeError throw করে না।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">?. দিয়ে function call করা যায়?</div>
+        <div class="va">হ্যাঁ — <code>obj.method?.()</code> syntax দিয়ে। method থাকলে call হবে, না থাকলে undefined return হবে। এটি callback function-এ যখন optional callback দেওয়া হয় তখন কাজে আসে।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">Optional chaining কি সবসময় ব্যবহার করা উচিত?</div>
+        <div class="va">না — শুধু সেখানে ব্যবহার করো যেখানে value সত্যিই optional হতে পারে। সর্বত্র ?. ব্যবহার করলে real bug লুকিয়ে যায় — কোডে error হওয়া উচিত ছিল কিন্তু undefined পাওয়া গেছে।</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd hd-chal">💪 CODING CHALLENGES</div>
+    <div class="card-body">
+      <div class="chal">
+        <div class="chal-hd">⚡ CHALLENGE 04 — Safe Profile Reader</div>
+        <div class="chal-body">
+          <p>নিচের user objects থেকে name, city, এবং প্রথম hobby safely বের করো। কোনোটা না থাকলে "N/A" দেখাও।</p>
+          <pre class="l3"><code><span class="cm">// 🎯 Solution</span>
+<span class="kw">const</span> users <span class="op">=</span> [
+  { name: <span class="str">"Rakib"</span>, address: { city: <span class="str">"Dhaka"</span> }, hobbies: [<span class="str">"coding"</span>] },
+  { name: <span class="str">"Nila"</span>,  address: <span class="num">null</span>,                hobbies: []           },
+  { name: <span class="str">"Siam"</span>  },
+];
+
+<span class="kw">function</span> <span class="fn">getProfile</span>(user) {
+  <span class="kw">const</span> name  <span class="op">=</span> user<span class="acc3c">?.</span>name            <span class="op">||</span> <span class="str">"N/A"</span>;
+  <span class="kw">const</span> city  <span class="op">=</span> user<span class="acc3c">?.</span>address<span class="acc3c">?.</span>city   <span class="op">||</span> <span class="str">"N/A"</span>;
+  <span class="kw">const</span> hobby <span class="op">=</span> user<span class="acc3c">?.</span>hobbies<span class="acc3c">?.</span>[<span class="num">0</span>]    <span class="op">||</span> <span class="str">"N/A"</span>;
+  console.<span class="fn">log</span>(<span class="str">`👤 ${name} | 🏙️ ${city} | 🎮 ${hobby}`</span>);
+}
+
+users.<span class="fn">forEach</span>(<span class="fn">getProfile</span>);
+<span class="cm">// 👤 Rakib | 🏙️ Dhaka | 🎮 coding
+// 👤 Nila  | 🏙️ N/A   | 🎮 N/A
+// 👤 Siam  | 🏙️ N/A   | 🎮 N/A</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd hd-fut">🚀 FUTURE IMPLEMENTATION</div>
+    <div class="card-body">
+      <div class="fg">
+        <div class="fc"><div class="fi">🌐</div><div class="ft">API Response</div><div class="fd">যেকোনো REST API থেকে nested data access করতে ?. অপরিহার্য।</div></div>
+        <div class="fc"><div class="fi">⚛️</div><div class="ft">React Props</div><div class="fd"><code>props?.user?.name</code> — component-এ optional props safely access করতে।</div></div>
+        <div class="fc"><div class="fi">🔌</div><div class="ft">Event Handlers</div><div class="fd"><code>event?.target?.value</code> — event object সবসময় same structure না হলে।</div></div>
+        <div class="fc"><div class="fi">🧪</div><div class="ft">Unit Testing</div><div class="fd">Mock object-এ missing property access safely test করতে ?. ব্যবহার।</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="div">━━━━━━ ✦ ━━━━━━</div>
+
+<!-- ══════════════════════════════
+     04 — Nullish Coalescing
+══════════════════════════════ -->
+<div id="s4" class="sec-wrap s4">
+  <div class="sec-head">
+    <div class="sec-num">04</div>
+    <div class="sec-info">
+      <h2>Nullish Coalescing <code style="font-size:18px;color:var(--acc4);">??</code></h2>
+      <p>// null আর undefined-এর সেরা প্রতিকার</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd hd-c4">📖 CONCEPT &amp; EXAMPLES</div>
+    <div class="card-body prose">
+
+      <div class="info inf4">
+        <strong>Nullish Coalescing (??):</strong> বাম দিকের value যদি <code>null</code> বা <code>undefined</code> হয়, তাহলে ডান দিকের value দেয়। <code>||</code> এর চেয়ে নিরাপদ — কারণ <code>0</code>, <code>false</code>, <code>""</code> কে false মনে করে না।
+      </div>
+
+      <div class="cmp">
+        <div class="cmp-box">
+          <div class="cmp-lbl cl-bad">❌ || এর সমস্যা (falsy চেক)</div>
+          <pre><code><span class="kw">const</span> score <span class="op">=</span> <span class="num">0</span>;
+
+<span class="cm">// ❌ 0 কে falsy ধরে default দেয়!</span>
+<span class="kw">const</span> s1 <span class="op">=</span> score <span class="op">||</span> <span class="num">100</span>;
+console.<span class="fn">log</span>(s1); <span class="cm">// 100 ← ভুল!</span></code></pre>
+        </div>
+        <div class="cmp-box">
+          <div class="cmp-lbl cl-good">✅ ?? সঠিক সমাধান</div>
+          <pre><code><span class="kw">const</span> score <span class="op">=</span> <span class="num">0</span>;
+
+<span class="cm">// ✅ শুধু null/undefined চেক করে</span>
+<span class="kw">const</span> s2 <span class="op">=</span> score <span class="acc4c">??</span> <span class="num">100</span>;
+console.<span class="fn">log</span>(s2); <span class="cm">// 0 ← সঠিক!</span></code></pre>
+        </div>
+      </div>
+
+      <pre class="l4"><code><span class="cm">// ✅ Ex 1: ?? vs || তুলনা — পার্থক্য স্পষ্ট করা</span>
+<span class="kw">const</span> values <span class="op">=</span> [<span class="num">null</span>, <span class="num">undefined</span>, <span class="num">0</span>, <span class="str">""</span>, <span class="num">false</span>, <span class="str">"hello"</span>];
+
+values.<span class="fn">forEach</span>(v <span class="op">=></span> {
+  console.<span class="fn">log</span>(<span class="str">`${JSON.stringify(v).padEnd(10)}`</span> <span class="op">+</span>
+    <span class="str">` || → ${v || "DEFAULT"}`</span>.<span class="fn">padEnd</span>(<span class="num">20</span>) <span class="op">+</span>
+    <span class="str">` ?? → ${v ?? "DEFAULT"}`</span>);
+});
+
+<span class="cm">// null       || → DEFAULT         ?? → DEFAULT
+// undefined  || → DEFAULT         ?? → DEFAULT
+// 0          || → DEFAULT         ?? → 0       ← পার্থক্য!
+// ""         || → DEFAULT         ?? → ""      ← পার্থক্য!
+// false      || → DEFAULT         ?? → false   ← পার্থক্য!
+// "hello"    || → hello           ?? → hello</span></code></pre>
+
+      <pre class="l4"><code><span class="cm">// ✅ Ex 2: User settings — 0 ও false valid value!</span>
+<span class="kw">const</span> userSettings <span class="op">=</span> {
+  fontSize:  <span class="num">0</span>,      <span class="cm">// 0 মানে minimum size — valid!</span>
+  darkMode:  <span class="num">false</span>,  <span class="cm">// false মানে light mode — valid!</span>
+  username:  <span class="str">""</span>,     <span class="cm">// "" মানে empty name — valid!</span>
+  language:  <span class="num">null</span>   <span class="cm">// null মানে not set — default চাই</span>
+};
+
+<span class="kw">const</span> fontSize  <span class="op">=</span> userSettings.fontSize  <span class="acc4c">??</span> <span class="num">16</span>;      <span class="cm">// 0  ✅</span>
+<span class="kw">const</span> darkMode  <span class="op">=</span> userSettings.darkMode  <span class="acc4c">??</span> <span class="num">true</span>;    <span class="cm">// false ✅</span>
+<span class="kw">const</span> username  <span class="op">=</span> userSettings.username  <span class="acc4c">??</span> <span class="str">"Guest"</span>; <span class="cm">// "" ✅</span>
+<span class="kw">const</span> language  <span class="op">=</span> userSettings.language  <span class="acc4c">??</span> <span class="str">"bn"</span>;    <span class="cm">// "bn" ✅ (null ছিল)</span>
+
+console.<span class="fn">log</span>({ fontSize, darkMode, username, language });</code></pre>
+
+      <pre class="l4"><code><span class="cm">// ✅ Ex 3: Optional Chaining + Nullish Coalescing — perfect combo!</span>
+<span class="kw">const</span> config <span class="op">=</span> {
+  database: { port: <span class="num">0</span>, host: <span class="str">"localhost"</span> }
+};
+
+<span class="kw">const</span> port    <span class="op">=</span> config<span class="acc3c">?.</span>database<span class="acc3c">?.</span>port    <span class="acc4c">??</span> <span class="num">5432</span>;
+<span class="kw">const</span> timeout <span class="op">=</span> config<span class="acc3c">?.</span>database<span class="acc3c">?.</span>timeout <span class="acc4c">??</span> <span class="num">3000</span>;
+<span class="kw">const</span> ssl     <span class="op">=</span> config<span class="acc3c">?.</span>database<span class="acc3c">?.</span>ssl     <span class="acc4c">??</span> <span class="num">false</span>;
+
+console.<span class="fn">log</span>({ port, timeout, ssl });
+<span class="cm">// { port: 0, timeout: 3000, ssl: false }
+// port = 0 রইলো (0 valid!), timeout ও ssl এর default ব্যবহার হলো</span></code></pre>
+
+      <pre class="l4"><code><span class="cm">// ✅ Ex 4: Nullish Assignment (??=) — ES2021</span>
+<span class="kw">let</span> user <span class="op">=</span> { name: <span class="str">"Rakib"</span>, score: <span class="num">null</span> };
+
+<span class="cm">// শুধু null/undefined হলেই assign করো</span>
+user.score   <span class="acc4c">??=</span> <span class="num">0</span>;      <span class="cm">// null ছিল, তাই 0 assign হলো</span>
+user.name    <span class="acc4c">??=</span> <span class="str">"Guest"</span>; <span class="cm">// "Rakib" ছিল, পরিবর্তন হবে না</span>
+
+console.<span class="fn">log</span>(user); <span class="cm">// { name: "Rakib", score: 0 }</span></code></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd hd-viva">🎤 VIVA GUIDE</div>
+    <div class="card-body">
+      <div class="viva">
+        <div class="vq">|| এবং ?? এর প্রধান পার্থক্য কি?</div>
+        <div class="va"><strong>||</strong> সব falsy value (null, undefined, 0, "", false, NaN) এর জন্য right-side দেয়। <strong>??</strong> শুধুমাত্র null এবং undefined এর জন্য right-side দেয়। 0, false, "" কে valid value হিসেবে রাখে।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">?? আর ?. একসাথে ব্যবহার করা যায়?</div>
+        <div class="va">হ্যাঁ — এটি সবচেয়ে শক্তিশালী combination: <code>user?.address?.city ?? "Unknown"</code>। Optional chaining দিয়ে safely access করো, তারপর nullish coalescing দিয়ে default দাও।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">??= কি?</div>
+        <div class="va">Nullish Assignment operator (ES2021)। <code>a ??= b</code> মানে: a যদি null বা undefined হয় তাহলে b assign করো, নইলে a অপরিবর্তিত থাকে। Short form of: <code>a = a ?? b</code>।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">?? এর সাথে && বা || একসাথে ব্যবহার করা যায়?</div>
+        <div class="va">সরাসরি না — SyntaxError হবে। Parentheses দিয়ে group করতে হবে: <code>(a || b) ?? c</code> অথবা <code>a ?? (b && c)</code>। এটি JavaScript-এর design decision ছিল ambiguity এড়াতে।</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd hd-chal">💪 CODING CHALLENGES</div>
+    <div class="card-body">
+      <div class="chal">
+        <div class="chal-hd">⚡ CHALLENGE 05 — Config Builder</div>
+        <div class="chal-body">
+          <p>User config এবং default config মিলিয়ে final config তৈরি করো। প্রতিটি property-র জন্য <code>??</code> ব্যবহার করো।</p>
+          <pre class="l4"><code><span class="cm">// 🎯 Solution</span>
+<span class="kw">function</span> <span class="fn">buildConfig</span>(userCfg <span class="op">=</span> {}) {
+  <span class="kw">return</span> {
+    host:     userCfg.host     <span class="acc4c">??</span> <span class="str">"localhost"</span>,
+    port:     userCfg.port     <span class="acc4c">??</span> <span class="num">3000</span>,
+    debug:    userCfg.debug    <span class="acc4c">??</span> <span class="num">false</span>,
+    timeout:  userCfg.timeout  <span class="acc4c">??</span> <span class="num">5000</span>,
+    maxRetry: userCfg.maxRetry <span class="acc4c">??</span> <span class="num">3</span>,
+  };
+}
+
+console.<span class="fn">log</span>(<span class="fn">buildConfig</span>());
+<span class="cm">// সব default — { host:"localhost", port:3000, debug:false... }</span>
+
+console.<span class="fn">log</span>(<span class="fn">buildConfig</span>({ port: <span class="num">0</span>, debug: <span class="num">false</span>, host: <span class="str">"prod.server.com"</span> }));
+<span class="cm">// { host:"prod.server.com", port:0, debug:false, timeout:5000, maxRetry:3 }
+// port:0 এবং debug:false সংরক্ষিত! (|| দিলে default হতো)</span></code></pre>
+        </div>
+      </div>
+
+      <div class="chal">
+        <div class="chal-hd">⚡ CHALLENGE 06 — Everything Together!</div>
+        <div class="chal-body">
+          <p>Spread + Default + Optional Chaining + Nullish — সব একসাথে ব্যবহার করে একটি <code>processOrder(order)</code> function বানাও।</p>
+          <pre class="l4"><code><span class="cm">// 🎯 Solution</span>
+<span class="kw">const</span> DEFAULT_ORDER <span class="op">=</span> {
+  currency: <span class="str">"BDT"</span>,
+  quantity: <span class="num">1</span>,
+  discount: <span class="num">0</span>,
+  express:  <span class="num">false</span>,
+};
+
+<span class="kw">function</span> <span class="fn">processOrder</span>(order <span class="op">=</span> {}) {
+  <span class="cm">// Spread: default + user order merge</span>
+  <span class="kw">const</span> final <span class="op">=</span> { <span class="acc1c">...</span>DEFAULT_ORDER, <span class="acc1c">...</span>order };
+
+  <span class="cm">// Optional chaining + nullish: safe access</span>
+  <span class="kw">const</span> customerName <span class="op">=</span> order<span class="acc3c">?.</span>customer<span class="acc3c">?.</span>name <span class="acc4c">??</span> <span class="str">"অতিথি"</span>;
+  <span class="kw">const</span> city         <span class="op">=</span> order<span class="acc3c">?.</span>address<span class="acc3c">?.</span>city  <span class="acc4c">??</span> <span class="str">"অজানা"</span>;
+
+  <span class="cm">// Default parameter: price নিশ্চিত করা</span>
+  <span class="kw">const</span> price    <span class="op">=</span> final.price    <span class="acc4c">??</span> <span class="num">0</span>;
+  <span class="kw">const</span> quantity <span class="op">=</span> final.quantity <span class="acc4c">??</span> <span class="num">1</span>;
+  <span class="kw">const</span> total    <span class="op">=</span> price <span class="op">*</span> quantity <span class="op">*</span> (<span class="num">1</span> <span class="op">-</span> final.discount <span class="op">/</span> <span class="num">100</span>);
+
+  console.<span class="fn">log</span>(<span class="str">`
+📦 অর্ডার সারসংক্ষেপ:
+  👤 গ্রাহক: ${customerName}
+  🏙️ শহর:   ${city}
+  💰 মূল্য:  ${price} × ${quantity} = ${total} ${final.currency}
+  🚀 এক্সপ্রেস: ${final.express ? "হ্যাঁ" : "না"}`</span>);
+}
+
+<span class="fn">processOrder</span>({
+  price: <span class="num">500</span>, quantity: <span class="num">3</span>, discount: <span class="num">10</span>,
+  customer: { name: <span class="str">"Rakib"</span> },
+  address:  { city: <span class="str">"Dhaka"</span> },
+  express: <span class="num">false</span>
+});
+
+<span class="fn">processOrder</span>(); <span class="cm">// সব default</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd hd-fut">🚀 FUTURE IMPLEMENTATION</div>
+    <div class="card-body">
+      <div class="fg">
+        <div class="fc"><div class="fi">⚙️</div><div class="ft">App Configuration</div><div class="fd">Environment variable বা DB থেকে আসা config null হলে safe default দেওয়া।</div></div>
+        <div class="fc"><div class="fi">📊</div><div class="ft">Data Normalization</div><div class="fd">API data-তে missing field গুলো safely handle করে UI render করা।</div></div>
+        <div class="fc"><div class="fi">🛒</div><div class="ft">Cart Calculation</div><div class="fd">quantity=0, discount=0 এর মতো valid zero values সংরক্ষণ করা।</div></div>
+        <div class="fc"><div class="fi">🔐</div><div class="ft">Auth & Permissions</div><div class="fd"><code>user?.role ?? "guest"</code> — permission check-এ সবচেয়ে safe উপায়।</div></div>
+      </div>
+    </div>
+  </div>
+</div><!-- /s4 -->
+
+<!-- FINAL CARD -->
+<div class="final">
+  <div class="final-title">✨ পর্যায় ১৫ — সম্পন্ন!</div>
+  <p style="color:#5a5a78;font-size:14px;margin-top:8px;">পরের পর্যায়ে যাওয়ার আগে নিশ্চিত করো:</p>
+  <div class="cl">
+    <span class="ci">✅ Spread দিয়ে copy/merge করতে পারি</span>
+    <span class="ci">✅ Rest parameter বুঝি</span>
+    <span class="ci">✅ Default parameter এ null/undefined পার্থক্য জানি</span>
+    <span class="ci">✅ ?. দিয়ে safe access করতে পারি</span>
+    <span class="ci">✅ ?? আর || এর পার্থক্য জানি</span>
+    <span class="ci">✅ সব একসাথে combine করতে পারি</span>
+  </div>
+  <p class="nxt">পরের পর্যায়ের জন্য <strong>Next</strong> বাটন ক্লিক করো ➜ পর্যায় ১৬: <strong>Classes & OOP</strong> 🏛️</p>
+  <nav class="toc">
+    <a href="https://anawarhossain.github.io/Javascript-prcatice/16-Classes-And-OOP/">Next</a>
+  </nav>
+</div>
+
+</div><!-- /container -->
+<footer>JS BOS MISSION &nbsp;·&nbsp; STAGE 15 &nbsp;·&nbsp; ES6+ FEATURES MASTERED ✨</footer>
+</body>
+</html>

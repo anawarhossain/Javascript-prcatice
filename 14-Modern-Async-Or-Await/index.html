@@ -1,394 +1,617 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="bn">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>পর্যায় ১৪ — Async/Await | JS বস মিশন</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700;800&family=Orbitron:wght@700;900&display=swap');
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>পর্যায় ১৪ — Async/Await | JS বস মিশন</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700;800&family=Orbitron:wght@700;900&display=swap");
 
-  :root {
-    --bg: #080c12;
-    --surface: #0e1420;
-    --card: #111827;
-    --border: #1e2a3a;
-    --accent: #00d4ff;
-    --accent2: #39ff14;
-    --accent3: #ff4757;
-    --accent4: #ffa502;
-    --accent5: #a29bfe;
-    --text: #e2e8f0;
-    --muted: #64748b;
-    --code-bg: #050810;
-  }
+      :root {
+        --bg: #080c12;
+        --surface: #0e1420;
+        --card: #111827;
+        --border: #1e2a3a;
+        --accent: #00d4ff;
+        --accent2: #39ff14;
+        --accent3: #ff4757;
+        --accent4: #ffa502;
+        --accent5: #a29bfe;
+        --text: #e2e8f0;
+        --muted: #64748b;
+        --code-bg: #050810;
+      }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Noto Sans Bengali', sans-serif;
-    line-height: 1.75;
-  }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Noto Sans Bengali", sans-serif;
+        line-height: 1.75;
+      }
 
-  /* ── HERO ── */
-  .hero {
-    position: relative;
-    padding: 70px 40px 50px;
-    text-align: center;
-    overflow: hidden;
-    background: radial-gradient(ellipse at 50% 0%, rgba(0,212,255,.12) 0%, transparent 70%);
-    border-bottom: 1px solid rgba(0,212,255,.25);
-  }
-  .hero::after {
-    content: 'ASYNC';
-    position: absolute;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 200px;
-    font-weight: 900;
-    color: rgba(0,212,255,.03);
-    top: 50%; left: 50%;
-    transform: translate(-50%,-50%);
-    pointer-events: none;
-    white-space: nowrap;
-  }
-  .stage-tag {
-    display: inline-block;
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 4px;
-    padding: 4px 16px;
-    border-radius: 2px;
-    margin-bottom: 20px;
-    font-family: 'JetBrains Mono', monospace;
-  }
-  .hero h1 {
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(38px, 7vw, 72px);
-    font-weight: 900;
-    color: #fff;
-    line-height: 1;
-    margin-bottom: 10px;
-    text-shadow: 0 0 40px rgba(0,212,255,.4);
-  }
-  .hero h1 span { color: var(--accent); }
-  .hero-sub {
-    color: var(--muted);
-    font-size: 14px;
-    max-width: 560px;
-    margin: 0 auto;
-  }
-  .hero-topics {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 24px;
-  }
-  .hero-topic {
-    background: rgba(0,212,255,.08);
-    border: 1px solid rgba(0,212,255,.2);
-    color: var(--accent);
-    font-size: 11px;
-    font-weight: 700;
-    padding: 5px 14px;
-    border-radius: 20px;
-    letter-spacing: 1px;
-  }
+      /* ── HERO ── */
+      .hero {
+        position: relative;
+        padding: 70px 40px 50px;
+        text-align: center;
+        overflow: hidden;
+        background: radial-gradient(
+          ellipse at 50% 0%,
+          rgba(0, 212, 255, 0.12) 0%,
+          transparent 70%
+        );
+        border-bottom: 1px solid rgba(0, 212, 255, 0.25);
+      }
+      .hero::after {
+        content: "ASYNC";
+        position: absolute;
+        font-family: "Orbitron", sans-serif;
+        font-size: 200px;
+        font-weight: 900;
+        color: rgba(0, 212, 255, 0.03);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        white-space: nowrap;
+      }
+      .stage-tag {
+        display: inline-block;
+        border: 1px solid var(--accent);
+        color: var(--accent);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 4px;
+        padding: 4px 16px;
+        border-radius: 2px;
+        margin-bottom: 20px;
+        font-family: "JetBrains Mono", monospace;
+      }
+      .hero h1 {
+        font-family: "Orbitron", sans-serif;
+        font-size: clamp(38px, 7vw, 72px);
+        font-weight: 900;
+        color: #fff;
+        line-height: 1;
+        margin-bottom: 10px;
+        text-shadow: 0 0 40px rgba(0, 212, 255, 0.4);
+      }
+      .hero h1 span {
+        color: var(--accent);
+      }
+      .hero-sub {
+        color: var(--muted);
+        font-size: 14px;
+        max-width: 560px;
+        margin: 0 auto;
+      }
+      .hero-topics {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 24px;
+      }
+      .hero-topic {
+        background: rgba(0, 212, 255, 0.08);
+        border: 1px solid rgba(0, 212, 255, 0.2);
+        color: var(--accent);
+        font-size: 11px;
+        font-weight: 700;
+        padding: 5px 14px;
+        border-radius: 20px;
+        letter-spacing: 1px;
+      }
 
-  /* ── NAV ── */
-  .toc {
-    display: flex;
-    gap: 6px;
-    justify-content: center;
-    flex-wrap: wrap;
-    padding: 16px 30px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; z-index: 100;
-  }
-  .toc a {
-    text-decoration: none;
-    color: var(--muted);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    padding: 5px 14px;
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    transition: all .2s;
-    font-family: 'JetBrains Mono', monospace;
-  }
-  .toc a:hover { color: var(--accent); border-color: var(--accent); background: rgba(0,212,255,.06); }
+      /* ── NAV ── */
+      .toc {
+        display: flex;
+        gap: 6px;
+        justify-content: center;
+        flex-wrap: wrap;
+        padding: 16px 30px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .toc a {
+        text-decoration: none;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        padding: 5px 14px;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        transition: all 0.2s;
+        font-family: "JetBrains Mono", monospace;
+      }
+      .toc a:hover {
+        color: var(--accent);
+        border-color: var(--accent);
+        background: rgba(0, 212, 255, 0.06);
+      }
 
-  /* ── LAYOUT ── */
-  .container { max-width: 1080px; margin: 0 auto; padding: 40px 24px 100px; }
+      /* ── LAYOUT ── */
+      .container {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 40px 24px 100px;
+      }
 
-  /* ── SECTION HEADER ── */
-  .section-header {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    margin: 64px 0 28px;
-    position: relative;
-  }
-  .section-header::before {
-    content: '';
-    position: absolute;
-    bottom: -14px; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, var(--accent), transparent);
-  }
-  .sec-num {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 52px;
-    font-weight: 900;
-    color: var(--accent);
-    opacity: .15;
-    line-height: 1;
-    flex-shrink: 0;
-  }
-  .sec-info h2 { font-size: 20px; font-weight: 800; color: #fff; }
-  .sec-info p { font-size: 12px; color: var(--muted); margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
+      /* ── SECTION HEADER ── */
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin: 64px 0 28px;
+        position: relative;
+      }
+      .section-header::before {
+        content: "";
+        position: absolute;
+        bottom: -14px;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, var(--accent), transparent);
+      }
+      .sec-num {
+        font-family: "Orbitron", sans-serif;
+        font-size: 52px;
+        font-weight: 900;
+        color: var(--accent);
+        opacity: 0.15;
+        line-height: 1;
+        flex-shrink: 0;
+      }
+      .sec-info h2 {
+        font-size: 20px;
+        font-weight: 800;
+        color: #fff;
+      }
+      .sec-info p {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 3px;
+        font-family: "JetBrains Mono", monospace;
+      }
 
-  /* ── CARD ── */
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    margin-bottom: 24px;
-    overflow: hidden;
-  }
-  .card-header {
-    padding: 13px 22px;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 3px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-family: 'JetBrains Mono', monospace;
-  }
-  .h-concept { background: rgba(0,212,255,.1); color: var(--accent); border-bottom: 1px solid rgba(0,212,255,.15); }
-  .h-viva    { background: rgba(57,255,20,.08); color: var(--accent2); border-bottom: 1px solid rgba(57,255,20,.15); }
-  .h-challenge { background: rgba(255,71,87,.08); color: var(--accent3); border-bottom: 1px solid rgba(255,71,87,.15); }
-  .h-future  { background: rgba(255,165,2,.08); color: var(--accent4); border-bottom: 1px solid rgba(255,165,2,.15); }
+      /* ── CARD ── */
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        margin-bottom: 24px;
+        overflow: hidden;
+      }
+      .card-header {
+        padding: 13px 22px;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 3px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: "JetBrains Mono", monospace;
+      }
+      .h-concept {
+        background: rgba(0, 212, 255, 0.1);
+        color: var(--accent);
+        border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+      }
+      .h-viva {
+        background: rgba(57, 255, 20, 0.08);
+        color: var(--accent2);
+        border-bottom: 1px solid rgba(57, 255, 20, 0.15);
+      }
+      .h-challenge {
+        background: rgba(255, 71, 87, 0.08);
+        color: var(--accent3);
+        border-bottom: 1px solid rgba(255, 71, 87, 0.15);
+      }
+      .h-future {
+        background: rgba(255, 165, 2, 0.08);
+        color: var(--accent4);
+        border-bottom: 1px solid rgba(255, 165, 2, 0.15);
+      }
 
-  .card-body { padding: 26px; }
+      .card-body {
+        padding: 26px;
+      }
 
-  /* ── CODE ── */
-  pre {
-    background: var(--code-bg);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--accent);
-    border-radius: 8px;
-    padding: 20px 22px;
-    overflow-x: auto;
-    margin: 16px 0;
-    position: relative;
-  }
-  pre.green { border-left-color: var(--accent2); }
-  pre.red   { border-left-color: var(--accent3); }
-  pre.orange{ border-left-color: var(--accent4); }
-  code {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    line-height: 1.9;
-    color: #8892aa;
-  }
-  .kw  { color: #c792ea; }
-  .fn  { color: #82aaff; }
-  .str { color: #c3e88d; }
-  .cm  { color: #546e7a; font-style: italic; }
-  .num { color: #f78c6c; }
-  .op  { color: #89ddff; }
-  .cls { color: #ffcb6b; }
+      /* ── CODE ── */
+      pre {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+        border-radius: 8px;
+        padding: 20px 22px;
+        overflow-x: auto;
+        margin: 16px 0;
+        position: relative;
+      }
+      pre.green {
+        border-left-color: var(--accent2);
+      }
+      pre.red {
+        border-left-color: var(--accent3);
+      }
+      pre.orange {
+        border-left-color: var(--accent4);
+      }
+      code {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        line-height: 1.9;
+        color: #8892aa;
+      }
+      .kw {
+        color: #c792ea;
+      }
+      .fn {
+        color: #82aaff;
+      }
+      .str {
+        color: #c3e88d;
+      }
+      .cm {
+        color: #546e7a;
+        font-style: italic;
+      }
+      .num {
+        color: #f78c6c;
+      }
+      .op {
+        color: #89ddff;
+      }
+      .cls {
+        color: #ffcb6b;
+      }
 
-  /* ── PROSE ── */
-  .prose p { font-size: 15px; margin-bottom: 14px; color: #cbd5e1; }
-  .prose p:last-child { margin-bottom: 0; }
-  .hl  { color: var(--accent);  font-weight: 700; }
-  .hl2 { color: var(--accent2); font-weight: 700; }
-  .hl3 { color: var(--accent3); font-weight: 700; }
-  .hl4 { color: var(--accent4); font-weight: 700; }
-  .hl5 { color: var(--accent5); font-weight: 700; }
+      /* ── PROSE ── */
+      .prose p {
+        font-size: 15px;
+        margin-bottom: 14px;
+        color: #cbd5e1;
+      }
+      .prose p:last-child {
+        margin-bottom: 0;
+      }
+      .hl {
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .hl2 {
+        color: var(--accent2);
+        font-weight: 700;
+      }
+      .hl3 {
+        color: var(--accent3);
+        font-weight: 700;
+      }
+      .hl4 {
+        color: var(--accent4);
+        font-weight: 700;
+      }
+      .hl5 {
+        color: var(--accent5);
+        font-weight: 700;
+      }
 
-  /* ── COMPARE BOX ── */
-  .compare-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin: 16px 0;
-  }
-  @media (max-width: 600px) { .compare-grid { grid-template-columns: 1fr; } }
-  .compare-box { border-radius: 8px; overflow: hidden; }
-  .compare-label {
-    padding: 8px 14px;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 2px;
-    font-family: 'JetBrains Mono', monospace;
-  }
-  .cl-bad  { background: rgba(255,71,87,.15); color: var(--accent3); }
-  .cl-good { background: rgba(57,255,20,.1); color: var(--accent2); }
-  .compare-box pre { margin: 0; border-radius: 0; border-left: none; border-top: none; }
+      /* ── COMPARE BOX ── */
+      .compare-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin: 16px 0;
+      }
+      @media (max-width: 600px) {
+        .compare-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .compare-box {
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .compare-label {
+        padding: 8px 14px;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        font-family: "JetBrains Mono", monospace;
+      }
+      .cl-bad {
+        background: rgba(255, 71, 87, 0.15);
+        color: var(--accent3);
+      }
+      .cl-good {
+        background: rgba(57, 255, 20, 0.1);
+        color: var(--accent2);
+      }
+      .compare-box pre {
+        margin: 0;
+        border-radius: 0;
+        border-left: none;
+        border-top: none;
+      }
 
-  /* ── VIVA ── */
-  .viva-item { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 14px; overflow: hidden; }
-  .viva-q {
-    background: rgba(57,255,20,.06);
-    padding: 13px 18px;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--accent2);
-    display: flex;
-    gap: 10px;
-  }
-  .viva-q::before { content: 'Q'; font-family: 'Orbitron', monospace; font-size: 11px; opacity: .6; flex-shrink: 0; padding-top: 2px; }
-  .viva-a {
-    padding: 14px 18px;
-    font-size: 14px;
-    color: #94a3b8;
-    border-top: 1px solid var(--border);
-    background: var(--code-bg);
-    line-height: 1.7;
-  }
-  .viva-a strong { color: var(--accent2); }
+      /* ── VIVA ── */
+      .viva-item {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 14px;
+        overflow: hidden;
+      }
+      .viva-q {
+        background: rgba(57, 255, 20, 0.06);
+        padding: 13px 18px;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--accent2);
+        display: flex;
+        gap: 10px;
+      }
+      .viva-q::before {
+        content: "Q";
+        font-family: "Orbitron", monospace;
+        font-size: 11px;
+        opacity: 0.6;
+        flex-shrink: 0;
+        padding-top: 2px;
+      }
+      .viva-a {
+        padding: 14px 18px;
+        font-size: 14px;
+        color: #94a3b8;
+        border-top: 1px solid var(--border);
+        background: var(--code-bg);
+        line-height: 1.7;
+      }
+      .viva-a strong {
+        color: var(--accent2);
+      }
 
-  /* ── CHALLENGE ── */
-  .challenge-item { border: 1px solid rgba(255,71,87,.2); border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
-  .challenge-hdr {
-    background: rgba(255,71,87,.08);
-    padding: 11px 18px;
-    font-weight: 800;
-    font-size: 11px;
-    color: var(--accent3);
-    letter-spacing: 2px;
-    font-family: 'JetBrains Mono', monospace;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .challenge-body { padding: 18px; font-size: 14px; color: #94a3b8; }
-  .challenge-body p { margin-bottom: 12px; }
+      /* ── CHALLENGE ── */
+      .challenge-item {
+        border: 1px solid rgba(255, 71, 87, 0.2);
+        border-radius: 10px;
+        margin-bottom: 20px;
+        overflow: hidden;
+      }
+      .challenge-hdr {
+        background: rgba(255, 71, 87, 0.08);
+        padding: 11px 18px;
+        font-weight: 800;
+        font-size: 11px;
+        color: var(--accent3);
+        letter-spacing: 2px;
+        font-family: "JetBrains Mono", monospace;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .challenge-body {
+        padding: 18px;
+        font-size: 14px;
+        color: #94a3b8;
+      }
+      .challenge-body p {
+        margin-bottom: 12px;
+      }
 
-  /* ── FUTURE GRID ── */
-  .future-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-top: 10px; }
-  .future-card {
-    background: rgba(255,165,2,.05);
-    border: 1px solid rgba(255,165,2,.18);
-    border-radius: 10px;
-    padding: 18px;
-    transition: border-color .2s;
-  }
-  .future-card:hover { border-color: var(--accent4); }
-  .fi { font-size: 26px; margin-bottom: 8px; }
-  .ft { font-size: 13px; font-weight: 800; color: var(--accent4); margin-bottom: 5px; }
-  .fd { font-size: 12px; color: var(--muted); line-height: 1.6; }
+      /* ── FUTURE GRID ── */
+      .future-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 14px;
+        margin-top: 10px;
+      }
+      .future-card {
+        background: rgba(255, 165, 2, 0.05);
+        border: 1px solid rgba(255, 165, 2, 0.18);
+        border-radius: 10px;
+        padding: 18px;
+        transition: border-color 0.2s;
+      }
+      .future-card:hover {
+        border-color: var(--accent4);
+      }
+      .fi {
+        font-size: 26px;
+        margin-bottom: 8px;
+      }
+      .ft {
+        font-size: 13px;
+        font-weight: 800;
+        color: var(--accent4);
+        margin-bottom: 5px;
+      }
+      .fd {
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
 
-  /* ── INFO BOX ── */
-  .info-box {
-    background: rgba(0,212,255,.06);
-    border: 1px solid rgba(0,212,255,.2);
-    border-radius: 8px;
-    padding: 16px 20px;
-    margin: 16px 0;
-    font-size: 14px;
-    color: #94a3b8;
-  }
-  .info-box strong { color: var(--accent); }
+      /* ── INFO BOX ── */
+      .info-box {
+        background: rgba(0, 212, 255, 0.06);
+        border: 1px solid rgba(0, 212, 255, 0.2);
+        border-radius: 8px;
+        padding: 16px 20px;
+        margin: 16px 0;
+        font-size: 14px;
+        color: #94a3b8;
+      }
+      .info-box strong {
+        color: var(--accent);
+      }
 
-  /* ── RULE BOX ── */
-  .rule-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin: 16px 0; }
-  .rule-item {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px;
-    background: rgba(255,255,255,.02);
-  }
-  .rule-title { font-size: 12px; font-weight: 800; color: var(--accent); margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; }
-  .rule-desc { font-size: 12px; color: var(--muted); line-height: 1.6; }
+      /* ── RULE BOX ── */
+      .rule-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+        margin: 16px 0;
+      }
+      .rule-item {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px;
+        background: rgba(255, 255, 255, 0.02);
+      }
+      .rule-title {
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--accent);
+        margin-bottom: 4px;
+        font-family: "JetBrains Mono", monospace;
+      }
+      .rule-desc {
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
 
-  /* ── DIVIDER ── */
-  .divider {
-    text-align: center;
-    color: var(--muted);
-    font-size: 10px;
-    letter-spacing: 6px;
-    margin: 44px 0;
-    opacity: .3;
-    font-family: 'JetBrains Mono', monospace;
-  }
+      /* ── DIVIDER ── */
+      .divider {
+        text-align: center;
+        color: var(--muted);
+        font-size: 10px;
+        letter-spacing: 6px;
+        margin: 44px 0;
+        opacity: 0.3;
+        font-family: "JetBrains Mono", monospace;
+      }
 
-  /* ── FINAL CARD ── */
-  .final-card {
-    background: linear-gradient(135deg, rgba(0,212,255,.07), rgba(57,255,20,.04));
-    border: 1px solid rgba(0,212,255,.3);
-    border-radius: 16px;
-    padding: 36px;
-    margin-top: 64px;
-    text-align: center;
-  }
-  .final-title { font-family: 'Orbitron', sans-serif; font-size: 22px; font-weight: 900; color: var(--accent); letter-spacing: 2px; margin-bottom: 10px; }
-  .check-list { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 18px; }
-  .check-item { background: rgba(57,255,20,.1); color: var(--accent2); padding: 6px 16px; border-radius: 20px; font-size: 11px; font-weight: 800; letter-spacing: 1px; }
-  .next-hint { margin-top: 22px; color: var(--muted); font-size: 13px; }
-  .next-hint strong { color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+      /* ── FINAL CARD ── */
+      .final-card {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 212, 255, 0.07),
+          rgba(57, 255, 20, 0.04)
+        );
+        border: 1px solid rgba(0, 212, 255, 0.3);
+        border-radius: 16px;
+        padding: 36px;
+        margin-top: 64px;
+        text-align: center;
+      }
+      .final-title {
+        font-family: "Orbitron", sans-serif;
+        font-size: 22px;
+        font-weight: 900;
+        color: var(--accent);
+        letter-spacing: 2px;
+        margin-bottom: 10px;
+      }
+      .check-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 18px;
+      }
+      .check-item {
+        background: rgba(57, 255, 20, 0.1);
+        color: var(--accent2);
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1px;
+      }
+      .next-hint {
+        margin-top: 22px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .next-hint strong {
+        color: var(--accent);
+        font-family: "JetBrains Mono", monospace;
+      }
 
-  footer { text-align: center; padding: 36px; color: var(--muted); font-size: 10px; letter-spacing: 4px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; }
-</style>
-</head>
-<body>
+      footer {
+        text-align: center;
+        padding: 36px;
+        color: var(--muted);
+        font-size: 10px;
+        letter-spacing: 4px;
+        border-top: 1px solid var(--border);
+        font-family: "JetBrains Mono", monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- HERO -->
+    <div class="hero">
+      <div class="stage-tag">JS BOS MISSION · STAGE 14</div>
+      <h1>MODERN <span>ASYNC</span>/AWAIT</h1>
+      <p class="hero-sub">
+        Promise-এর উপর দাঁড়িয়ে — আরও পরিষ্কার, আরও শক্তিশালী asynchronous
+        JavaScript
+      </p>
+      <div class="hero-topics">
+        <span class="hero-topic">async/await Syntax</span>
+        <span class="hero-topic">Error Handling (try-catch)</span>
+        <span class="hero-topic">Real API Call (fetch)</span>
+        <span class="hero-topic">Best Practices</span>
+      </div>
+    </div>
 
-<!-- HERO -->
-<div class="hero">
-  <div class="stage-tag">JS BOS MISSION · STAGE 14</div>
-  <h1>MODERN <span>ASYNC</span>/AWAIT</h1>
-  <p class="hero-sub">Promise-এর উপর দাঁড়িয়ে — আরও পরিষ্কার, আরও শক্তিশালী asynchronous JavaScript</p>
-  <div class="hero-topics">
-    <span class="hero-topic">async/await Syntax</span>
-    <span class="hero-topic">Error Handling (try-catch)</span>
-    <span class="hero-topic">Real API Call (fetch)</span>
-    <span class="hero-topic">Best Practices</span>
-  </div>
-</div>
+    <!-- NAV -->
+    <nav class="toc">
+      <a href="#t1">01 · async/await Syntax</a>
+      <a href="#t2">02 · try-catch Error Handling</a>
+      <a href="#t3">03 · Real API Call (fetch)</a>
+      <a href="#t4">04 · Best Practices</a>
+    </nav>
 
-<!-- NAV -->
-<nav class="toc">
-  <a href="#t1">01 · async/await Syntax</a>
-  <a href="#t2">02 · try-catch Error Handling</a>
-  <a href="#t3">03 · Real API Call (fetch)</a>
-  <a href="#t4">04 · Best Practices</a>
-</nav>
-
-<div class="container">
-
-<!-- ══════════════════════════════════════════
+    <div class="container">
+      <!-- ══════════════════════════════════════════
      TOPIC 01 — async/await Syntax
 ══════════════════════════════════════════ -->
-<div id="t1">
-  <div class="section-header">
-    <div class="sec-num">01</div>
-    <div class="sec-info">
-      <h2>async/await Syntax</h2>
-      <p>// Promise-কে synchronous-এর মতো লেখার যাদু</p>
-    </div>
-  </div>
+      <div id="t1">
+        <div class="section-header">
+          <div class="sec-num">01</div>
+          <div class="sec-info">
+            <h2>async/await Syntax</h2>
+            <p>// Promise-কে synchronous-এর মতো লেখার যাদু</p>
+          </div>
+        </div>
 
-  <!-- CONCEPT -->
-  <div class="card">
-    <div class="card-header h-concept">📖 CONCEPT &amp; EXAMPLES</div>
-    <div class="card-body prose">
-      <p>
-        <span class="hl">async</span> keyword দিয়ে function বানালে সেটি সবসময় <strong>Promise return করে</strong>।<br>
-        <span class="hl">await</span> keyword শুধু async function-এর ভেতরে ব্যবহার করা যায় — এটি Promise resolve হওয়া পর্যন্ত অপেক্ষা করে এবং তারপর value দেয়।
-      </p>
-      <p>মূলত <span class="hl">async/await</span> হলো Promise-এর উপর তৈরি একটি <em>syntactic sugar</em> — ভেতরে সব Promise-ই চলছে, কিন্তু দেখতে synchronous মনে হয়।</p>
+        <!-- CONCEPT -->
+        <div class="card">
+          <div class="card-header h-concept">📖 CONCEPT &amp; EXAMPLES</div>
+          <div class="card-body prose">
+            <p>
+              <span class="hl">async</span> keyword দিয়ে function বানালে সেটি
+              সবসময় <strong>Promise return করে</strong>।<br />
+              <span class="hl">await</span> keyword শুধু async function-এর ভেতরে
+              ব্যবহার করা যায় — এটি Promise resolve হওয়া পর্যন্ত অপেক্ষা করে
+              এবং তারপর value দেয়।
+            </p>
+            <p>
+              মূলত <span class="hl">async/await</span> হলো Promise-এর উপর তৈরি
+              একটি <em>syntactic sugar</em> — ভেতরে সব Promise-ই চলছে, কিন্তু
+              দেখতে synchronous মনে হয়।
+            </p>
 
-      <!-- COMPARE -->
-      <div class="compare-grid">
-        <div class="compare-box">
-          <div class="compare-label cl-bad">❌ PROMISE WAY (জটিল)</div>
-          <pre class="red"><code><span class="kw">function</span> <span class="fn">getUser</span>() {
+            <!-- COMPARE -->
+            <div class="compare-grid">
+              <div class="compare-box">
+                <div class="compare-label cl-bad">❌ PROMISE WAY (জটিল)</div>
+                <pre
+                  class="red"
+                ><code><span class="kw">function</span> <span class="fn">getUser</span>() {
   <span class="kw">return</span> <span class="fn">fetchUser</span>()
     .<span class="fn">then</span>(user <span class="op">=></span> {
       <span class="kw">return</span> <span class="fn">fetchPosts</span>(user.id);
@@ -398,18 +621,22 @@
     })
     .<span class="fn">catch</span>(err <span class="op">=></span> console.<span class="fn">log</span>(err));
 }</code></pre>
-        </div>
-        <div class="compare-box">
-          <div class="compare-label cl-good">✅ ASYNC/AWAIT (পরিষ্কার)</div>
-          <pre class="green"><code><span class="kw">async function</span> <span class="fn">getUser</span>() {
+              </div>
+              <div class="compare-box">
+                <div class="compare-label cl-good">
+                  ✅ ASYNC/AWAIT (পরিষ্কার)
+                </div>
+                <pre
+                  class="green"
+                ><code><span class="kw">async function</span> <span class="fn">getUser</span>() {
   <span class="kw">const</span> user  <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetchUser</span>();
   <span class="kw">const</span> posts <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetchPosts</span>(user.id);
   console.<span class="fn">log</span>(posts);
 }</code></pre>
-        </div>
-      </div>
+              </div>
+            </div>
 
-      <pre><code><span class="cm">// ✅ Example 1: async function সবসময় Promise return করে</span>
+            <pre><code><span class="cm">// ✅ Example 1: async function সবসময় Promise return করে</span>
 <span class="kw">async function</span> <span class="fn">greet</span>() {
   <span class="kw">return</span> <span class="str">"হ্যালো, JS বস!"</span>;
 }
@@ -422,7 +649,7 @@
   <span class="kw">return</span> <span class="fn">Promise</span>.<span class="fn">resolve</span>(<span class="str">"হ্যালো, JS বস!"</span>);
 }</code></pre>
 
-      <pre><code><span class="cm">// ✅ Example 2: await দিয়ে Promise resolve করা</span>
+            <pre><code><span class="cm">// ✅ Example 2: await দিয়ে Promise resolve করা</span>
 <span class="kw">function</span> <span class="fn">delay</span>(ms) {
   <span class="kw">return new</span> <span class="fn">Promise</span>(res <span class="op">=></span> <span class="fn">setTimeout</span>(res, ms));
 }
@@ -437,7 +664,7 @@
 
 <span class="fn">cookFood</span>();</code></pre>
 
-      <pre><code><span class="cm">// ✅ Example 3: Arrow function এ async</span>
+            <pre><code><span class="cm">// ✅ Example 3: Arrow function এ async</span>
 <span class="kw">const</span> <span class="fn">fetchData</span> <span class="op">=</span> <span class="kw">async</span> () <span class="op">=></span> {
   <span class="kw">const</span> result <span class="op">=</span> <span class="kw">await</span> <span class="fn">Promise</span>.<span class="fn">resolve</span>({ name: <span class="str">"Rakib"</span>, score: <span class="num">99</span> });
   console.<span class="fn">log</span>(<span class="str">`👤 ${result.name} — Score: ${result.score}`</span>);
@@ -446,42 +673,61 @@
 
 <span class="fn">fetchData</span>().<span class="fn">then</span>(data <span class="op">=></span> console.<span class="fn">log</span>(<span class="str">"Returned:"</span>, data.name));</code></pre>
 
-      <pre><code><span class="cm">// ✅ Example 4: IIFE async (Immediately Invoked)</span>
+            <pre><code><span class="cm">// ✅ Example 4: IIFE async (Immediately Invoked)</span>
 (<span class="kw">async</span> () <span class="op">=></span> {
   <span class="kw">const</span> val <span class="op">=</span> <span class="kw">await</span> <span class="fn">Promise</span>.<span class="fn">resolve</span>(<span class="num">42</span>);
   console.<span class="fn">log</span>(<span class="str">"উত্তর:"</span>, val); <span class="cm">// 42</span>
 })();</code></pre>
-    </div>
-  </div>
+          </div>
+        </div>
 
-  <!-- VIVA -->
-  <div class="card">
-    <div class="card-header h-viva">🎤 VIVA GUIDE</div>
-    <div class="card-body">
-      <div class="viva-item">
-        <div class="viva-q">async/await কি শুধু syntactic sugar?</div>
-        <div class="viva-a">হ্যাঁ। async/await হলো Promise-এর উপর দাঁড়ানো syntactic sugar। ভেতরে JavaScript engine সব কিছু Promise হিসেবেই পরিচালনা করে। async function সবসময় Promise return করে, এবং await কেবল .then() এর কাজটি পরিষ্কারভাবে লেখার উপায়।</div>
-      </div>
-      <div class="viva-item">
-        <div class="viva-q">await কি শুধু Promise-এর সাথে কাজ করে?</div>
-        <div class="viva-a">না — await যেকোনো value-র সামনে দেওয়া যায়। Non-Promise value দিলে সেটি সরাসরি return হয়। তবে এটি Promise হলেই কাজটা আসল — তখন resolve হওয়া পর্যন্ত execution থেমে থাকে।</div>
-      </div>
-      <div class="viva-item">
-        <div class="viva-q">async function-এর বাইরে await ব্যবহার করলে কি হয়?</div>
-        <div class="viva-a">SyntaxError হবে — "await is only valid in async functions"। তবে ES2022 থেকে Top-Level await চালু হয়েছে, যা ES Module-এর top level-এ সরাসরি await লেখার সুযোগ দেয়।</div>
-      </div>
-    </div>
-  </div>
+        <!-- VIVA -->
+        <div class="card">
+          <div class="card-header h-viva">🎤 VIVA GUIDE</div>
+          <div class="card-body">
+            <div class="viva-item">
+              <div class="viva-q">async/await কি শুধু syntactic sugar?</div>
+              <div class="viva-a">
+                হ্যাঁ। async/await হলো Promise-এর উপর দাঁড়ানো syntactic sugar।
+                ভেতরে JavaScript engine সব কিছু Promise হিসেবেই পরিচালনা করে।
+                async function সবসময় Promise return করে, এবং await কেবল .then()
+                এর কাজটি পরিষ্কারভাবে লেখার উপায়।
+              </div>
+            </div>
+            <div class="viva-item">
+              <div class="viva-q">await কি শুধু Promise-এর সাথে কাজ করে?</div>
+              <div class="viva-a">
+                না — await যেকোনো value-র সামনে দেওয়া যায়। Non-Promise value
+                দিলে সেটি সরাসরি return হয়। তবে এটি Promise হলেই কাজটা আসল —
+                তখন resolve হওয়া পর্যন্ত execution থেমে থাকে।
+              </div>
+            </div>
+            <div class="viva-item">
+              <div class="viva-q">
+                async function-এর বাইরে await ব্যবহার করলে কি হয়?
+              </div>
+              <div class="viva-a">
+                SyntaxError হবে — "await is only valid in async functions"। তবে
+                ES2022 থেকে Top-Level await চালু হয়েছে, যা ES Module-এর top
+                level-এ সরাসরি await লেখার সুযোগ দেয়।
+              </div>
+            </div>
+          </div>
+        </div>
 
-  <!-- CHALLENGE -->
-  <div class="card">
-    <div class="card-header h-challenge">💪 CODING CHALLENGES</div>
-    <div class="card-body">
-      <div class="challenge-item">
-        <div class="challenge-hdr">⚡ CHALLENGE 01 — Coffee Machine</div>
-        <div class="challenge-body">
-          <p>একটি async function <code>makeCoffee()</code> বানাও যা step-by-step: পানি গরম করো (1s) → কফি বানাও (2s) → পরিবেশন করো (0.5s)।</p>
-          <pre class="red"><code><span class="cm">// 🎯 Solution</span>
+        <!-- CHALLENGE -->
+        <div class="card">
+          <div class="card-header h-challenge">💪 CODING CHALLENGES</div>
+          <div class="card-body">
+            <div class="challenge-item">
+              <div class="challenge-hdr">⚡ CHALLENGE 01 — Coffee Machine</div>
+              <div class="challenge-body">
+                <p>
+                  একটি async function <code>makeCoffee()</code> বানাও যা
+                  step-by-step: পানি গরম করো (1s) → কফি বানাও (2s) → পরিবেশন করো
+                  (0.5s)।
+                </p>
+                <pre class="red"><code><span class="cm">// 🎯 Solution</span>
 <span class="kw">function</span> <span class="fn">wait</span>(ms, msg) {
   <span class="kw">return new</span> <span class="fn">Promise</span>(res <span class="op">=></span> <span class="fn">setTimeout</span>(() <span class="op">=></span> { console.<span class="fn">log</span>(msg); <span class="fn">res</span>(); }, ms));
 }
@@ -495,48 +741,73 @@
 }
 
 <span class="fn">makeCoffee</span>();</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FUTURE -->
+        <div class="card">
+          <div class="card-header h-future">🚀 FUTURE IMPLEMENTATION</div>
+          <div class="card-body">
+            <div class="future-grid">
+              <div class="future-card">
+                <div class="fi">⚡</div>
+                <div class="ft">React useEffect</div>
+                <div class="fd">
+                  async function ডেকে API data fetch করা হয় component mount-এ।
+                </div>
+              </div>
+              <div class="future-card">
+                <div class="fi">🔌</div>
+                <div class="ft">Node.js Backend</div>
+                <div class="fd">
+                  Express route handler-এ async/await দিয়ে DB query করা হয়।
+                </div>
+              </div>
+              <div class="future-card">
+                <div class="fi">🧪</div>
+                <div class="ft">Jest Testing</div>
+                <div class="fd">
+                  async test() দিয়ে async function-এর unit test লেখা হয়।
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
+      <!-- /t1 -->
 
-  <!-- FUTURE -->
-  <div class="card">
-    <div class="card-header h-future">🚀 FUTURE IMPLEMENTATION</div>
-    <div class="card-body">
-      <div class="future-grid">
-        <div class="future-card"><div class="fi">⚡</div><div class="ft">React useEffect</div><div class="fd">async function ডেকে API data fetch করা হয় component mount-এ।</div></div>
-        <div class="future-card"><div class="fi">🔌</div><div class="ft">Node.js Backend</div><div class="fd">Express route handler-এ async/await দিয়ে DB query করা হয়।</div></div>
-        <div class="future-card"><div class="fi">🧪</div><div class="ft">Jest Testing</div><div class="fd">async test() দিয়ে async function-এর unit test লেখা হয়।</div></div>
-      </div>
-    </div>
-  </div>
-</div><!-- /t1 -->
+      <div class="divider">━━━━━━━━ ✦ ━━━━━━━━</div>
 
-<div class="divider">━━━━━━━━ ✦ ━━━━━━━━</div>
-
-<!-- ══════════════════════════════════════════
+      <!-- ══════════════════════════════════════════
      TOPIC 02 — try-catch Error Handling
 ══════════════════════════════════════════ -->
-<div id="t2">
-  <div class="section-header">
-    <div class="sec-num">02</div>
-    <div class="sec-info">
-      <h2>Error Handling — try/catch/finally</h2>
-      <p>// async/await এর সাথে error পরিচালনা</p>
-    </div>
-  </div>
+      <div id="t2">
+        <div class="section-header">
+          <div class="sec-num">02</div>
+          <div class="sec-info">
+            <h2>Error Handling — try/catch/finally</h2>
+            <p>// async/await এর সাথে error পরিচালনা</p>
+          </div>
+        </div>
 
-  <div class="card">
-    <div class="card-header h-concept">📖 CONCEPT &amp; EXAMPLES</div>
-    <div class="card-body prose">
-      <p>
-        <span class="hl">Promise</span>-এ error handle করতে <code>.catch()</code> লাগতো। <span class="hl">async/await</span>-এ সাধারণ <span class="hl3">try...catch</span> block ব্যবহার হয় — যেভাবে synchronous code-এ করা হয়।
-      </p>
+        <div class="card">
+          <div class="card-header h-concept">📖 CONCEPT &amp; EXAMPLES</div>
+          <div class="card-body prose">
+            <p>
+              <span class="hl">Promise</span>-এ error handle করতে
+              <code>.catch()</code> লাগতো। <span class="hl">async/await</span>-এ
+              সাধারণ <span class="hl3">try...catch</span> block ব্যবহার হয় —
+              যেভাবে synchronous code-এ করা হয়।
+            </p>
 
-      <div class="info-box"><strong>🔑 Rule:</strong> await যদি reject হয় তাহলে সেটি <code>throw</code> করে — catch block সেটি ধরে।</div>
+            <div class="info-box">
+              <strong>🔑 Rule:</strong> await যদি reject হয় তাহলে সেটি
+              <code>throw</code> করে — catch block সেটি ধরে।
+            </div>
 
-      <pre><code><span class="cm">// ✅ Example 1: Basic try-catch with async/await</span>
+            <pre><code><span class="cm">// ✅ Example 1: Basic try-catch with async/await</span>
 <span class="kw">async function</span> <span class="fn">getUser</span>(id) {
   <span class="kw">try</span> {
     <span class="kw">const</span> response <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`https://jsonplaceholder.typicode.com/users/${id}`</span>);
@@ -558,7 +829,7 @@
 
 <span class="fn">getUser</span>(<span class="num">1</span>);</code></pre>
 
-      <pre><code><span class="cm">// ✅ Example 2: Custom Error throw করা</span>
+            <pre><code><span class="cm">// ✅ Example 2: Custom Error throw করা</span>
 <span class="kw">async function</span> <span class="fn">login</span>(email, password) {
   <span class="kw">try</span> {
     <span class="kw">if</span> (<span class="op">!</span>email.<span class="fn">includes</span>(<span class="str">"@"</span>)) {
@@ -590,7 +861,7 @@
 <span class="fn">login</span>(<span class="str">"rakib@test.com"</span>, <span class="str">"wrong"</span>);
 <span class="fn">login</span>(<span class="str">"invalid-email"</span>, <span class="str">"1234"</span>);</code></pre>
 
-      <pre><code><span class="cm">// ✅ Example 3: Error কে caller এ পাঠানো (re-throw)</span>
+            <pre><code><span class="cm">// ✅ Example 3: Error কে caller এ পাঠানো (re-throw)</span>
 <span class="kw">async function</span> <span class="fn">fetchProduct</span>(id) {
   <span class="kw">try</span> {
     <span class="kw">const</span> res  <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`/api/products/${id}`</span>);
@@ -611,35 +882,55 @@
     console.<span class="fn">log</span>(<span class="str">"❌ প্রোডাক্ট লোড হয়নি"</span>);
   }
 }</code></pre>
-    </div>
-  </div>
+          </div>
+        </div>
 
-  <div class="card">
-    <div class="card-header h-viva">🎤 VIVA GUIDE</div>
-    <div class="card-body">
-      <div class="viva-item">
-        <div class="viva-q">async/await এ .catch() নাকি try-catch — কোনটা ভালো?</div>
-        <div class="viva-a">দুটোই কাজ করে। তবে <strong>try-catch</strong> বেশি preferred কারণ: (১) synchronous error-ও catch করে (যেমন JSON.parse() এর error), (২) multiple await এর জন্য একটি block যথেষ্ট, (৩) কোড বেশি readable। Production-এ সাধারণত try-catch ব্যবহার হয়।</div>
-      </div>
-      <div class="viva-item">
-        <div class="viva-q">await-এর আগে try না থাকলে unhandled error কি হয়?</div>
-        <div class="viva-a">UnhandledPromiseRejectionWarning দেখাবে। Node.js-এ এটি process crash করতে পারে। সবসময় async code-এ error handle করা best practice।</div>
-      </div>
-      <div class="viva-item">
-        <div class="viva-q">finally ব্লক কি await করে?</div>
-        <div class="viva-a">হ্যাঁ, finally ব্লকও async হতে পারে এবং await ব্যবহার করা যায়। তবে সাধারণত cleanup কাজে (loader বন্ধ, connection close) synchronous code রাখা হয়।</div>
-      </div>
-    </div>
-  </div>
+        <div class="card">
+          <div class="card-header h-viva">🎤 VIVA GUIDE</div>
+          <div class="card-body">
+            <div class="viva-item">
+              <div class="viva-q">
+                async/await এ .catch() নাকি try-catch — কোনটা ভালো?
+              </div>
+              <div class="viva-a">
+                দুটোই কাজ করে। তবে <strong>try-catch</strong> বেশি preferred
+                কারণ: (১) synchronous error-ও catch করে (যেমন JSON.parse() এর
+                error), (২) multiple await এর জন্য একটি block যথেষ্ট, (৩) কোড
+                বেশি readable। Production-এ সাধারণত try-catch ব্যবহার হয়।
+              </div>
+            </div>
+            <div class="viva-item">
+              <div class="viva-q">
+                await-এর আগে try না থাকলে unhandled error কি হয়?
+              </div>
+              <div class="viva-a">
+                UnhandledPromiseRejectionWarning দেখাবে। Node.js-এ এটি process
+                crash করতে পারে। সবসময় async code-এ error handle করা best
+                practice।
+              </div>
+            </div>
+            <div class="viva-item">
+              <div class="viva-q">finally ব্লক কি await করে?</div>
+              <div class="viva-a">
+                হ্যাঁ, finally ব্লকও async হতে পারে এবং await ব্যবহার করা যায়।
+                তবে সাধারণত cleanup কাজে (loader বন্ধ, connection close)
+                synchronous code রাখা হয়।
+              </div>
+            </div>
+          </div>
+        </div>
 
-  <div class="card">
-    <div class="card-header h-challenge">💪 CODING CHALLENGES</div>
-    <div class="card-body">
-      <div class="challenge-item">
-        <div class="challenge-hdr">⚡ CHALLENGE 02 — Safe Division</div>
-        <div class="challenge-body">
-          <p>একটি async function <code>safeDivide(a, b)</code> বানাও। b === 0 হলে custom error throw করো, নইলে ফলাফল দাও।</p>
-          <pre class="red"><code><span class="cm">// 🎯 Solution</span>
+        <div class="card">
+          <div class="card-header h-challenge">💪 CODING CHALLENGES</div>
+          <div class="card-body">
+            <div class="challenge-item">
+              <div class="challenge-hdr">⚡ CHALLENGE 02 — Safe Division</div>
+              <div class="challenge-body">
+                <p>
+                  একটি async function <code>safeDivide(a, b)</code> বানাও। b ===
+                  0 হলে custom error throw করো, নইলে ফলাফল দাও।
+                </p>
+                <pre class="red"><code><span class="cm">// 🎯 Solution</span>
 <span class="kw">async function</span> <span class="fn">safeDivide</span>(a, b) {
   <span class="kw">try</span> {
     <span class="kw">if</span> (b <span class="op">===</span> <span class="num">0</span>) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">"শূন্য দিয়ে ভাগ করা যাবে না!"</span>);
@@ -655,14 +946,17 @@
 
 <span class="fn">safeDivide</span>(<span class="num">10</span>, <span class="num">2</span>);  <span class="cm">// ✅ 5</span>
 <span class="fn">safeDivide</span>(<span class="num">10</span>, <span class="num">0</span>);  <span class="cm">// ❌ Error</span></code></pre>
-        </div>
-      </div>
+              </div>
+            </div>
 
-      <div class="challenge-item">
-        <div class="challenge-hdr">⚡ CHALLENGE 03 — Retry Mechanism</div>
-        <div class="challenge-body">
-          <p>একটি <code>fetchWithRetry(url, retries)</code> function বানাও যা fail হলে নির্দিষ্ট সংখ্যকবার retry করবে।</p>
-          <pre class="red"><code><span class="cm">// 🎯 Solution</span>
+            <div class="challenge-item">
+              <div class="challenge-hdr">⚡ CHALLENGE 03 — Retry Mechanism</div>
+              <div class="challenge-body">
+                <p>
+                  একটি <code>fetchWithRetry(url, retries)</code> function বানাও
+                  যা fail হলে নির্দিষ্ট সংখ্যকবার retry করবে।
+                </p>
+                <pre class="red"><code><span class="cm">// 🎯 Solution</span>
 <span class="kw">async function</span> <span class="fn">fetchWithRetry</span>(url, retries <span class="op">=</span> <span class="num">3</span>) {
   <span class="kw">for</span> (<span class="kw">let</span> attempt <span class="op">=</span> <span class="num">1</span>; attempt <span class="op"><=</span> retries; attempt<span class="op">++</span>) {
     <span class="kw">try</span> {
@@ -683,49 +977,74 @@
 
 <span class="fn">fetchWithRetry</span>(<span class="str">"https://jsonplaceholder.typicode.com/posts/1"</span>)
   .<span class="fn">catch</span>(err <span class="op">=></span> console.<span class="fn">log</span>(<span class="str">"চূড়ান্ত ব্যর্থতা:"</span>, err.message));</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header h-future">🚀 FUTURE IMPLEMENTATION</div>
+          <div class="card-body">
+            <div class="future-grid">
+              <div class="future-card">
+                <div class="fi">🔁</div>
+                <div class="ft">Retry Logic</div>
+                <div class="fd">
+                  Network flaky হলে automatic retry — payment gateway, critical
+                  API-এ ব্যবহার।
+                </div>
+              </div>
+              <div class="future-card">
+                <div class="fi">📱</div>
+                <div class="ft">Mobile App</div>
+                <div class="fd">
+                  Offline → Online transition-এ pending request retry করতে
+                  try-catch লাগে।
+                </div>
+              </div>
+              <div class="future-card">
+                <div class="fi">🛡️</div>
+                <div class="ft">Error Boundary</div>
+                <div class="fd">
+                  React Error Boundary-র সাথে async error handling করা হয়।
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
+      <!-- /t2 -->
 
-  <div class="card">
-    <div class="card-header h-future">🚀 FUTURE IMPLEMENTATION</div>
-    <div class="card-body">
-      <div class="future-grid">
-        <div class="future-card"><div class="fi">🔁</div><div class="ft">Retry Logic</div><div class="fd">Network flaky হলে automatic retry — payment gateway, critical API-এ ব্যবহার।</div></div>
-        <div class="future-card"><div class="fi">📱</div><div class="ft">Mobile App</div><div class="fd">Offline → Online transition-এ pending request retry করতে try-catch লাগে।</div></div>
-        <div class="future-card"><div class="fi">🛡️</div><div class="ft">Error Boundary</div><div class="fd">React Error Boundary-র সাথে async error handling করা হয়।</div></div>
-      </div>
-    </div>
-  </div>
-</div><!-- /t2 -->
+      <div class="divider">━━━━━━━━ ✦ ━━━━━━━━</div>
 
-<div class="divider">━━━━━━━━ ✦ ━━━━━━━━</div>
-
-<!-- ══════════════════════════════════════════
+      <!-- ══════════════════════════════════════════
      TOPIC 03 — Real API Call (fetch)
 ══════════════════════════════════════════ -->
-<div id="t3">
-  <div class="section-header">
-    <div class="sec-num">03</div>
-    <div class="sec-info">
-      <h2>Real API Call করা — fetch()</h2>
-      <p>// async/await দিয়ে সত্যিকারের HTTP request</p>
-    </div>
-  </div>
+      <div id="t3">
+        <div class="section-header">
+          <div class="sec-num">03</div>
+          <div class="sec-info">
+            <h2>Real API Call করা — fetch()</h2>
+            <p>// async/await দিয়ে সত্যিকারের HTTP request</p>
+          </div>
+        </div>
 
-  <div class="card">
-    <div class="card-header h-concept">📖 CONCEPT &amp; EXAMPLES</div>
-    <div class="card-body prose">
-      <p>
-        <span class="hl">fetch()</span> হলো browser-built-in function যা HTTP request করে এবং <strong>Promise return করে</strong>। async/await দিয়ে এটি ব্যবহার করা অনেক সহজ।
-      </p>
+        <div class="card">
+          <div class="card-header h-concept">📖 CONCEPT &amp; EXAMPLES</div>
+          <div class="card-body prose">
+            <p>
+              <span class="hl">fetch()</span> হলো browser-built-in function যা
+              HTTP request করে এবং <strong>Promise return করে</strong>।
+              async/await দিয়ে এটি ব্যবহার করা অনেক সহজ।
+            </p>
 
-      <div class="info-box">
-        <strong>⚠️ গুরুত্বপূর্ণ:</strong> fetch() কখনো HTTP error (404, 500) এ reject করে না — শুধু network failure-এ reject করে। তাই <code>response.ok</code> check করতে হয়।
-      </div>
+            <div class="info-box">
+              <strong>⚠️ গুরুত্বপূর্ণ:</strong> fetch() কখনো HTTP error (404,
+              500) এ reject করে না — শুধু network failure-এ reject করে। তাই
+              <code>response.ok</code> check করতে হয়।
+            </div>
 
-      <pre><code><span class="cm">// ✅ Example 1: GET Request — User data আনা</span>
+            <pre><code><span class="cm">// ✅ Example 1: GET Request — User data আনা</span>
 <span class="kw">async function</span> <span class="fn">getUser</span>(id) {
   <span class="kw">try</span> {
     <span class="kw">const</span> response <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetch</span>(
@@ -749,7 +1068,7 @@
 
 <span class="fn">getUser</span>(<span class="num">1</span>);</code></pre>
 
-      <pre><code><span class="cm">// ✅ Example 2: POST Request — Data পাঠানো</span>
+            <pre><code><span class="cm">// ✅ Example 2: POST Request — Data পাঠানো</span>
 <span class="kw">async function</span> <span class="fn">createPost</span>(postData) {
   <span class="kw">try</span> {
     <span class="kw">const</span> response <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">"https://jsonplaceholder.typicode.com/posts"</span>, {
@@ -773,7 +1092,7 @@
   userId: <span class="num">1</span>
 });</code></pre>
 
-      <pre><code><span class="cm">// ✅ Example 3: Multiple API call — Promise.all + async/await</span>
+            <pre><code><span class="cm">// ✅ Example 3: Multiple API call — Promise.all + async/await</span>
 <span class="kw">async function</span> <span class="fn">loadDashboard</span>() {
   <span class="kw">try</span> {
     console.<span class="fn">log</span>(<span class="str">"⏳ Dashboard লোড হচ্ছে..."</span>);
@@ -797,35 +1116,52 @@
 }
 
 <span class="fn">loadDashboard</span>();</code></pre>
-    </div>
-  </div>
+          </div>
+        </div>
 
-  <div class="card">
-    <div class="card-header h-viva">🎤 VIVA GUIDE</div>
-    <div class="card-body">
-      <div class="viva-item">
-        <div class="viva-q">fetch() এ কেন দুটো await লাগে?</div>
-        <div class="viva-a">প্রথম await fetch()-এর Response object পায় (headers, status সহ)। দ্বিতীয় await response.json() — এটি Response body পড়ে JSON-এ convert করে। body পড়া একটি আলাদা async operation, তাই দুটো await লাগে।</div>
-      </div>
-      <div class="viva-item">
-        <div class="viva-q">fetch() 404 পেলে reject করে না কেন?</div>
-        <div class="viva-a">fetch() শুধু network failure-এ reject করে (server unreachable, CORS error)। HTTP 404 বা 500 response পেলে Promise fulfilled হয় — শুধু response.ok false থাকে। তাই if(!response.ok) throw দিয়ে manually handle করতে হয়।</div>
-      </div>
-      <div class="viva-item">
-        <div class="viva-q">axios vs fetch — কোনটা ব্যবহার করবো?</div>
-        <div class="viva-a">fetch() built-in, কোনো library লাগে না। axios automatically JSON parse করে, HTTP error-এ reject করে, request cancel করা যায়, interceptor আছে। Real project-এ axios বেশি সুবিধাজনক, কিন্তু interview-এ fetch() বোঝা জরুরি।</div>
-      </div>
-    </div>
-  </div>
+        <div class="card">
+          <div class="card-header h-viva">🎤 VIVA GUIDE</div>
+          <div class="card-body">
+            <div class="viva-item">
+              <div class="viva-q">fetch() এ কেন দুটো await লাগে?</div>
+              <div class="viva-a">
+                প্রথম await fetch()-এর Response object পায় (headers, status
+                সহ)। দ্বিতীয় await response.json() — এটি Response body পড়ে
+                JSON-এ convert করে। body পড়া একটি আলাদা async operation, তাই
+                দুটো await লাগে।
+              </div>
+            </div>
+            <div class="viva-item">
+              <div class="viva-q">fetch() 404 পেলে reject করে না কেন?</div>
+              <div class="viva-a">
+                fetch() শুধু network failure-এ reject করে (server unreachable,
+                CORS error)। HTTP 404 বা 500 response পেলে Promise fulfilled হয়
+                — শুধু response.ok false থাকে। তাই if(!response.ok) throw দিয়ে
+                manually handle করতে হয়।
+              </div>
+            </div>
+            <div class="viva-item">
+              <div class="viva-q">axios vs fetch — কোনটা ব্যবহার করবো?</div>
+              <div class="viva-a">
+                fetch() built-in, কোনো library লাগে না। axios automatically JSON
+                parse করে, HTTP error-এ reject করে, request cancel করা যায়,
+                interceptor আছে। Real project-এ axios বেশি সুবিধাজনক, কিন্তু
+                interview-এ fetch() বোঝা জরুরি।
+              </div>
+            </div>
+          </div>
+        </div>
 
-  <div class="card">
-    <div class="card-header h-challenge">💪 CODING CHALLENGES</div>
-    <div class="card-body">
-      <div class="challenge-item">
-        <div class="challenge-hdr">⚡ CHALLENGE 04 — Post List Fetcher</div>
-        <div class="challenge-body">
-          <p>JSONPlaceholder থেকে প্রথম ৫টি post এর title print করো।</p>
-          <pre class="red"><code><span class="cm">// 🎯 Solution</span>
+        <div class="card">
+          <div class="card-header h-challenge">💪 CODING CHALLENGES</div>
+          <div class="card-body">
+            <div class="challenge-item">
+              <div class="challenge-hdr">
+                ⚡ CHALLENGE 04 — Post List Fetcher
+              </div>
+              <div class="challenge-body">
+                <p>JSONPlaceholder থেকে প্রথম ৫টি post এর title print করো।</p>
+                <pre class="red"><code><span class="cm">// 🎯 Solution</span>
 <span class="kw">async function</span> <span class="fn">showPosts</span>() {
   <span class="kw">try</span> {
     <span class="kw">const</span> res   <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">"https://jsonplaceholder.typicode.com/posts"</span>);
@@ -843,14 +1179,19 @@
 }
 
 <span class="fn">showPosts</span>();</code></pre>
-        </div>
-      </div>
+              </div>
+            </div>
 
-      <div class="challenge-item">
-        <div class="challenge-hdr">⚡ CHALLENGE 05 — Weather App Simulator</div>
-        <div class="challenge-body">
-          <p>একটি async function বানাও যা city name নিয়ে mock weather data return করবে। Invalid city হলে error throw করো।</p>
-          <pre class="red"><code><span class="cm">// 🎯 Solution</span>
+            <div class="challenge-item">
+              <div class="challenge-hdr">
+                ⚡ CHALLENGE 05 — Weather App Simulator
+              </div>
+              <div class="challenge-body">
+                <p>
+                  একটি async function বানাও যা city name নিয়ে mock weather data
+                  return করবে। Invalid city হলে error throw করো।
+                </p>
+                <pre class="red"><code><span class="cm">// 🎯 Solution</span>
 <span class="kw">const</span> weatherDB <span class="op">=</span> {
   dhaka:  { temp: <span class="num">32</span>, humid: <span class="num">85</span>, desc: <span class="str">"☁️ আংশিক মেঘলা"</span> },
   chittagong: { temp: <span class="num">28</span>, humid: <span class="num">90</span>, desc: <span class="str">"🌧️ বৃষ্টি"</span> },
@@ -879,52 +1220,106 @@
 
 <span class="fn">showWeather</span>(<span class="str">"Dhaka"</span>);
 <span class="fn">showWeather</span>(<span class="str">"Rajshahi"</span>);</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header h-future">🚀 FUTURE IMPLEMENTATION</div>
+          <div class="card-body">
+            <div class="future-grid">
+              <div class="future-card">
+                <div class="fi">🌐</div>
+                <div class="ft">REST API</div>
+                <div class="fd">
+                  সব modern web app-এ async/await দিয়ে GET, POST, PUT, DELETE
+                  করা হয়।
+                </div>
+              </div>
+              <div class="future-card">
+                <div class="fi">📱</div>
+                <div class="ft">React Native</div>
+                <div class="fd">
+                  Mobile app-এ server থেকে data fetch করতে async/await ব্যবহার।
+                </div>
+              </div>
+              <div class="future-card">
+                <div class="fi">🛒</div>
+                <div class="ft">E-commerce</div>
+                <div class="fd">
+                  Product list, cart, order সব async API call দিয়ে পরিচালিত।
+                </div>
+              </div>
+              <div class="future-card">
+                <div class="fi">🤖</div>
+                <div class="ft">AI Integration</div>
+                <div class="fd">
+                  OpenAI, Claude API call — সব async। Response stream করাও
+                  async/await দিয়ে।
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
+      <!-- /t3 -->
 
-  <div class="card">
-    <div class="card-header h-future">🚀 FUTURE IMPLEMENTATION</div>
-    <div class="card-body">
-      <div class="future-grid">
-        <div class="future-card"><div class="fi">🌐</div><div class="ft">REST API</div><div class="fd">সব modern web app-এ async/await দিয়ে GET, POST, PUT, DELETE করা হয়।</div></div>
-        <div class="future-card"><div class="fi">📱</div><div class="ft">React Native</div><div class="fd">Mobile app-এ server থেকে data fetch করতে async/await ব্যবহার।</div></div>
-        <div class="future-card"><div class="fi">🛒</div><div class="ft">E-commerce</div><div class="fd">Product list, cart, order সব async API call দিয়ে পরিচালিত।</div></div>
-        <div class="future-card"><div class="fi">🤖</div><div class="ft">AI Integration</div><div class="fd">OpenAI, Claude API call — সব async। Response stream করাও async/await দিয়ে।</div></div>
-      </div>
-    </div>
-  </div>
-</div><!-- /t3 -->
+      <div class="divider">━━━━━━━━ ✦ ━━━━━━━━</div>
 
-<div class="divider">━━━━━━━━ ✦ ━━━━━━━━</div>
-
-<!-- ══════════════════════════════════════════
+      <!-- ══════════════════════════════════════════
      TOPIC 04 — Best Practices
 ══════════════════════════════════════════ -->
-<div id="t4">
-  <div class="section-header">
-    <div class="sec-num">04</div>
-    <div class="sec-info">
-      <h2>async/await Best Practices</h2>
-      <p>// senior developer এর মতো লেখার কৌশল</p>
-    </div>
-  </div>
+      <div id="t4">
+        <div class="section-header">
+          <div class="sec-num">04</div>
+          <div class="sec-info">
+            <h2>async/await Best Practices</h2>
+            <p>// senior developer এর মতো লেখার কৌশল</p>
+          </div>
+        </div>
 
-  <div class="card">
-    <div class="card-header h-concept">📖 CONCEPT &amp; EXAMPLES</div>
-    <div class="card-body prose">
+        <div class="card">
+          <div class="card-header h-concept">📖 CONCEPT &amp; EXAMPLES</div>
+          <div class="card-body prose">
+            <div class="rule-grid">
+              <div class="rule-item">
+                <div class="rule-title">❌ Avoid</div>
+                <div class="rule-desc">
+                  অপ্রয়োজনে সব await sequential করা — performance নষ্ট।
+                </div>
+              </div>
+              <div class="rule-item">
+                <div class="rule-title">✅ Do</div>
+                <div class="rule-desc">
+                  Independent call-গুলো Promise.all দিয়ে parallel চালানো।
+                </div>
+              </div>
+              <div class="rule-item">
+                <div class="rule-title">❌ Avoid</div>
+                <div class="rule-desc">
+                  forEach-এর ভেতরে await — কাজ করে না ঠিকমতো।
+                </div>
+              </div>
+              <div class="rule-item">
+                <div class="rule-title">✅ Do</div>
+                <div class="rule-desc">
+                  for...of loop ব্যবহার করো async iteration-এ।
+                </div>
+              </div>
+              <div class="rule-item">
+                <div class="rule-title">❌ Avoid</div>
+                <div class="rule-desc">
+                  Error handle না করে await ছেড়ে দেওয়া।
+                </div>
+              </div>
+              <div class="rule-item">
+                <div class="rule-title">✅ Do</div>
+                <div class="rule-desc">সবসময় try-catch ব্যবহার করো।</div>
+              </div>
+            </div>
 
-      <div class="rule-grid">
-        <div class="rule-item"><div class="rule-title">❌ Avoid</div><div class="rule-desc">অপ্রয়োজনে সব await sequential করা — performance নষ্ট।</div></div>
-        <div class="rule-item"><div class="rule-title">✅ Do</div><div class="rule-desc">Independent call-গুলো Promise.all দিয়ে parallel চালানো।</div></div>
-        <div class="rule-item"><div class="rule-title">❌ Avoid</div><div class="rule-desc">forEach-এর ভেতরে await — কাজ করে না ঠিকমতো।</div></div>
-        <div class="rule-item"><div class="rule-title">✅ Do</div><div class="rule-desc">for...of loop ব্যবহার করো async iteration-এ।</div></div>
-        <div class="rule-item"><div class="rule-title">❌ Avoid</div><div class="rule-desc">Error handle না করে await ছেড়ে দেওয়া।</div></div>
-        <div class="rule-item"><div class="rule-title">✅ Do</div><div class="rule-desc">সবসময় try-catch ব্যবহার করো।</div></div>
-      </div>
-
-      <pre><code><span class="cm">// ❌ BAD: Sequential — মোট ৩ সেকেন্ড লাগবে (1+1+1)</span>
+            <pre><code><span class="cm">// ❌ BAD: Sequential — মোট ৩ সেকেন্ড লাগবে (1+1+1)</span>
 <span class="kw">async function</span> <span class="fn">badExample</span>() {
   <span class="kw">const</span> a <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetchA</span>(); <span class="cm">// 1s</span>
   <span class="kw">const</span> b <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetchB</span>(); <span class="cm">// 1s (A-এর জন্য অপেক্ষা করে)</span>
@@ -938,7 +1333,7 @@
   console.<span class="fn">log</span>(a, b, c);
 }</code></pre>
 
-      <pre><code><span class="cm">// ❌ BAD: forEach এ await কাজ করে না সঠিকভাবে</span>
+            <pre><code><span class="cm">// ❌ BAD: forEach এ await কাজ করে না সঠিকভাবে</span>
 <span class="kw">async function</span> <span class="fn">processUsers</span>(users) {
   users.<span class="fn">forEach</span>(<span class="kw">async</span> (user) <span class="op">=></span> {
     <span class="kw">await</span> <span class="fn">saveUser</span>(user); <span class="cm">// ⚠️ সব একসাথে শুরু হয়, order নেই</span>
@@ -954,7 +1349,7 @@
   console.<span class="fn">log</span>(<span class="str">"✅ সব সংরক্ষণ হয়েছে"</span>);
 }</code></pre>
 
-      <pre><code><span class="cm">// ✅ Best Practice: Wrapper function দিয়ে cleaner code</span>
+            <pre><code><span class="cm">// ✅ Best Practice: Wrapper function দিয়ে cleaner code</span>
 <span class="kw">async function</span> <span class="fn">asyncWrapper</span>(promise) {
   <span class="kw">try</span> {
     <span class="kw">const</span> data <span class="op">=</span> <span class="kw">await</span> promise;
@@ -979,7 +1374,7 @@
 
 <span class="fn">main</span>();</code></pre>
 
-      <pre><code><span class="cm">// ✅ async/await + Promise.all + error handling সব একসাথে</span>
+            <pre><code><span class="cm">// ✅ async/await + Promise.all + error handling সব একসাথে</span>
 <span class="kw">async function</span> <span class="fn">fullExample</span>() {
   <span class="kw">const</span> BASE <span class="op">=</span> <span class="str">"https://jsonplaceholder.typicode.com"</span>;
   <span class="kw">let</span> loading <span class="op">=</span> <span class="num">true</span>;
@@ -1010,39 +1405,69 @@
 }
 
 <span class="fn">fullExample</span>();</code></pre>
-    </div>
-  </div>
+          </div>
+        </div>
 
-  <div class="card">
-    <div class="card-header h-viva">🎤 VIVA GUIDE</div>
-    <div class="card-body">
-      <div class="viva-item">
-        <div class="viva-q">forEach এ async/await কেন কাজ করে না?</div>
-        <div class="viva-a">forEach প্রতিটি callback এর await-এর জন্য অপেক্ষা করে না — callback async হলেও forEach সেটি ignore করে। ফলে সব async operation একসাথে শুরু হয় এবং forEach return করে। Sequential await দরকার হলে for...of, parallel দরকার হলে Promise.all + map ব্যবহার করতে হবে।</div>
-      </div>
-      <div class="viva-item">
-        <div class="viva-q">async function কি সবসময় Promise return করে?</div>
-        <div class="viva-a">হ্যাঁ, সবসময়। async function থেকে যা-ই return করো না কেন — primitive value, object, undefined — সব কিছু automatically Promise-এ wrap হয়ে যায়।</div>
-      </div>
-      <div class="viva-item">
-        <div class="viva-q">Sequential vs Parallel await — কখন কোনটা?</div>
-        <div class="viva-a"><strong>Sequential:</strong> যখন পরের কাজের জন্য আগের result দরকার (user ID দিয়ে posts আনা)। <strong>Parallel:</strong> যখন কাজগুলো independent (users এবং products একই সাথে আনা)। Parallel সবসময় দ্রুত — Promise.all ব্যবহার করো।</div>
-      </div>
-      <div class="viva-item">
-        <div class="viva-q">Top-Level await কি?</div>
-        <div class="viva-a">ES2022-এ আসা feature — ES Module (.mjs) এর top level-এ async function ছাড়াই await লেখা যায়। Browser এবং Node.js 14.8+ এ supported। এটি module loading-এর জন্য খুব useful।</div>
-      </div>
-    </div>
-  </div>
+        <div class="card">
+          <div class="card-header h-viva">🎤 VIVA GUIDE</div>
+          <div class="card-body">
+            <div class="viva-item">
+              <div class="viva-q">forEach এ async/await কেন কাজ করে না?</div>
+              <div class="viva-a">
+                forEach প্রতিটি callback এর await-এর জন্য অপেক্ষা করে না —
+                callback async হলেও forEach সেটি ignore করে। ফলে সব async
+                operation একসাথে শুরু হয় এবং forEach return করে। Sequential
+                await দরকার হলে for...of, parallel দরকার হলে Promise.all + map
+                ব্যবহার করতে হবে।
+              </div>
+            </div>
+            <div class="viva-item">
+              <div class="viva-q">
+                async function কি সবসময় Promise return করে?
+              </div>
+              <div class="viva-a">
+                হ্যাঁ, সবসময়। async function থেকে যা-ই return করো না কেন —
+                primitive value, object, undefined — সব কিছু automatically
+                Promise-এ wrap হয়ে যায়।
+              </div>
+            </div>
+            <div class="viva-item">
+              <div class="viva-q">
+                Sequential vs Parallel await — কখন কোনটা?
+              </div>
+              <div class="viva-a">
+                <strong>Sequential:</strong> যখন পরের কাজের জন্য আগের result
+                দরকার (user ID দিয়ে posts আনা)। <strong>Parallel:</strong> যখন
+                কাজগুলো independent (users এবং products একই সাথে আনা)। Parallel
+                সবসময় দ্রুত — Promise.all ব্যবহার করো।
+              </div>
+            </div>
+            <div class="viva-item">
+              <div class="viva-q">Top-Level await কি?</div>
+              <div class="viva-a">
+                ES2022-এ আসা feature — ES Module (.mjs) এর top level-এ async
+                function ছাড়াই await লেখা যায়। Browser এবং Node.js 14.8+ এ
+                supported। এটি module loading-এর জন্য খুব useful।
+              </div>
+            </div>
+          </div>
+        </div>
 
-  <div class="card">
-    <div class="card-header h-challenge">💪 CODING CHALLENGES</div>
-    <div class="card-body">
-      <div class="challenge-item">
-        <div class="challenge-hdr">⚡ CHALLENGE 06 — Sequential User Processor</div>
-        <div class="challenge-body">
-          <p>user IDs [1,2,3] এর জন্য একের পর এক (sequential) API call করো এবং প্রতিটির name print করো।</p>
-          <pre class="red"><code><span class="cm">// 🎯 Solution — for...of ব্যবহার</span>
+        <div class="card">
+          <div class="card-header h-challenge">💪 CODING CHALLENGES</div>
+          <div class="card-body">
+            <div class="challenge-item">
+              <div class="challenge-hdr">
+                ⚡ CHALLENGE 06 — Sequential User Processor
+              </div>
+              <div class="challenge-body">
+                <p>
+                  user IDs [1,2,3] এর জন্য একের পর এক (sequential) API call করো
+                  এবং প্রতিটির name print করো।
+                </p>
+                <pre
+                  class="red"
+                ><code><span class="cm">// 🎯 Solution — for...of ব্যবহার</span>
 <span class="kw">async function</span> <span class="fn">processAll</span>(ids) {
   <span class="kw">const</span> BASE <span class="op">=</span> <span class="str">"https://jsonplaceholder.typicode.com/users"</span>;
 
@@ -1059,14 +1484,17 @@
 }
 
 <span class="fn">processAll</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>]);</code></pre>
-        </div>
-      </div>
+              </div>
+            </div>
 
-      <div class="challenge-item">
-        <div class="challenge-hdr">⚡ CHALLENGE 07 — Mini CRUD App</div>
-        <div class="challenge-body">
-          <p>async/await দিয়ে getPost, createPost, deletePost তিনটি function বানাও এবং chain করে ব্যবহার করো।</p>
-          <pre class="red"><code><span class="cm">// 🎯 Solution</span>
+            <div class="challenge-item">
+              <div class="challenge-hdr">⚡ CHALLENGE 07 — Mini CRUD App</div>
+              <div class="challenge-body">
+                <p>
+                  async/await দিয়ে getPost, createPost, deletePost তিনটি
+                  function বানাও এবং chain করে ব্যবহার করো।
+                </p>
+                <pre class="red"><code><span class="cm">// 🎯 Solution</span>
 <span class="kw">const</span> API <span class="op">=</span> <span class="str">"https://jsonplaceholder.typicode.com/posts"</span>;
 
 <span class="kw">async function</span> <span class="fn">getPost</span>(id) {
@@ -1104,43 +1532,101 @@
 }
 
 <span class="fn">crudDemo</span>();</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header h-future">🚀 FUTURE IMPLEMENTATION</div>
+          <div class="card-body">
+            <div class="future-grid">
+              <div class="future-card">
+                <div class="fi">⚛️</div>
+                <div class="ft">React Hooks</div>
+                <div class="fd">
+                  useEffect-এ async function call করে state update করা হয় সব
+                  React app-এ।
+                </div>
+              </div>
+              <div class="future-card">
+                <div class="fi">🟢</div>
+                <div class="ft">Node.js API</div>
+                <div class="fd">
+                  Express route: async (req, res) => { const data = await
+                  db.find()... }
+                </div>
+              </div>
+              <div class="future-card">
+                <div class="fi">🔥</div>
+                <div class="ft">Firebase</div>
+                <div class="fd">
+                  Firestore CRUD সব async/await দিয়ে — await addDoc(), await
+                  getDoc()।
+                </div>
+              </div>
+              <div class="future-card">
+                <div class="fi">🤝</div>
+                <div class="ft">Third-party SDK</div>
+                <div class="fd">
+                  Stripe payment, Twilio SMS, SendGrid email — সব async function
+                  call।
+                </div>
+              </div>
+              <div class="future-card">
+                <div class="fi">📦</div>
+                <div class="ft">Next.js</div>
+                <div class="fd">
+                  Server Components-এ top-level await দিয়ে সরাসরি data fetch
+                  করা হয়।
+                </div>
+              </div>
+              <div class="future-card">
+                <div class="fi">🧵</div>
+                <div class="ft">Web Workers</div>
+                <div class="fd">
+                  Heavy computation Web Worker-এ, result async/await দিয়ে main
+                  thread-এ নেওয়া।
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
+      <!-- /t4 -->
 
-  <div class="card">
-    <div class="card-header h-future">🚀 FUTURE IMPLEMENTATION</div>
-    <div class="card-body">
-      <div class="future-grid">
-        <div class="future-card"><div class="fi">⚛️</div><div class="ft">React Hooks</div><div class="fd">useEffect-এ async function call করে state update করা হয় সব React app-এ।</div></div>
-        <div class="future-card"><div class="fi">🟢</div><div class="ft">Node.js API</div><div class="fd">Express route: async (req, res) => { const data = await db.find()... }</div></div>
-        <div class="future-card"><div class="fi">🔥</div><div class="ft">Firebase</div><div class="fd">Firestore CRUD সব async/await দিয়ে — await addDoc(), await getDoc()।</div></div>
-        <div class="future-card"><div class="fi">🤝</div><div class="ft">Third-party SDK</div><div class="fd">Stripe payment, Twilio SMS, SendGrid email — সব async function call।</div></div>
-        <div class="future-card"><div class="fi">📦</div><div class="ft">Next.js</div><div class="fd">Server Components-এ top-level await দিয়ে সরাসরি data fetch করা হয়।</div></div>
-        <div class="future-card"><div class="fi">🧵</div><div class="ft">Web Workers</div><div class="fd">Heavy computation Web Worker-এ, result async/await দিয়ে main thread-এ নেওয়া।</div></div>
+      <!-- FINAL -->
+      <div class="final-card">
+        <div class="final-title">⚡ STAGE 14 — COMPLETE!</div>
+        <p style="color: #64748b; font-size: 14px; margin-top: 8px">
+          এই পর্যায় শেষ করার আগে নিশ্চিত করো:
+        </p>
+        <div class="check-list">
+          <span class="check-item">✅ async/await syntax বুঝি</span>
+          <span class="check-item"
+            >✅ try-catch দিয়ে error handle করতে পারি</span
+          >
+          <span class="check-item"
+            >✅ fetch() দিয়ে real API call করতে পারি</span
+          >
+          <span class="check-item">✅ Sequential vs Parallel জানি</span>
+          <span class="check-item">✅ forEach সমস্যা বুঝি ও সমাধান জানি</span>
+          <span class="check-item">✅ Best practices ফলো করতে পারি</span>
+        </div>
+        <p class="next-hint">
+          পরবর্তী পর্যায়ের জন্য <strong>Next</strong> বাটন ক্লিক করো ➜ পর্যায় ১৫:
+          <strong>ES6+ Features</strong>
+        </p>
+        <nav class="toc">
+          <a href="https://anawarhossain.github.io/Javascript-prcatice/15-ES6-And-Freatures/">Next</a>
+        </nav>
       </div>
     </div>
-  </div>
-</div><!-- /t4 -->
+    <!-- /container -->
 
-<!-- FINAL -->
-<div class="final-card">
-  <div class="final-title">⚡ STAGE 14 — COMPLETE!</div>
-  <p style="color: #64748b; font-size: 14px; margin-top: 8px;">এই পর্যায় শেষ করার আগে নিশ্চিত করো:</p>
-  <div class="check-list">
-    <span class="check-item">✅ async/await syntax বুঝি</span>
-    <span class="check-item">✅ try-catch দিয়ে error handle করতে পারি</span>
-    <span class="check-item">✅ fetch() দিয়ে real API call করতে পারি</span>
-    <span class="check-item">✅ Sequential vs Parallel জানি</span>
-    <span class="check-item">✅ forEach সমস্যা বুঝি ও সমাধান জানি</span>
-    <span class="check-item">✅ Best practices ফলো করতে পারি</span>
-  </div>
-  <p class="next-hint">পরবর্তী পর্যায়ের জন্য <strong>Next</strong> টাইপ করো ➜ পর্যায় ১৫: <strong>ES6+ Features</strong></p>
-</div>
-
-</div><!-- /container -->
-
-<footer>JS BOS MISSION &nbsp;·&nbsp; STAGE 14 &nbsp;·&nbsp; ASYNC / AWAIT MASTERED 🚀</footer>
-</body>
+    <footer>
+      JS BOS MISSION &nbsp;·&nbsp; STAGE 14 &nbsp;·&nbsp; ASYNC / AWAIT MASTERED
+      🚀
+    </footer>
+  </body>
 </html>

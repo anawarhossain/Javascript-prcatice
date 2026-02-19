@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>পর্যায় ১৮ — Local & Session Storage | JS বস মিশন</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;600;700;800&family=Righteous&display=swap');
+
+  :root {
+    --bg:       #0c1117;
+    --surface:  #111820;
+    --card:     #141d26;
+    --border:   #1e2d3d;
+    --acc1:     #00b4d8;   /* localStorage   — cyan       */
+    --acc2:     #f4a261;   /* sessionStorage — amber      */
+    --acc3:     #06d6a0;   /* JSON methods   — mint       */
+    --acc4:     #e040fb;   /* CRUD app       — violet     */
+    --text:     #d9e8f5;
+    --muted:    #4a6580;
+    --code-bg:  #080e14;
+  }
+
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans Bengali', sans-serif;
+    line-height: 1.75;
+  }
+
+  /* ═══ HERO ═══ */
+  .hero {
+    position: relative; overflow: hidden;
+    padding: 78px 40px 58px; text-align: center;
+    background: linear-gradient(180deg, #0c1117 0%, #0a1520 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,180,216,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,180,216,.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+  .hero-glow {
+    position: absolute; width: 700px; height: 400px;
+    background: radial-gradient(ellipse, rgba(0,180,216,.08) 0%, transparent 70%);
+    top: 50%; left: 50%; transform: translate(-50%,-50%);
+    pointer-events: none;
+  }
+  .hero-inner { position: relative; z-index: 1; }
+
+  .stage-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'Azeret Mono', monospace;
+    font-size: 10px; font-weight: 600; letter-spacing: 3px;
+    color: var(--acc1); border: 1px solid rgba(0,180,216,.35);
+    background: rgba(0,180,216,.07);
+    padding: 5px 16px; border-radius: 4px; margin-bottom: 22px;
+  }
+
+  .hero h1 {
+    font-family: 'Righteous', sans-serif;
+    font-size: clamp(44px, 9vw, 92px);
+    color: #fff; line-height: 1;
+    letter-spacing: 1px; margin-bottom: 12px;
+  }
+  .hero h1 .hl { color: var(--acc1); }
+  .hero-sub { color: var(--muted); font-size: 14px; max-width: 520px; margin: 0 auto 26px; }
+
+  .pill-row { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+  .pill {
+    font-family: 'Azeret Mono', monospace; font-size: 10px; font-weight: 600;
+    padding: 5px 14px; border-radius: 20px; border: 1px solid;
+  }
+  .p1 { color:var(--acc1); border-color:rgba(0,180,216,.35);  background:rgba(0,180,216,.08); }
+  .p2 { color:var(--acc2); border-color:rgba(244,162,97,.35); background:rgba(244,162,97,.08); }
+  .p3 { color:var(--acc3); border-color:rgba(6,214,160,.35);  background:rgba(6,214,160,.08); }
+  .p4 { color:var(--acc4); border-color:rgba(224,64,251,.35); background:rgba(224,64,251,.08); }
+
+  /* ═══ NAV ═══ */
+  .toc {
+    display:flex; gap:6px; justify-content:center; flex-wrap:wrap;
+    padding:13px 24px; background:var(--surface);
+    border-bottom:1px solid var(--border);
+    position:sticky; top:0; z-index:100;
+  }
+  .toc a {
+    text-decoration:none;
+    font-family:'Azeret Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px;
+    color:var(--muted); padding:5px 14px;
+    border:1px solid var(--border); border-radius:20px; transition:all .18s;
+  }
+  .toc a:hover { color:var(--acc1); border-color:var(--acc1); background:rgba(0,180,216,.06); }
+
+  /* ═══ LAYOUT ═══ */
+  .wrap { max-width:1080px; margin:0 auto; padding:48px 24px 110px; }
+
+  /* ═══ SECTION HEADER ═══ */
+  .sec { margin-top:72px; }
+  .sec-hd {
+    display:flex; align-items:flex-end; gap:18px;
+    margin-bottom:28px; padding-bottom:15px;
+    border-bottom:1px solid var(--border); position:relative;
+  }
+  .sec-hd::after {
+    content:''; position:absolute; bottom:-1px; left:0; height:2px; width:90px;
+  }
+  .s1 .sec-hd::after { background:var(--acc1); }
+  .s2 .sec-hd::after { background:var(--acc2); }
+  .s3 .sec-hd::after { background:var(--acc3); }
+  .s4 .sec-hd::after { background:var(--acc4); }
+
+  .sec-n {
+    font-family:'Righteous',sans-serif; font-size:70px;
+    line-height:1; opacity:.08; flex-shrink:0;
+  }
+  .s1 .sec-n { color:var(--acc1); }
+  .s2 .sec-n { color:var(--acc2); }
+  .s3 .sec-n { color:var(--acc3); }
+  .s4 .sec-n { color:var(--acc4); }
+
+  .sec-info h2 { font-size:21px; font-weight:800; color:#fff; }
+  .sec-info sub {
+    font-family:'Azeret Mono',monospace; font-size:11px;
+    color:var(--muted); display:block; margin-top:3px;
+  }
+
+  /* ═══ CARD ═══ */
+  .card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:12px; margin-bottom:22px; overflow:hidden;
+  }
+  .card-hd {
+    padding:12px 22px; font-family:'Azeret Mono',monospace;
+    font-size:10px; font-weight:600; letter-spacing:3px;
+    display:flex; align-items:center; gap:10px;
+    border-bottom:1px solid var(--border);
+  }
+  .hc1 { color:var(--acc1); background:rgba(0,180,216,.07);  }
+  .hc2 { color:var(--acc2); background:rgba(244,162,97,.07); }
+  .hc3 { color:var(--acc3); background:rgba(6,214,160,.07);  }
+  .hc4 { color:var(--acc4); background:rgba(224,64,251,.07); }
+  .h-viva { color:var(--acc3); background:rgba(6,214,160,.07);  border-bottom:1px solid var(--border); }
+  .h-chal { color:var(--acc2); background:rgba(244,162,97,.07); border-bottom:1px solid var(--border); }
+  .h-fut  { color:var(--acc1); background:rgba(0,180,216,.07);  border-bottom:1px solid var(--border); }
+
+  .card-body { padding:26px; }
+
+  /* ═══ CODE ═══ */
+  pre {
+    background:var(--code-bg); border-radius:8px;
+    padding:20px 22px; overflow-x:auto; margin:14px 0;
+    border-left:3px solid var(--border);
+  }
+  pre.l1 { border-left-color:var(--acc1); }
+  pre.l2 { border-left-color:var(--acc2); }
+  pre.l3 { border-left-color:var(--acc3); }
+  pre.l4 { border-left-color:var(--acc4); }
+  code {
+    font-family:'Azeret Mono',monospace; font-size:12.5px;
+    line-height:1.95; color:#3a5a75;
+  }
+  .kw  { color:#7ec8e3; }
+  .fn  { color:#79d4c8; }
+  .str { color:#9fd693; }
+  .cm  { color:#243040; font-style:italic; }
+  .num { color:#f4a261; }
+  .op  { color:#5bc0de; }
+  .cl  { color:#ffd47e; }
+  .a1  { color:#00c8f0; font-weight:600; }
+  .a2  { color:#f4b571; font-weight:600; }
+  .a3  { color:#1af0b0; font-weight:600; }
+  .a4  { color:#e870ff; font-weight:600; }
+
+  /* ═══ PROSE ═══ */
+  .prose p { font-size:15px; margin-bottom:14px; color:#7a9ab5; }
+  .prose p:last-child { margin-bottom:0; }
+  .hl1 { color:var(--acc1); font-weight:700; }
+  .hl2 { color:var(--acc2); font-weight:700; }
+  .hl3 { color:var(--acc3); font-weight:700; }
+  .hl4 { color:var(--acc4); font-weight:700; }
+
+  /* ═══ INFO BOX ═══ */
+  .info {
+    border-radius:8px; padding:15px 20px; margin:14px 0;
+    font-size:14px; line-height:1.7; color:#7a9ab5;
+  }
+  .info strong { font-weight:700; }
+  .i1 { background:rgba(0,180,216,.06);  border-left:3px solid var(--acc1); }
+  .i1 strong { color:var(--acc1); }
+  .i2 { background:rgba(244,162,97,.06); border-left:3px solid var(--acc2); }
+  .i2 strong { color:var(--acc2); }
+  .i3 { background:rgba(6,214,160,.06);  border-left:3px solid var(--acc3); }
+  .i3 strong { color:var(--acc3); }
+  .i4 { background:rgba(224,64,251,.06); border-left:3px solid var(--acc4); }
+  .i4 strong { color:var(--acc4); }
+
+  /* ═══ COMPARISON TABLE ═══ */
+  .cmp-table { width:100%; border-collapse:collapse; margin:16px 0; font-size:13px; }
+  .cmp-table th {
+    padding:11px 16px; text-align:left;
+    font-family:'Azeret Mono',monospace; font-size:10px; letter-spacing:1px;
+    border:1px solid var(--border);
+  }
+  .th-ls { background:rgba(0,180,216,.12); color:var(--acc1); }
+  .th-ss { background:rgba(244,162,97,.12); color:var(--acc2); }
+  .th-lbl { background:rgba(255,255,255,.04); color:var(--muted); }
+  .cmp-table td {
+    padding:10px 16px; border:1px solid var(--border);
+    background:var(--code-bg); vertical-align:top; line-height:1.6; color:var(--muted);
+  }
+  .cmp-table td:first-child { font-family:'Azeret Mono',monospace; font-size:12px; color:#5a7a95; }
+  .yes { color:var(--acc3); font-weight:700; }
+  .no  { color:#e05252; font-weight:700; }
+
+  /* ═══ API METHODS GRID ═══ */
+  .api-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:12px; margin:14px 0; }
+  .api-item {
+    background:var(--code-bg); border:1px solid var(--border);
+    border-radius:8px; padding:14px 16px;
+  }
+  .api-name { font-family:'Azeret Mono',monospace; font-size:12px; font-weight:600; margin-bottom:5px; }
+  .api-desc { font-size:12px; color:var(--muted); line-height:1.6; }
+  .an1 { color:var(--acc1); }
+  .an2 { color:var(--acc2); }
+  .an3 { color:var(--acc3); }
+
+  /* ═══ VIVA ═══ */
+  .viva { border:1px solid var(--border); border-radius:8px; margin-bottom:14px; overflow:hidden; }
+  .vq {
+    background:rgba(6,214,160,.06); padding:13px 18px;
+    font-size:14px; font-weight:700; color:var(--acc3);
+    display:flex; gap:10px;
+  }
+  .vq::before { content:'Q'; font-family:'Azeret Mono',monospace; font-size:10px; opacity:.7; flex-shrink:0; padding-top:3px; }
+  .va {
+    padding:14px 18px; font-size:13.5px; color:var(--muted);
+    border-top:1px solid var(--border); background:var(--code-bg); line-height:1.75;
+  }
+  .va strong { color:var(--acc3); }
+
+  /* ═══ CHALLENGE ═══ */
+  .chal { border:1px solid rgba(244,162,97,.2); border-radius:10px; margin-bottom:20px; overflow:hidden; }
+  .chal-hd {
+    background:rgba(244,162,97,.07); padding:11px 18px;
+    font-family:'Azeret Mono',monospace; font-size:10px; font-weight:600;
+    letter-spacing:2px; color:var(--acc2);
+    display:flex; align-items:center; gap:8px;
+  }
+  .chal-body { padding:18px; font-size:14px; color:var(--muted); }
+  .chal-body p { margin-bottom:10px; }
+
+  /* ═══ FUTURE GRID ═══ */
+  .fg { display:grid; grid-template-columns:repeat(auto-fill,minmax(215px,1fr)); gap:13px; margin-top:12px; }
+  .fc {
+    background:rgba(0,180,216,.04); border:1px solid rgba(0,180,216,.15);
+    border-radius:10px; padding:17px; transition:border-color .2s;
+  }
+  .fc:hover { border-color:var(--acc1); }
+  .fi { font-size:24px; margin-bottom:7px; }
+  .ft { font-size:13px; font-weight:800; color:var(--acc1); margin-bottom:5px; }
+  .fd { font-size:12px; color:var(--muted); line-height:1.6; }
+
+  /* ═══ STORAGE VISUAL ═══ */
+  .storage-visual {
+    display:grid; grid-template-columns:1fr 1fr; gap:20px;
+    margin:20px 0;
+  }
+  @media(max-width:580px) { .storage-visual { grid-template-columns:1fr; } }
+  .sv-box {
+    border-radius:10px; padding:20px; border:2px solid;
+  }
+  .sv1 { border-color:rgba(0,180,216,.3); background:rgba(0,180,216,.05); }
+  .sv2 { border-color:rgba(244,162,97,.3); background:rgba(244,162,97,.05); }
+  .sv-title {
+    font-family:'Righteous',sans-serif; font-size:17px;
+    margin-bottom:12px;
+  }
+  .sv1 .sv-title { color:var(--acc1); }
+  .sv2 .sv-title { color:var(--acc2); }
+  .sv-row { display:flex; justify-content:space-between; align-items:center;
+    padding:6px 0; border-bottom:1px solid var(--border); font-size:12px; }
+  .sv-row:last-child { border-bottom:none; }
+  .sv-key { font-family:'Azeret Mono',monospace; color:var(--muted); }
+  .sv-val { color:var(--text); font-weight:600; font-size:12px; }
+
+  /* ═══ DIVIDER ═══ */
+  .div {
+    display:flex; align-items:center; gap:12px;
+    margin:52px 0; color:var(--border);
+    font-family:'Azeret Mono',monospace; font-size:10px; letter-spacing:4px;
+  }
+  .div::before,.div::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  /* ═══ FINAL ═══ */
+  .final {
+    margin-top:72px;
+    background:linear-gradient(135deg, rgba(0,180,216,.07), rgba(224,64,251,.04));
+    border:1px solid rgba(0,180,216,.25);
+    border-radius:16px; padding:42px; text-align:center;
+  }
+  .final-title { font-family:'Righteous',sans-serif; font-size:28px; color:#fff; margin-bottom:8px; }
+  .final-title span { color:var(--acc1); }
+  .cl { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:18px; }
+  .ci {
+    background:rgba(6,214,160,.1); color:var(--acc3);
+    padding:6px 16px; border-radius:20px;
+    font-size:11px; font-weight:700; letter-spacing:1px;
+    font-family:'Azeret Mono',monospace;
+  }
+  .nxt { margin-top:24px; color:var(--muted); font-size:13px; }
+  .nxt strong { color:var(--acc1); font-family:'Azeret Mono',monospace; }
+
+  footer {
+    text-align:center; padding:36px; color:var(--muted);
+    font-size:10px; letter-spacing:4px;
+    border-top:1px solid var(--border);
+    font-family:'Azeret Mono',monospace;
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="stage-badge">⬡ JS BOS MISSION · STAGE 18</div>
+    <h1><span class="hl">LOCAL</span> &amp; SESSION<br>STORAGE</h1>
+    <p class="hero-sub">Browser-এ data সংরক্ষণ করো — server ছাড়াই persistent data management শেখো</p>
+    <div class="pill-row">
+      <span class="pill p1">localStorage</span>
+      <span class="pill p2">sessionStorage</span>
+      <span class="pill p3">JSON.stringify / parse</span>
+      <span class="pill p4">CRUD Application</span>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="toc">
+  <a href="#s1">01 · localStorage</a>
+  <a href="#s2">02 · sessionStorage</a>
+  <a href="#s3">03 · JSON Methods</a>
+  <a href="#s4">04 · CRUD App</a>
+</nav>
+
+<div class="wrap">
+
+<!-- ═══════════════════════════════════
+     01 — localStorage
+═══════════════════════════════════ -->
+<div id="s1" class="sec s1">
+  <div class="sec-hd">
+    <div class="sec-n">01</div>
+    <div class="sec-info">
+      <h2>localStorage</h2>
+      <sub>// Browser বন্ধ করলেও data থাকে — permanent storage</sub>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd hc1">📖 CONCEPT &amp; EXAMPLES</div>
+    <div class="card-body prose">
+
+      <div class="info i1">
+        <strong>localStorage</strong> হলো browser-এর একটি key-value store। Data টেক্সট হিসেবে সংরক্ষিত হয়। Browser বন্ধ করলেও বা computer restart করলেও data থাকে। প্রতিটি domain-এর জন্য আলাদা storage (~5MB)।
+      </div>
+
+      <!-- API METHODS -->
+      <div class="api-grid">
+        <div class="api-item"><div class="api-name an1">localStorage.setItem(key, value)</div><div class="api-desc">Data সংরক্ষণ করো। Value সবসময় string হতে হবে।</div></div>
+        <div class="api-item"><div class="api-name an1">localStorage.getItem(key)</div><div class="api-desc">Data পড়ো। না থাকলে null return করে।</div></div>
+        <div class="api-item"><div class="api-name an1">localStorage.removeItem(key)</div><div class="api-desc">একটি নির্দিষ্ট key মুছে দাও।</div></div>
+        <div class="api-item"><div class="api-name an1">localStorage.clear()</div><div class="api-desc">সব data মুছে দাও।</div></div>
+        <div class="api-item"><div class="api-name an1">localStorage.key(index)</div><div class="api-desc">index দিয়ে key নামটি পড়ো।</div></div>
+        <div class="api-item"><div class="api-name an1">localStorage.length</div><div class="api-desc">কতটি item আছে তা জানো।</div></div>
+      </div>
+
+      <pre class="l1"><code><span class="cm">// ✅ Ex 1: Basic CRUD — setItem, getItem, removeItem, clear</span>
+
+<span class="cm">// CREATE / UPDATE — data সংরক্ষণ</span>
+<span class="a1">localStorage</span>.<span class="fn">setItem</span>(<span class="str">"username"</span>, <span class="str">"Rakib"</span>);
+<span class="a1">localStorage</span>.<span class="fn">setItem</span>(<span class="str">"theme"</span>,    <span class="str">"dark"</span>);
+<span class="a1">localStorage</span>.<span class="fn">setItem</span>(<span class="str">"language"</span>, <span class="str">"bn"</span>);
+
+<span class="cm">// READ — data পড়া</span>
+<span class="kw">const</span> name  <span class="op">=</span> <span class="a1">localStorage</span>.<span class="fn">getItem</span>(<span class="str">"username"</span>);
+<span class="kw">const</span> theme <span class="op">=</span> <span class="a1">localStorage</span>.<span class="fn">getItem</span>(<span class="str">"theme"</span>);
+<span class="kw">const</span> none  <span class="op">=</span> <span class="a1">localStorage</span>.<span class="fn">getItem</span>(<span class="str">"notExist"</span>); <span class="cm">// null</span>
+
+console.<span class="fn">log</span>(name, theme, none); <span class="cm">// "Rakib" "dark" null</span>
+
+<span class="cm">// DELETE — একটি মুছো</span>
+<span class="a1">localStorage</span>.<span class="fn">removeItem</span>(<span class="str">"language"</span>);
+
+<span class="cm">// কতটি আছে</span>
+console.<span class="fn">log</span>(<span class="a1">localStorage</span>.length); <span class="cm">// 2</span>
+
+<span class="cm">// সব মুছো</span>
+<span class="a1">localStorage</span>.<span class="fn">clear</span>();
+console.<span class="fn">log</span>(<span class="a1">localStorage</span>.length); <span class="cm">// 0</span></code></pre>
+
+      <pre class="l1"><code><span class="cm">// ✅ Ex 2: Number ও Boolean — string conversion সমস্যা</span>
+
+<span class="cm">// ⚠️ সমস্যা: সব কিছু string হয়ে যায়!</span>
+<span class="a1">localStorage</span>.<span class="fn">setItem</span>(<span class="str">"count"</span>, <span class="num">42</span>);
+<span class="a1">localStorage</span>.<span class="fn">setItem</span>(<span class="str">"isLoggedIn"</span>, <span class="num">true</span>);
+
+<span class="kw">const</span> count     <span class="op">=</span> <span class="a1">localStorage</span>.<span class="fn">getItem</span>(<span class="str">"count"</span>);
+<span class="kw">const</span> isLoggedIn <span class="op">=</span> <span class="a1">localStorage</span>.<span class="fn">getItem</span>(<span class="str">"isLoggedIn"</span>);
+
+console.<span class="fn">log</span>(<span class="kw">typeof</span> count);     <span class="cm">// "string" ← ⚠️ number নয়!</span>
+console.<span class="fn">log</span>(<span class="kw">typeof</span> isLoggedIn); <span class="cm">// "string" ← ⚠️ boolean নয়!</span>
+console.<span class="fn">log</span>(isLoggedIn <span class="op">===</span> <span class="num">true</span>); <span class="cm">// false ← বড় bug!</span>
+
+<span class="cm">// ✅ সমাধান: Type convert করো</span>
+<span class="kw">const</span> countNum  <span class="op">=</span> <span class="fn">Number</span>(<span class="a1">localStorage</span>.<span class="fn">getItem</span>(<span class="str">"count"</span>));
+<span class="kw">const</span> loggedIn  <span class="op">=</span> <span class="a1">localStorage</span>.<span class="fn">getItem</span>(<span class="str">"isLoggedIn"</span>) <span class="op">===</span> <span class="str">"true"</span>;
+
+console.<span class="fn">log</span>(countNum, <span class="kw">typeof</span> countNum);   <span class="cm">// 42 "number" ✅</span>
+console.<span class="fn">log</span>(loggedIn, <span class="kw">typeof</span> loggedIn);   <span class="cm">// true "boolean" ✅</span></code></pre>
+
+      <pre class="l1"><code><span class="cm">// ✅ Ex 3: সব items loop করা</span>
+<span class="a1">localStorage</span>.<span class="fn">setItem</span>(<span class="str">"name"</span>,  <span class="str">"Rakib"</span>);
+<span class="a1">localStorage</span>.<span class="fn">setItem</span>(<span class="str">"score"</span>, <span class="str">"95"</span>);
+<span class="a1">localStorage</span>.<span class="fn">setItem</span>(<span class="str">"level"</span>, <span class="str">"5"</span>);
+
+console.<span class="fn">log</span>(<span class="str">"📦 localStorage contents:"</span>);
+<span class="kw">for</span> (<span class="kw">let</span> i <span class="op">=</span> <span class="num">0</span>; i <span class="op"><</span> <span class="a1">localStorage</span>.length; i<span class="op">++</span>) {
+  <span class="kw">const</span> key <span class="op">=</span> <span class="a1">localStorage</span>.<span class="fn">key</span>(i);
+  <span class="kw">const</span> val <span class="op">=</span> <span class="a1">localStorage</span>.<span class="fn">getItem</span>(key);
+  console.<span class="fn">log</span>(<span class="str">`  ${key}: ${val}`</span>);
+}
+
+<span class="cm">// Object.entries style</span>
+<span class="kw">const</span> allData <span class="op">=</span> { ...<span class="a1">localStorage</span> };
+console.<span class="fn">log</span>(allData); <span class="cm">// { name:"Rakib", score:"95", level:"5" }</span></code></pre>
+
+      <pre class="l1"><code><span class="cm">// ✅ Ex 4: Storage Event — অন্য tab-এ change detect করা</span>
+window.<span class="fn">addEventListener</span>(<span class="str">"storage"</span>, (event) <span class="op">=></span> {
+  console.<span class="fn">log</span>(<span class="str">"🔔 Storage পরিবর্তন হয়েছে!"</span>);
+  console.<span class="fn">log</span>(<span class="str">"  Key:"</span>,      event.key);
+  console.<span class="fn">log</span>(<span class="str">"  Old Value:"</span>, event.oldValue);
+  console.<span class="fn">log</span>(<span class="str">"  New Value:"</span>, event.newValue);
+  console.<span class="fn">log</span>(<span class="str">"  URL:"</span>,       event.url);
+});
+<span class="cm">// ⚠️ Note: একই tab-এ change হলে fire হয় না — শুধু অন্য tab-এ</span></code></pre>
+    </div>
+  </div>
+
+  <!-- VIVA -->
+  <div class="card">
+    <div class="card-hd h-viva">🎤 VIVA GUIDE</div>
+    <div class="card-body">
+      <div class="viva">
+        <div class="vq">localStorage-এ কত data রাখা যায়?</div>
+        <div class="va">বেশিরভাগ browser-এ প্রতি domain-এর জন্য <strong>5-10MB</strong>। Limit exceed করলে QuotaExceededError throw হয়। তাই বড় data রাখতে IndexedDB বা server use করো।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">localStorage কি secure?</div>
+        <div class="va">না — localStorage JavaScript দিয়ে সরাসরি access করা যায়। <strong>XSS attack</strong>-এ attacker সব data পড়তে পারে। তাই sensitive data (password, token) localStorage-এ কখনো রাখো না। JWT token HttpOnly cookie-তে রাখাই safe।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">localStorage কি synchronous?</div>
+        <div class="va">হ্যাঁ — সম্পূর্ণ synchronous। Read/write blocking operation। তাই main thread slow হতে পারে। Large data বা frequent access-এ IndexedDB (async) ব্যবহার করা উচিত।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">localStorage কোথায় দেখা যায়?</div>
+        <div class="va">Browser DevTools → Application → Storage → Local Storage। সেখানে key-value সব দেখা ও manually edit করা যায়।</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHALLENGE -->
+  <div class="card">
+    <div class="card-hd h-chal">💪 CODING CHALLENGES</div>
+    <div class="card-body">
+      <div class="chal">
+        <div class="chal-hd">⚡ CHALLENGE 01 — Visit Counter</div>
+        <div class="chal-body">
+          <p>localStorage দিয়ে একটি visit counter বানাও। প্রতিবার page load হলে counter বাড়বে। Browser বন্ধ করলেও count থাকবে।</p>
+          <pre class="l1"><code><span class="cm">// 🎯 Solution</span>
+<span class="kw">function</span> <span class="fn">trackVisit</span>() {
+  <span class="kw">const</span> key     <span class="op">=</span> <span class="str">"visitCount"</span>;
+  <span class="kw">const</span> current <span class="op">=</span> <span class="fn">Number</span>(<span class="a1">localStorage</span>.<span class="fn">getItem</span>(key)) <span class="op">||</span> <span class="num">0</span>;
+  <span class="kw">const</span> updated <span class="op">=</span> current <span class="op">+</span> <span class="num">1</span>;
+
+  <span class="a1">localStorage</span>.<span class="fn">setItem</span>(key, updated);
+  console.<span class="fn">log</span>(<span class="str">`👋 স্বাগতম! আপনি ${updated} বার এসেছেন`</span>);
+
+  <span class="kw">if</span> (updated <span class="op">===</span> <span class="num">1</span>)   console.<span class="fn">log</span>(<span class="str">"🎉 প্রথমবার এলেন!"</span>);
+  <span class="kw">if</span> (updated <span class="op">===</span> <span class="num">10</span>)  console.<span class="fn">log</span>(<span class="str">"🏆 ১০ বার সম্পন্ন!"</span>);
+  <span class="kw">if</span> (updated <span class="op">===</span> <span class="num">100</span>) console.<span class="fn">log</span>(<span class="str">"🌟 ১০০ বার! আপনি সত্যিকারের বস!"</span>);
+
+  <span class="kw">return</span> updated;
+}
+
+<span class="cm">// Reset function</span>
+<span class="kw">function</span> <span class="fn">resetVisit</span>() {
+  <span class="a1">localStorage</span>.<span class="fn">removeItem</span>(<span class="str">"visitCount"</span>);
+  console.<span class="fn">log</span>(<span class="str">"🔄 Counter reset হয়েছে"</span>);
+}
+
+<span class="fn">trackVisit</span>(); <span class="cm">// প্রতিবার page load-এ call করো</span></code></pre>
+        </div>
+      </div>
+
+      <div class="chal">
+        <div class="chal-hd">⚡ CHALLENGE 02 — Theme Switcher</div>
+        <div class="chal-body">
+          <p>Light/Dark theme toggle করো এবং localStorage-এ save করো যাতে page reload করলেও theme থাকে।</p>
+          <pre class="l1"><code><span class="cm">// 🎯 Solution</span>
+<span class="kw">const</span> ThemeManager <span class="op">=</span> {
+  <span class="fn">get</span>() {
+    <span class="kw">return</span> <span class="a1">localStorage</span>.<span class="fn">getItem</span>(<span class="str">"theme"</span>) <span class="op">??</span> <span class="str">"light"</span>;
+  },
+
+  <span class="fn">set</span>(theme) {
+    <span class="a1">localStorage</span>.<span class="fn">setItem</span>(<span class="str">"theme"</span>, theme);
+    document.body.dataset.theme <span class="op">=</span> theme; <span class="cm">// HTML-এ apply</span>
+    console.<span class="fn">log</span>(<span class="str">`🎨 Theme: ${theme}`</span>);
+  },
+
+  <span class="fn">toggle</span>() {
+    <span class="kw">const</span> current <span class="op">=</span> <span class="kw">this</span>.<span class="fn">get</span>();
+    <span class="kw">this</span>.<span class="fn">set</span>(current <span class="op">===</span> <span class="str">"light"</span> ? <span class="str">"dark"</span> : <span class="str">"light"</span>);
+  },
+
+  <span class="fn">init</span>() {
+    <span class="cm">// Page load-এ saved theme apply</span>
+    <span class="kw">this</span>.<span class="fn">set</span>(<span class="kw">this</span>.<span class="fn">get</span>());
+    console.<span class="fn">log</span>(<span class="str">`✅ Loaded theme: ${this.get()}`</span>);
+  }
+};
+
+ThemeManager.<span class="fn">init</span>();     <span class="cm">// Page load-এ</span>
+ThemeManager.<span class="fn">toggle</span>();   <span class="cm">// Button click-এ</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FUTURE -->
+  <div class="card">
+    <div class="card-hd h-fut">🚀 FUTURE IMPLEMENTATION</div>
+    <div class="card-body">
+      <div class="fg">
+        <div class="fc"><div class="fi">🎨</div><div class="ft">Theme Preference</div><div class="fd">Dark/Light mode user preference — page reload-এও থাকে।</div></div>
+        <div class="fc"><div class="fi">🛒</div><div class="ft">Shopping Cart</div><div class="fd">Cart items localStorage-এ — browser বন্ধ করলেও cart থাকে।</div></div>
+        <div class="fc"><div class="fi">📝</div><div class="ft">Draft Saving</div><div class="fd">Form data auto-save — accident-এ page reload হলেও হারাবে না।</div></div>
+        <div class="fc"><div class="fi">⚙️</div><div class="ft">User Preferences</div><div class="fd">Language, font size, layout preference সব localStorage-এ।</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="div">STORE · RETRIEVE · PERSIST</div>
+
+<!-- ═══════════════════════════════════
+     02 — sessionStorage
+═══════════════════════════════════ -->
+<div id="s2" class="sec s2">
+  <div class="sec-hd">
+    <div class="sec-n">02</div>
+    <div class="sec-info">
+      <h2>sessionStorage</h2>
+      <sub>// Tab বন্ধ হলে data মুছে যায় — temporary storage</sub>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd hc2">📖 CONCEPT &amp; EXAMPLES</div>
+    <div class="card-body prose">
+
+      <!-- COMPARISON TABLE -->
+      <table class="cmp-table">
+        <tr>
+          <th class="th-lbl">বৈশিষ্ট্য</th>
+          <th class="th-ls">💾 localStorage</th>
+          <th class="th-ss">⏱️ sessionStorage</th>
+        </tr>
+        <tr>
+          <td>Data থাকে</td>
+          <td><span class="yes">চিরস্থায়ী</span> (manually delete না করলে)</td>
+          <td><span class="no">Tab বন্ধ হলে মুছে যায়</span></td>
+        </tr>
+        <tr>
+          <td>অন্য Tab-এ access</td>
+          <td><span class="yes">হ্যাঁ</span> (same origin)</td>
+          <td><span class="no">না</span> (শুধু same tab)</td>
+        </tr>
+        <tr>
+          <td>Browser Restart</td>
+          <td><span class="yes">Data থাকে</span></td>
+          <td><span class="no">Data মুছে যায়</span></td>
+        </tr>
+        <tr>
+          <td>Storage Limit</td>
+          <td>~5-10MB</td>
+          <td>~5-10MB</td>
+        </tr>
+        <tr>
+          <td>API</td>
+          <td colspan="2" style="text-align:center;color:var(--acc3);">একই API — শুধু নাম আলাদা</td>
+        </tr>
+        <tr>
+          <td>ব্যবহার</td>
+          <td>Theme, preferences, cart</td>
+          <td>Form data, one-time token, wizard steps</td>
+        </tr>
+      </table>
+
+      <pre class="l2"><code><span class="cm">// ✅ Ex 1: sessionStorage — localStorage-এর মতোই API</span>
+
+<span class="a2">sessionStorage</span>.<span class="fn">setItem</span>(<span class="str">"sessionId"</span>, <span class="str">"xyz-123-abc"</span>);
+<span class="a2">sessionStorage</span>.<span class="fn">setItem</span>(<span class="str">"currentPage"</span>, <span class="str">"checkout"</span>);
+
+<span class="kw">const</span> sid  <span class="op">=</span> <span class="a2">sessionStorage</span>.<span class="fn">getItem</span>(<span class="str">"sessionId"</span>);
+<span class="kw">const</span> page <span class="op">=</span> <span class="a2">sessionStorage</span>.<span class="fn">getItem</span>(<span class="str">"currentPage"</span>);
+
+console.<span class="fn">log</span>(sid, page); <span class="cm">// "xyz-123-abc" "checkout"</span>
+
+<span class="cm">// Tab বন্ধ হলে সব automatically মুছে যাবে!</span>
+<span class="cm">// Browser refresh-এ থাকে, কিন্তু tab close-এ যায়</span></code></pre>
+
+      <pre class="l2"><code><span class="cm">// ✅ Ex 2: Multi-step Form — sessionStorage perfect use case</span>
+<span class="kw">const</span> FormWizard <span class="op">=</span> {
+  <span class="cm">// Step data save করা</span>
+  <span class="fn">saveStep</span>(step, data) {
+    <span class="a2">sessionStorage</span>.<span class="fn">setItem</span>(<span class="str">`step_${step}`</span>, <span class="fn">JSON</span>.<span class="fn">stringify</span>(data));
+    console.<span class="fn">log</span>(<span class="str">`💾 Step ${step} saved`</span>);
+  },
+
+  <span class="cm">// Step data পড়া</span>
+  <span class="fn">getStep</span>(step) {
+    <span class="kw">const</span> data <span class="op">=</span> <span class="a2">sessionStorage</span>.<span class="fn">getItem</span>(<span class="str">`step_${step}`</span>);
+    <span class="kw">return</span> data ? <span class="fn">JSON</span>.<span class="fn">parse</span>(data) : <span class="kw">null</span>;
+  },
+
+  <span class="cm">// সব step collect করা</span>
+  <span class="fn">collectAll</span>() {
+    <span class="kw">return</span> {
+      personal: <span class="kw">this</span>.<span class="fn">getStep</span>(<span class="num">1</span>),
+      address:  <span class="kw">this</span>.<span class="fn">getStep</span>(<span class="num">2</span>),
+      payment:  <span class="kw">this</span>.<span class="fn">getStep</span>(<span class="num">3</span>),
+    };
+  },
+
+  <span class="cm">// Submit হলে সব clear</span>
+  <span class="fn">clear</span>() {
+    [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>].<span class="fn">forEach</span>(s <span class="op">=></span> <span class="a2">sessionStorage</span>.<span class="fn">removeItem</span>(<span class="str">`step_${s}`</span>));
+    console.<span class="fn">log</span>(<span class="str">"🗑️ Form data cleared"</span>);
+  }
+};
+
+<span class="cm">// Step 1: Personal info</span>
+FormWizard.<span class="fn">saveStep</span>(<span class="num">1</span>, { name: <span class="str">"Rakib"</span>, email: <span class="str">"r@test.com"</span> });
+
+<span class="cm">// Step 2: Address</span>
+FormWizard.<span class="fn">saveStep</span>(<span class="num">2</span>, { city: <span class="str">"Dhaka"</span>, zip: <span class="str">"1000"</span> });
+
+<span class="cm">// Step 3: Payment</span>
+FormWizard.<span class="fn">saveStep</span>(<span class="num">3</span>, { method: <span class="str">"bkash"</span>, number: <span class="str">"01700000000"</span> });
+
+<span class="cm">// Submit-এ সব collect করো</span>
+<span class="kw">const</span> formData <span class="op">=</span> FormWizard.<span class="fn">collectAll</span>();
+console.<span class="fn">log</span>(<span class="str">"📋 Full Form Data:"</span>, formData);
+FormWizard.<span class="fn">clear</span>();</code></pre>
+
+      <pre class="l2"><code><span class="cm">// ✅ Ex 3: Scroll Position Save — tab-specific behavior</span>
+<span class="cm">// Scroll position save করো (tab-specific, reload-এ restore)</span>
+
+window.<span class="fn">addEventListener</span>(<span class="str">"scroll"</span>, () <span class="op">=></span> {
+  <span class="a2">sessionStorage</span>.<span class="fn">setItem</span>(<span class="str">"scrollY"</span>, window.scrollY);
+});
+
+<span class="cm">// Page load-এ restore করো</span>
+<span class="kw">const</span> savedScroll <span class="op">=</span> <span class="a2">sessionStorage</span>.<span class="fn">getItem</span>(<span class="str">"scrollY"</span>);
+<span class="kw">if</span> (savedScroll) {
+  window.<span class="fn">scrollTo</span>(<span class="num">0</span>, <span class="fn">Number</span>(savedScroll));
+  console.<span class="fn">log</span>(<span class="str">`📍 Scroll restored: ${savedScroll}px`</span>);
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd h-viva">🎤 VIVA GUIDE</div>
+    <div class="card-body">
+      <div class="viva">
+        <div class="vq">sessionStorage কখন মুছে যায়?</div>
+        <div class="va">শুধুমাত্র যখন browser tab বন্ধ হয়। <strong>Page refresh করলে data থাকে।</strong> নতুন tab-এ same URL খুললে sessionStorage আলাদা — ওই tab-এর data পাবে না। এটিই localStorage থেকে সবচেয়ে বড় পার্থক্য।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">কোনটা কখন ব্যবহার করবো?</div>
+        <div class="va"><strong>localStorage:</strong> User preferences (theme, language), shopping cart, auth token (non-sensitive), bookmarks। <strong>sessionStorage:</strong> One-time form data, wizard steps, temporary filter state, one-time OTP context।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">Incognito mode-এ কি কাজ করে?</div>
+        <div class="va">হ্যাঁ — উভয়ই কাজ করে। কিন্তু Incognito window বন্ধ করলে <strong>localStorage-ও মুছে যায়</strong> — যেন sessionStorage-এর মতো আচরণ করে। এটি browser-এর privacy feature।</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd h-chal">💪 CODING CHALLENGES</div>
+    <div class="card-body">
+      <div class="chal">
+        <div class="chal-hd">⚡ CHALLENGE 03 — Tab-specific Quiz State</div>
+        <div class="chal-body">
+          <p>sessionStorage দিয়ে quiz-এর current question, score, এবং answers save করো। Tab বন্ধ হলে quiz reset হবে।</p>
+          <pre class="l2"><code><span class="cm">// 🎯 Solution</span>
+<span class="kw">const</span> QuizSession <span class="op">=</span> {
+  <span class="fn">start</span>() {
+    <span class="a2">sessionStorage</span>.<span class="fn">setItem</span>(<span class="str">"quiz_question"</span>, <span class="str">"0"</span>);
+    <span class="a2">sessionStorage</span>.<span class="fn">setItem</span>(<span class="str">"quiz_score"</span>,    <span class="str">"0"</span>);
+    <span class="a2">sessionStorage</span>.<span class="fn">setItem</span>(<span class="str">"quiz_answers"</span>,  <span class="fn">JSON</span>.<span class="fn">stringify</span>([]));
+    console.<span class="fn">log</span>(<span class="str">"🎮 Quiz শুরু হলো!"</span>);
+  },
+
+  <span class="fn">answer</span>(questionIdx, answer, isCorrect) {
+    <span class="kw">const</span> score   <span class="op">=</span> <span class="fn">Number</span>(<span class="a2">sessionStorage</span>.<span class="fn">getItem</span>(<span class="str">"quiz_score"</span>)) <span class="op">+</span> (isCorrect ? <span class="num">10</span> : <span class="num">0</span>);
+    <span class="kw">const</span> answers <span class="op">=</span> <span class="fn">JSON</span>.<span class="fn">parse</span>(<span class="a2">sessionStorage</span>.<span class="fn">getItem</span>(<span class="str">"quiz_answers"</span>));
+
+    answers.<span class="fn">push</span>({ questionIdx, answer, isCorrect });
+    <span class="a2">sessionStorage</span>.<span class="fn">setItem</span>(<span class="str">"quiz_score"</span>,    <span class="fn">String</span>(score));
+    <span class="a2">sessionStorage</span>.<span class="fn">setItem</span>(<span class="str">"quiz_question"</span>, <span class="fn">String</span>(questionIdx <span class="op">+</span> <span class="num">1</span>));
+    <span class="a2">sessionStorage</span>.<span class="fn">setItem</span>(<span class="str">"quiz_answers"</span>,  <span class="fn">JSON</span>.<span class="fn">stringify</span>(answers));
+
+    <span class="kw">const</span> icon <span class="op">=</span> isCorrect ? <span class="str">"✅"</span> : <span class="str">"❌"</span>;
+    console.<span class="fn">log</span>(<span class="str">`${icon} Q${questionIdx + 1}: ${answer} | Score: ${score}`</span>);
+  },
+
+  <span class="fn">getState</span>() {
+    <span class="kw">return</span> {
+      question: <span class="fn">Number</span>(<span class="a2">sessionStorage</span>.<span class="fn">getItem</span>(<span class="str">"quiz_question"</span>)),
+      score:    <span class="fn">Number</span>(<span class="a2">sessionStorage</span>.<span class="fn">getItem</span>(<span class="str">"quiz_score"</span>)),
+      answers:  <span class="fn">JSON</span>.<span class="fn">parse</span>(<span class="a2">sessionStorage</span>.<span class="fn">getItem</span>(<span class="str">"quiz_answers"</span>) <span class="op">||</span> <span class="str">"[]"</span>),
+    };
+  }
+};
+
+QuizSession.<span class="fn">start</span>();
+QuizSession.<span class="fn">answer</span>(<span class="num">0</span>, <span class="str">"JavaScript"</span>,  <span class="num">true</span>);
+QuizSession.<span class="fn">answer</span>(<span class="num">1</span>, <span class="str">"Python"</span>,      <span class="num">false</span>);
+QuizSession.<span class="fn">answer</span>(<span class="num">2</span>, <span class="str">"async/await"</span>, <span class="num">true</span>);
+
+console.<span class="fn">log</span>(<span class="str">"📊 Quiz State:"</span>, QuizSession.<span class="fn">getState</span>());</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd h-fut">🚀 FUTURE IMPLEMENTATION</div>
+    <div class="card-body">
+      <div class="fg">
+        <div class="fc"><div class="fi">📋</div><div class="ft">Multi-step Form</div><div class="fd">Checkout wizard, registration form — tab বন্ধে auto-reset স্বাভাবিক।</div></div>
+        <div class="fc"><div class="fi">🔑</div><div class="ft">One-time Context</div><div class="fd">Password reset token context, OTP verification state।</div></div>
+        <div class="fc"><div class="fi">🔍</div><div class="ft">Filter State</div><div class="fd">Search filter, sort preference — session-specific, new tab-এ fresh start।</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="div">STORE · RETRIEVE · PERSIST</div>
+
+<!-- ═══════════════════════════════════
+     03 — JSON.stringify & JSON.parse
+═══════════════════════════════════ -->
+<div id="s3" class="sec s3">
+  <div class="sec-hd">
+    <div class="sec-n">03</div>
+    <div class="sec-info">
+      <h2>JSON.stringify &amp; JSON.parse</h2>
+      <sub>// Object/Array storage-এ রাখার একমাত্র পথ</sub>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd hc3">📖 CONCEPT &amp; EXAMPLES</div>
+    <div class="card-body prose">
+
+      <div class="info i3">
+        localStorage শুধু <strong>string</strong> রাখতে পারে। Object বা Array সরাসরি রাখলে <code>"[object Object]"</code> হয়ে যায়! তাই <strong>JSON.stringify()</strong> দিয়ে string-এ convert করে রাখতে হয়, এবং পড়ার সময় <strong>JSON.parse()</strong> দিয়ে আবার object বানাতে হয়।
+      </div>
+
+      <pre class="l3"><code><span class="cm">// ❌ ভুল — Object সরাসরি রাখলে কি হয়?</span>
+<span class="kw">const</span> user <span class="op">=</span> { name: <span class="str">"Rakib"</span>, age: <span class="num">25</span> };
+<span class="a1">localStorage</span>.<span class="fn">setItem</span>(<span class="str">"user"</span>, user);
+console.<span class="fn">log</span>(<span class="a1">localStorage</span>.<span class="fn">getItem</span>(<span class="str">"user"</span>)); <span class="cm">// "[object Object]" ← ভুল!</span>
+
+<span class="cm">// ✅ সঠিক — JSON.stringify দিয়ে রাখো</span>
+<span class="a1">localStorage</span>.<span class="fn">setItem</span>(<span class="str">"user"</span>, <span class="a3">JSON</span>.<span class="fn">stringify</span>(user));
+<span class="kw">const</span> raw     <span class="op">=</span> <span class="a1">localStorage</span>.<span class="fn">getItem</span>(<span class="str">"user"</span>);
+<span class="kw">const</span> parsed  <span class="op">=</span> <span class="a3">JSON</span>.<span class="fn">parse</span>(raw);
+
+console.<span class="fn">log</span>(raw);           <span class="cm">// '{"name":"Rakib","age":25}'</span>
+console.<span class="fn">log</span>(parsed.name);   <span class="cm">// "Rakib" ✅</span>
+console.<span class="fn">log</span>(parsed.age);    <span class="cm">// 25 ✅ (number ঠিক থাকে!)</span></code></pre>
+
+      <pre class="l3"><code><span class="cm">// ✅ Ex 2: JSON.stringify — Advanced Features</span>
+
+<span class="kw">const</span> data <span class="op">=</span> {
+  name:      <span class="str">"Rakib"</span>,
+  scores:    [<span class="num">85</span>, <span class="num">92</span>, <span class="num">78</span>],
+  address:   { city: <span class="str">"Dhaka"</span> },
+  active:    <span class="num">true</span>,
+  fn:        () <span class="op">=></span> <span class="str">"ignored"</span>, <span class="cm">// ⚠️ function skip হবে!</span>
+  undValue:  <span class="num">undefined</span>,       <span class="cm">// ⚠️ undefined skip হবে!</span>
+};
+
+<span class="cm">// Basic stringify</span>
+<span class="kw">const</span> json1 <span class="op">=</span> <span class="a3">JSON</span>.<span class="fn">stringify</span>(data);
+console.<span class="fn">log</span>(json1);
+<span class="cm">// {"name":"Rakib","scores":[85,92,78],"address":{"city":"Dhaka"},"active":true}</span>
+
+<span class="cm">// Pretty print — human readable</span>
+<span class="kw">const</span> json2 <span class="op">=</span> <span class="a3">JSON</span>.<span class="fn">stringify</span>(data, <span class="kw">null</span>, <span class="num">2</span>); <span class="cm">// 2 space indent</span>
+console.<span class="fn">log</span>(json2);
+
+<span class="cm">// Replacer — specific fields only রাখো</span>
+<span class="kw">const</span> json3 <span class="op">=</span> <span class="a3">JSON</span>.<span class="fn">stringify</span>(data, [<span class="str">"name"</span>, <span class="str">"active"</span>]);
+console.<span class="fn">log</span>(json3); <span class="cm">// {"name":"Rakib","active":true}</span></code></pre>
+
+      <pre class="l3"><code><span class="cm">// ✅ Ex 3: Safe parse — error handling সহ</span>
+<span class="kw">function</span> <span class="fn">safeGet</span>(key, defaultValue <span class="op">=</span> <span class="kw">null</span>) {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> raw <span class="op">=</span> <span class="a1">localStorage</span>.<span class="fn">getItem</span>(key);
+    <span class="kw">if</span> (raw <span class="op">===</span> <span class="kw">null</span>) <span class="kw">return</span> defaultValue;
+    <span class="kw">return</span> <span class="a3">JSON</span>.<span class="fn">parse</span>(raw);
+  } <span class="kw">catch</span> (err) {
+    console.<span class="fn">warn</span>(<span class="str">`⚠️ Parse error for key "${key}":`, err.message);
+    <span class="kw">return</span> defaultValue;
+  }
+}
+
+<span class="kw">function</span> <span class="fn">safeSet</span>(key, value) {
+  <span class="kw">try</span> {
+    <span class="a1">localStorage</span>.<span class="fn">setItem</span>(key, <span class="a3">JSON</span>.<span class="fn">stringify</span>(value));
+    <span class="kw">return</span> <span class="num">true</span>;
+  } <span class="kw">catch</span> (err) {
+    console.<span class="fn">error</span>(<span class="str">`❌ Storage error: ${err.message}`</span>);
+    <span class="kw">return</span> <span class="num">false</span>;
+  }
+}
+
+<span class="cm">// ব্যবহার</span>
+<span class="fn">safeSet</span>(<span class="str">"profile"</span>, { name: <span class="str">"Rakib"</span>, scores: [<span class="num">85</span>, <span class="num">92</span>] });
+<span class="kw">const</span> profile <span class="op">=</span> <span class="fn">safeGet</span>(<span class="str">"profile"</span>, {});
+console.<span class="fn">log</span>(profile.scores[<span class="num">0</span>]); <span class="cm">// 85</span>
+
+<span class="kw">const</span> missing <span class="op">=</span> <span class="fn">safeGet</span>(<span class="str">"noKey"</span>, []);
+console.<span class="fn">log</span>(missing); <span class="cm">// [] (default value)</span></code></pre>
+
+      <pre class="l3"><code><span class="cm">// ✅ Ex 4: Deep Clone using JSON (trick!)</span>
+<span class="kw">const</span> original <span class="op">=</span> { user: { name: <span class="str">"Rakib"</span>, scores: [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>] } };
+
+<span class="cm">// JSON trick দিয়ে deep clone</span>
+<span class="kw">const</span> deepClone <span class="op">=</span> <span class="a3">JSON</span>.<span class="fn">parse</span>(<span class="a3">JSON</span>.<span class="fn">stringify</span>(original));
+
+deepClone.user.name <span class="op">=</span> <span class="str">"Nila"</span>;
+deepClone.user.scores.<span class="fn">push</span>(<span class="num">4</span>);
+
+console.<span class="fn">log</span>(original.user.name);    <span class="cm">// "Rakib" ← অপরিবর্তিত!</span>
+console.<span class="fn">log</span>(original.user.scores);  <span class="cm">// [1,2,3] ← অপরিবর্তিত!</span>
+<span class="cm">// ⚠️ তবে function, Date, undefined clone হয় না</span></code></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd h-viva">🎤 VIVA GUIDE</div>
+    <div class="card-body">
+      <div class="viva">
+        <div class="vq">JSON.stringify কি কি skip করে?</div>
+        <div class="va"><strong>Functions, undefined, Symbol</strong> — এগুলো JSON.stringify করলে output থেকে বাদ পড়ে যায়। Date object string হয়ে যায় (parse করলে string পাবে, Date নয়)। Circular reference থাকলে error throw করে।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">JSON আর JavaScript Object notation কি এক?</div>
+        <div class="va">না — পার্থক্য আছে। JSON-এ সব key <strong>double quote</strong>-এ থাকতে হয়। Trailing comma নেই। Function নেই। undefined নেই। JavaScript object-এ এসব থাকতে পারে।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">localStorage-এ object রাখলে কি হয়?</div>
+        <div class="va">localStorage.setItem("k", {a:1}) করলে value হয় "[object Object]" — toString() automatically call হয়। তাই সবসময় JSON.stringify() দিয়ে convert করে রাখতে হবে।</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd h-chal">💪 CODING CHALLENGES</div>
+    <div class="card-body">
+      <div class="chal">
+        <div class="chal-hd">⚡ CHALLENGE 04 — Settings Manager</div>
+        <div class="chal-body">
+          <p>Complex settings object localStorage-এ রাখো এবং পড়ো। Default settings merge করো।</p>
+          <pre class="l3"><code><span class="cm">// 🎯 Solution</span>
+<span class="kw">const</span> defaultSettings <span class="op">=</span> {
+  theme:       <span class="str">"light"</span>,
+  fontSize:    <span class="num">16</span>,
+  language:    <span class="str">"bn"</span>,
+  notifications: <span class="num">true</span>,
+  autoSave:    <span class="num">true</span>,
+};
+
+<span class="kw">const</span> SettingsManager <span class="op">=</span> {
+  KEY: <span class="str">"app_settings"</span>,
+
+  <span class="fn">load</span>() {
+    <span class="kw">try</span> {
+      <span class="kw">const</span> saved <span class="op">=</span> <span class="a1">localStorage</span>.<span class="fn">getItem</span>(<span class="kw">this</span>.KEY);
+      <span class="kw">const</span> user  <span class="op">=</span> saved ? <span class="a3">JSON</span>.<span class="fn">parse</span>(saved) : {};
+      <span class="kw">return</span> { ...defaultSettings, ...user }; <span class="cm">// merge!</span>
+    } <span class="kw">catch</span> { <span class="kw">return</span> { ...defaultSettings }; }
+  },
+
+  <span class="fn">save</span>(settings) {
+    <span class="a1">localStorage</span>.<span class="fn">setItem</span>(<span class="kw">this</span>.KEY, <span class="a3">JSON</span>.<span class="fn">stringify</span>(settings));
+    console.<span class="fn">log</span>(<span class="str">"✅ Settings saved"</span>);
+  },
+
+  <span class="fn">update</span>(key, value) {
+    <span class="kw">const</span> current <span class="op">=</span> <span class="kw">this</span>.<span class="fn">load</span>();
+    current[key] <span class="op">=</span> value;
+    <span class="kw">this</span>.<span class="fn">save</span>(current);
+    console.<span class="fn">log</span>(<span class="str">`🔧 ${key} → ${value}`</span>);
+    <span class="kw">return</span> current;
+  },
+
+  <span class="fn">reset</span>() {
+    <span class="a1">localStorage</span>.<span class="fn">removeItem</span>(<span class="kw">this</span>.KEY);
+    console.<span class="fn">log</span>(<span class="str">"🔄 Default settings restored"</span>);
+    <span class="kw">return</span> { ...defaultSettings };
+  }
+};
+
+<span class="cm">// ব্যবহার</span>
+<span class="kw">let</span> settings <span class="op">=</span> SettingsManager.<span class="fn">load</span>();
+console.<span class="fn">log</span>(<span class="str">"Current:"</span>, settings);
+
+SettingsManager.<span class="fn">update</span>(<span class="str">"theme"</span>,    <span class="str">"dark"</span>);
+SettingsManager.<span class="fn">update</span>(<span class="str">"fontSize"</span>, <span class="num">18</span>);
+SettingsManager.<span class="fn">update</span>(<span class="str">"language"</span>, <span class="str">"en"</span>);
+
+settings <span class="op">=</span> SettingsManager.<span class="fn">load</span>();
+console.<span class="fn">log</span>(<span class="str">"Updated:"</span>, settings);</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd h-fut">🚀 FUTURE IMPLEMENTATION</div>
+    <div class="card-body">
+      <div class="fg">
+        <div class="fc"><div class="fi">📡</div><div class="ft">API Cache</div><div class="fd">API response JSON.stringify করে cache, parse করে দ্রুত দেখানো।</div></div>
+        <div class="fc"><div class="fi">🔄</div><div class="ft">State Persistence</div><div class="fd">Redux state localStorage-এ JSON করে persist করা।</div></div>
+        <div class="fc"><div class="fi">🧪</div><div class="ft">Mock Database</div><div class="fd">Small app-এ server ছাড়াই JSON + localStorage দিয়ে fake DB।</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="div">STORE · RETRIEVE · PERSIST</div>
+
+<!-- ═══════════════════════════════════
+     04 — Simple CRUD Application
+═══════════════════════════════════ -->
+<div id="s4" class="sec s4">
+  <div class="sec-hd">
+    <div class="sec-n">04</div>
+    <div class="sec-info">
+      <h2>Simple CRUD Application</h2>
+      <sub>// localStorage দিয়ে Create, Read, Update, Delete</sub>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd hc4">📖 CONCEPT &amp; EXAMPLES</div>
+    <div class="card-body prose">
+
+      <div class="info i4">
+        localStorage + JSON = Simple Database। এই পর্যায়ে একটি complete <strong>Note-taking app</strong> বানাবো যেখানে notes add, read, update, delete সব কিছু হবে। Data সবসময় browser-এ persist থাকবে।
+      </div>
+
+      <pre class="l4"><code><span class="cm">// ✅ Complete Notes CRUD System</span>
+<span class="kw">class</span> <span class="cl">NotesDB</span> {
+  <span class="fn">constructor</span>() {
+    <span class="kw">this</span>.KEY <span class="op">=</span> <span class="str">"notes_db"</span>;
+  }
+
+  <span class="cm">// Private: সব notes পড়া</span>
+  <span class="fn">_getAll</span>() {
+    <span class="kw">try</span> {
+      <span class="kw">return</span> <span class="a3">JSON</span>.<span class="fn">parse</span>(<span class="a1">localStorage</span>.<span class="fn">getItem</span>(<span class="kw">this</span>.KEY)) <span class="op">||</span> [];
+    } <span class="kw">catch</span> { <span class="kw">return</span> []; }
+  }
+
+  <span class="cm">// Private: সব notes save করা</span>
+  <span class="fn">_saveAll</span>(notes) {
+    <span class="a1">localStorage</span>.<span class="fn">setItem</span>(<span class="kw">this</span>.KEY, <span class="a3">JSON</span>.<span class="fn">stringify</span>(notes));
+  }
+
+  <span class="cm">// CREATE — নতুন note যোগ করো</span>
+  <span class="fn">create</span>(title, content, tags <span class="op">=</span> []) {
+    <span class="kw">const</span> notes <span class="op">=</span> <span class="kw">this</span>.<span class="fn">_getAll</span>();
+    <span class="kw">const</span> note  <span class="op">=</span> {
+      id:        Date.<span class="fn">now</span>().<span class="fn">toString</span>(),
+      title,
+      content,
+      tags,
+      createdAt: <span class="kw">new</span> <span class="cl">Date</span>().<span class="fn">toLocaleString</span>(<span class="str">"bn-BD"</span>),
+      updatedAt: <span class="kw">null</span>,
+    };
+    notes.<span class="fn">push</span>(note);
+    <span class="kw">this</span>.<span class="fn">_saveAll</span>(notes);
+    console.<span class="fn">log</span>(<span class="str">`✅ Note created: "${title}" [ID: ${note.id}]`</span>);
+    <span class="kw">return</span> note;
+  }
+
+  <span class="cm">// READ ALL — সব notes পড়ো</span>
+  <span class="fn">readAll</span>() {
+    <span class="kw">const</span> notes <span class="op">=</span> <span class="kw">this</span>.<span class="fn">_getAll</span>();
+    console.<span class="fn">log</span>(<span class="str">`\n📋 ${notes.length} টি Note আছে:`</span>);
+    notes.<span class="fn">forEach</span>((n, i) <span class="op">=></span>
+      console.<span class="fn">log</span>(<span class="str">`  ${i+1}. [${n.id.slice(-4)}] ${n.title} — ${n.tags.join(", ") || "কোনো tag নেই"}`</span>)
+    );
+    <span class="kw">return</span> notes;
+  }
+
+  <span class="cm">// READ ONE — নির্দিষ্ট note পড়ো</span>
+  <span class="fn">readOne</span>(id) {
+    <span class="kw">const</span> note <span class="op">=</span> <span class="kw">this</span>.<span class="fn">_getAll</span>().<span class="fn">find</span>(n <span class="op">=></span> n.id <span class="op">===</span> id);
+    <span class="kw">if</span> (<span class="op">!</span>note) { console.<span class="fn">log</span>(<span class="str">"❌ Note পাওয়া যায়নি"</span>); <span class="kw">return</span> <span class="kw">null</span>; }
+    console.<span class="fn">log</span>(<span class="str">`\n📄 "${note.title}"\n   ${note.content}\n   Tags: ${note.tags.join(", ")}`</span>);
+    <span class="kw">return</span> note;
+  }
+
+  <span class="cm">// UPDATE — note পরিবর্তন করো</span>
+  <span class="fn">update</span>(id, updates) {
+    <span class="kw">const</span> notes <span class="op">=</span> <span class="kw">this</span>.<span class="fn">_getAll</span>();
+    <span class="kw">const</span> idx   <span class="op">=</span> notes.<span class="fn">findIndex</span>(n <span class="op">=></span> n.id <span class="op">===</span> id);
+    <span class="kw">if</span> (idx <span class="op">===</span> <span class="op">-</span><span class="num">1</span>) { console.<span class="fn">log</span>(<span class="str">"❌ Note পাওয়া যায়নি"</span>); <span class="kw">return</span> <span class="kw">null</span>; }
+
+    notes[idx] <span class="op">=</span> {
+      ...notes[idx],
+      ...updates,
+      updatedAt: <span class="kw">new</span> <span class="cl">Date</span>().<span class="fn">toLocaleString</span>(<span class="str">"bn-BD"</span>),
+    };
+    <span class="kw">this</span>.<span class="fn">_saveAll</span>(notes);
+    console.<span class="fn">log</span>(<span class="str">`✏️ Note updated: "${notes[idx].title}"`</span>);
+    <span class="kw">return</span> notes[idx];
+  }
+
+  <span class="cm">// DELETE — note মুছো</span>
+  <span class="fn">delete</span>(id) {
+    <span class="kw">const</span> notes  <span class="op">=</span> <span class="kw">this</span>.<span class="fn">_getAll</span>();
+    <span class="kw">const</span> target <span class="op">=</span> notes.<span class="fn">find</span>(n <span class="op">=></span> n.id <span class="op">===</span> id);
+    <span class="kw">if</span> (<span class="op">!</span>target) { console.<span class="fn">log</span>(<span class="str">"❌ Note পাওয়া যায়নি"</span>); <span class="kw">return</span> <span class="num">false</span>; }
+
+    <span class="kw">const</span> filtered <span class="op">=</span> notes.<span class="fn">filter</span>(n <span class="op">=></span> n.id <span class="op">!==</span> id);
+    <span class="kw">this</span>.<span class="fn">_saveAll</span>(filtered);
+    console.<span class="fn">log</span>(<span class="str">`🗑️ Note deleted: "${target.title}"`</span>);
+    <span class="kw">return</span> <span class="num">true</span>;
+  }
+
+  <span class="cm">// SEARCH — tag বা title দিয়ে খোঁজো</span>
+  <span class="fn">search</span>(query) {
+    <span class="kw">const</span> q       <span class="op">=</span> query.<span class="fn">toLowerCase</span>();
+    <span class="kw">const</span> results <span class="op">=</span> <span class="kw">this</span>.<span class="fn">_getAll</span>().<span class="fn">filter</span>(n <span class="op">=></span>
+      n.title.<span class="fn">toLowerCase</span>().<span class="fn">includes</span>(q) <span class="op">||</span>
+      n.content.<span class="fn">toLowerCase</span>().<span class="fn">includes</span>(q) <span class="op">||</span>
+      n.tags.<span class="fn">some</span>(t <span class="op">=></span> t.<span class="fn">includes</span>(q))
+    );
+    console.<span class="fn">log</span>(<span class="str">`🔍 "${query}" এর জন্য ${results.length}টি result`</span>);
+    <span class="kw">return</span> results;
+  }
+
+  <span class="cm">// STATS — statistics দেখো</span>
+  <span class="fn">stats</span>() {
+    <span class="kw">const</span> notes <span class="op">=</span> <span class="kw">this</span>.<span class="fn">_getAll</span>();
+    <span class="kw">const</span> allTags <span class="op">=</span> notes.<span class="fn">flatMap</span>(n <span class="op">=></span> n.tags);
+    <span class="kw">const</span> tagCount <span class="op">=</span> allTags.<span class="fn">reduce</span>((acc, t) <span class="op">=></span> {
+      acc[t] <span class="op">=</span> (acc[t] <span class="op">||</span> <span class="num">0</span>) <span class="op">+</span> <span class="num">1</span>; <span class="kw">return</span> acc;
+    }, {});
+    console.<span class="fn">log</span>(<span class="str">`\n📊 Stats: ${notes.length}টি note, Tags:`, tagCount);
+    <span class="kw">return</span> { total: notes.length, tagCount };
+  }
+}</code></pre>
+
+      <pre class="l4"><code><span class="cm">// ✅ ব্যবহার — পুরো CRUD flow</span>
+<span class="kw">const</span> db <span class="op">=</span> <span class="kw">new</span> <span class="cl">NotesDB</span>();
+
+<span class="cm">// CREATE</span>
+<span class="kw">const</span> n1 <span class="op">=</span> db.<span class="fn">create</span>(<span class="str">"JavaScript Closures"</span>, <span class="str">"Closure মানে function তার scope মনে রাখে"</span>, [<span class="str">"js"</span>, <span class="str">"advanced"</span>]);
+<span class="kw">const</span> n2 <span class="op">=</span> db.<span class="fn">create</span>(<span class="str">"Async/Await Tips"</span>,    <span class="str">"forEach-এ await কাজ করে না"</span>,                [<span class="str">"js"</span>, <span class="str">"async"</span>]);
+<span class="kw">const</span> n3 <span class="op">=</span> db.<span class="fn">create</span>(<span class="str">"OOP Basics"</span>,           <span class="str">"Class হলো object তৈরির blueprint"</span>,          [<span class="str">"js"</span>, <span class="str">"oop"</span>]);
+
+<span class="cm">// READ ALL</span>
+db.<span class="fn">readAll</span>();
+
+<span class="cm">// READ ONE</span>
+db.<span class="fn">readOne</span>(n1.id);
+
+<span class="cm">// UPDATE</span>
+db.<span class="fn">update</span>(n2.id, {
+  content: <span class="str">"forEach-এ await কাজ করে না — for...of ব্যবহার করো"</span>,
+  tags:    [<span class="str">"js"</span>, <span class="str">"async"</span>, <span class="str">"bestpractice"</span>]
+});
+
+<span class="cm">// SEARCH</span>
+db.<span class="fn">search</span>(<span class="str">"async"</span>);
+
+<span class="cm">// DELETE</span>
+db.<span class="fn">delete</span>(n3.id);
+
+<span class="cm">// STATS</span>
+db.<span class="fn">stats</span>();
+
+<span class="cm">// Final list</span>
+db.<span class="fn">readAll</span>();</code></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd h-viva">🎤 VIVA GUIDE</div>
+    <div class="card-body">
+      <div class="viva">
+        <div class="vq">localStorage দিয়ে কি production database replace করা যায়?</div>
+        <div class="va">না — localStorage শুধু সেই browser-এ সেই user-এর জন্য। অন্য device বা browser-এ নেই। No backup, no sync, 5MB limit, no query language। Production-এ server database ব্যবহার করো। তবে small PWA বা offline-first app-এ useful।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">localStorage QuotaExceededError হলে কি করবো?</div>
+        <div class="va">try-catch দিয়ে ধরো। পুরনো বা কম গুরুত্বপূর্ণ data মুছে দাও। LRU (Least Recently Used) cache strategy implement করো — সবচেয়ে কম ব্যবহৃত data আগে মুছো।</div>
+      </div>
+      <div class="viva">
+        <div class="vq">CRUD operation-এ কোন data structure ব্যবহার করা ভালো?</div>
+        <div class="va">Array of objects — প্রতিটি object-এ unique id রাখো। Update ও delete-এ findIndex() দিয়ে খুঁজো। আরও দ্রুত lookup দরকার হলে object-as-map (id → item) ব্যবহার করো।</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd h-chal">💪 CODING CHALLENGES</div>
+    <div class="card-body">
+      <div class="chal">
+        <div class="chal-hd">⚡ CHALLENGE 05 — Bookmark Manager</div>
+        <div class="chal-body">
+          <p>localStorage দিয়ে একটি Bookmark Manager বানাও। URL, title, category সহ bookmarks add, list, delete করো।</p>
+          <pre class="l4"><code><span class="cm">// 🎯 Solution</span>
+<span class="kw">const</span> BookmarkManager <span class="op">=</span> {
+  KEY: <span class="str">"bookmarks"</span>,
+
+  <span class="fn">_load</span>() {
+    <span class="kw">return</span> <span class="a3">JSON</span>.<span class="fn">parse</span>(<span class="a1">localStorage</span>.<span class="fn">getItem</span>(<span class="kw">this</span>.KEY) <span class="op">||</span> <span class="str">"[]"</span>);
+  },
+  <span class="fn">_save</span>(data) {
+    <span class="a1">localStorage</span>.<span class="fn">setItem</span>(<span class="kw">this</span>.KEY, <span class="a3">JSON</span>.<span class="fn">stringify</span>(data));
+  },
+
+  <span class="fn">add</span>(url, title, category <span class="op">=</span> <span class="str">"General"</span>) {
+    <span class="kw">const</span> bm <span class="op">=</span> <span class="kw">this</span>.<span class="fn">_load</span>();
+    <span class="kw">if</span> (bm.<span class="fn">some</span>(b <span class="op">=></span> b.url <span class="op">===</span> url)) {
+      console.<span class="fn">log</span>(<span class="str">"⚠️ এই URL আগেই আছে!"</span>); <span class="kw">return</span>;
+    }
+    bm.<span class="fn">push</span>({ id: Date.<span class="fn">now</span>(), url, title, category, savedAt: <span class="kw">new</span> <span class="cl">Date</span>().<span class="fn">toLocaleDateString</span>() });
+    <span class="kw">this</span>.<span class="fn">_save</span>(bm);
+    console.<span class="fn">log</span>(<span class="str">`🔖 Saved: "${title}"`</span>);
+  },
+
+  <span class="fn">list</span>(category <span class="op">=</span> <span class="kw">null</span>) {
+    <span class="kw">let</span> bm <span class="op">=</span> <span class="kw">this</span>.<span class="fn">_load</span>();
+    <span class="kw">if</span> (category) bm <span class="op">=</span> bm.<span class="fn">filter</span>(b <span class="op">=></span> b.category <span class="op">===</span> category);
+    <span class="kw">const</span> label <span class="op">=</span> category ? <span class="str">`"${category}"`</span> : <span class="str">"সব"</span>;
+    console.<span class="fn">log</span>(<span class="str">`\n📚 ${label} Bookmarks (${bm.length}টি):`</span>);
+    bm.<span class="fn">forEach</span>(b <span class="op">=></span> console.<span class="fn">log</span>(<span class="str">`  [${b.category}] ${b.title}\n    🔗 ${b.url}`</span>));
+  },
+
+  <span class="fn">delete</span>(id) {
+    <span class="kw">const</span> bm  <span class="op">=</span> <span class="kw">this</span>.<span class="fn">_load</span>();
+    <span class="kw">const</span> upd <span class="op">=</span> bm.<span class="fn">filter</span>(b <span class="op">=></span> b.id <span class="op">!==</span> id);
+    <span class="kw">if</span> (upd.length <span class="op">===</span> bm.length) { console.<span class="fn">log</span>(<span class="str">"❌ Bookmark পাওয়া যায়নি"</span>); <span class="kw">return</span>; }
+    <span class="kw">this</span>.<span class="fn">_save</span>(upd);
+    console.<span class="fn">log</span>(<span class="str">"🗑️ Bookmark মুছে গেছে"</span>);
+  }
+};
+
+<span class="cm">// ব্যবহার</span>
+BookmarkManager.<span class="fn">add</span>(<span class="str">"https://mdn.com"</span>,    <span class="str">"MDN Web Docs"</span>,     <span class="str">"Reference"</span>);
+BookmarkManager.<span class="fn">add</span>(<span class="str">"https://js.info"</span>,    <span class="str">"JavaScript.info"</span>,  <span class="str">"Learning"</span>);
+BookmarkManager.<span class="fn">add</span>(<span class="str">"https://github.com"</span>, <span class="str">"GitHub"</span>,            <span class="str">"Tools"</span>);
+BookmarkManager.<span class="fn">add</span>(<span class="str">"https://mdn.com"</span>,    <span class="str">"Duplicate!"</span>,        <span class="str">"Reference"</span>);
+
+BookmarkManager.<span class="fn">list</span>();               <span class="cm">// সব</span>
+BookmarkManager.<span class="fn">list</span>(<span class="str">"Learning"</span>);     <span class="cm">// শুধু Learning</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd h-fut">🚀 FUTURE IMPLEMENTATION</div>
+    <div class="card-body">
+      <div class="fg">
+        <div class="fc"><div class="fi">📝</div><div class="ft">Note / Todo App</div><div class="fd">Server ছাড়া পুরো functioning app — localStorage-ই database।</div></div>
+        <div class="fc"><div class="fi">🔴</div><div class="ft">PWA Offline</div><div class="fd">Progressive Web App-এ offline data — service worker + localStorage।</div></div>
+        <div class="fc"><div class="fi">🔄</div><div class="ft">Redux Persist</div><div class="fd">Redux store localStorage-এ persist করে page reload-এ state রাখা।</div></div>
+        <div class="fc"><div class="fi">🛒</div><div class="ft">E-commerce Cart</div><div class="fd">Cart data localStorage-এ — login না করেও cart maintain করা।</div></div>
+        <div class="fc"><div class="fi">📊</div><div class="ft">Analytics Cache</div><div class="fd">User behavior locally store করে batch-এ server-এ পাঠানো।</div></div>
+        <div class="fc"><div class="fi">🔑</div><div class="ft">Credentials</div><div class="fd">"Remember me" checkbox — username localStorage-এ (password নয়!)।</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FINAL CARD -->
+<div class="final">
+  <div class="final-title">পর্যায় ১৮ — <span>সম্পন্ন!</span> 💾</div>
+  <p style="color:var(--muted);font-size:14px;margin-top:8px;">পরের পর্যায়ে যাওয়ার আগে নিশ্চিত করো:</p>
+  <div class="cl">
+    <span class="ci">✅ localStorage 6টি method জানি</span>
+    <span class="ci">✅ sessionStorage কখন ব্যবহার করবো</span>
+    <span class="ci">✅ JSON.stringify/parse সঠিকভাবে করি</span>
+    <span class="ci">✅ Type conversion বুঝি</span>
+    <span class="ci">✅ Safe get/set wrapper লিখতে পারি</span>
+    <span class="ci">✅ localStorage CRUD app বানাতে পারি</span>
+  </div>
+  <p class="nxt">পরের পর্যায়ের জন্য <strong>Next</strong> বাটন ক্লিক করো ➜ পর্যায় ১৯: <strong>Advanced DOM &amp; Browser APIs</strong> 🌐</p>
+  <nav class="toc">
+    <a href="https://anawarhossain.github.io/Javascript-prcatice/19-Advanced-Dom-And-Browser-APIs/">Next</a>
+  </nav>
+</div>
+
+</div>
+<footer>JS BOS MISSION &nbsp;·&nbsp; STAGE 18 &nbsp;·&nbsp; STORAGE MASTERED 💾</footer>
+</body>
+</html>
