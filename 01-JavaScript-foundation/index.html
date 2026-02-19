@@ -1,0 +1,2091 @@
+<!doctype html>
+<html lang="bn">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>পর্যায় ১ — JavaScript এর ভিত্তি</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Hind+Siliguri:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #08090e;
+      --surface: #0f1017;
+      --card: #13151e;
+      --card2: #181a25;
+      --border: #1e2130;
+      --border2: #272a3d;
+      --y: #f7c948;
+      --o: #ff6b35;
+      --g: #2ecc71;
+      --b: #4a9eff;
+      --p: #a78bfa;
+      --r: #ff4d6d;
+      --text: #dde1f5;
+      --muted: #5a5f7a;
+      --code-bg: #0c0e16;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Hind Siliguri", sans-serif;
+      min-height: 100vh;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 3px;
+    }
+
+    /* Grid bg */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(74, 158, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74, 158, 255, 0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* TOP NAV */
+    .topnav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(8, 9, 14, 0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-phase {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      color: var(--b);
+      background: rgba(74, 158, 255, 0.1);
+      border: 1px solid rgba(74, 158, 255, 0.25);
+      padding: 4px 12px;
+      border-radius: 100px;
+    }
+
+    .nav-title {
+      font-family: "Syne", sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .nav-progress {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .progress-dots {
+      display: flex;
+      gap: 5px;
+    }
+
+    .pdot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border2);
+      transition: background 0.3s;
+      cursor: pointer;
+    }
+
+    .pdot.done {
+      background: var(--g);
+    }
+
+    .pdot.active {
+      background: var(--y);
+      box-shadow: 0 0 8px var(--y);
+    }
+
+    /* LAYOUT */
+    .layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: calc(100vh - 53px);
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      position: sticky;
+      top: 53px;
+      height: calc(100vh - 53px);
+      overflow-y: auto;
+    }
+
+    .sidebar-label {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      padding: 0 20px 12px;
+    }
+
+    .sitem {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: all 0.2s;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .sitem:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .sitem.active {
+      color: var(--y);
+      border-left-color: var(--y);
+      background: rgba(247, 201, 72, 0.06);
+    }
+
+    .sitem-num {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      background: var(--border);
+      padding: 2px 6px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .sitem.active .sitem-num {
+      background: rgba(247, 201, 72, 0.2);
+      color: var(--y);
+    }
+
+    /* MAIN */
+    .main {
+      padding: 40px 48px 80px;
+      max-width: 860px;
+    }
+
+    @media (max-width: 700px) {
+      .main {
+        padding: 24px 20px 60px;
+      }
+    }
+
+    /* SECTION */
+    .section {
+      display: none;
+      animation: fadeIn 0.35s ease;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* SECTION HEADER */
+    .sec-head {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .sec-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .sec-tag {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 6px;
+    }
+
+    .sec-title {
+      font-family: "Syne", sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    /* CARD */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      font-family: "Syne", sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .card-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    /* Q&A */
+    .qa-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .qa-item {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .qa-q {
+      padding: 14px 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+
+    .qa-q:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .qa-arrow {
+      font-size: 12px;
+      color: var(--muted);
+      transition: transform 0.3s;
+      flex-shrink: 0;
+    }
+
+    .qa-item.open .qa-arrow {
+      transform: rotate(180deg);
+      color: var(--y);
+    }
+
+    .qa-item.open .qa-q {
+      color: var(--y);
+    }
+
+    .qa-a {
+      display: none;
+      padding: 0 18px 16px;
+      color: #9099ba;
+      font-size: 14px;
+      line-height: 1.8;
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+    }
+
+    .qa-item.open .qa-a {
+      display: block;
+    }
+
+    /* CODE BLOCK */
+    .code-wrap {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 16px 0;
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    .code-bar {
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .code-lang {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .copy-btn {
+      font-size: 10px;
+      color: var(--muted);
+      background: none;
+      border: 1px solid var(--border);
+      padding: 3px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: "JetBrains Mono", monospace;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      color: var(--text);
+      border-color: var(--border2);
+    }
+
+    .copy-btn.copied {
+      color: var(--g);
+      border-color: var(--g);
+    }
+
+    pre {
+      padding: 16px;
+      overflow-x: auto;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #c9d1f5;
+    }
+
+    /* Syntax highlight helpers */
+    .kw {
+      color: #c792ea;
+    }
+
+    /* keyword */
+    .str {
+      color: #c3e88d;
+    }
+
+    /* string */
+    .num {
+      color: #f78c6c;
+    }
+
+    /* number */
+    .cm {
+      color: #546e7a;
+      font-style: italic;
+    }
+
+    /* comment */
+    .fn {
+      color: #82aaff;
+    }
+
+    /* function */
+    .op {
+      color: #89ddff;
+    }
+
+    /* operator */
+    .bn {
+      color: var(--b);
+    }
+
+    /* boolean */
+    .vr {
+      color: #f07178;
+    }
+
+    /* variable name */
+
+    /* CHALLENGE */
+    .challenge-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .chal {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--y);
+      border-radius: 10px;
+      padding: 18px 20px;
+    }
+
+    .chal-num {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      color: var(--y);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .chal-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .show-sol-btn {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      background: none;
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      padding: 5px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+
+    .show-sol-btn:hover {
+      border-color: var(--y);
+      color: var(--y);
+    }
+
+    .solution {
+      display: none;
+    }
+
+    .solution.visible {
+      display: block;
+    }
+
+    /* FUTURE USE */
+    .future-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .future-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .future-item {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #9099ba;
+    }
+
+    .future-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+
+    /* TYPE BADGE */
+    .type-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 10px;
+    }
+
+    .type-item {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .type-name {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .type-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* COMPARISON TABLE */
+    .comp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .comp-table th {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      text-align: left;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .comp-table td {
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      vertical-align: top;
+      line-height: 1.6;
+      color: #9099ba;
+    }
+
+    .comp-table td:first-child {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .comp-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* SUMMARY BOX */
+    .summary {
+      background: linear-gradient(135deg,
+          rgba(247, 201, 72, 0.07),
+          rgba(255, 107, 53, 0.04));
+      border: 1px solid rgba(247, 201, 72, 0.2);
+      border-radius: 14px;
+      padding: 28px;
+      text-align: center;
+    }
+
+    .summary h2 {
+      font-family: "Syne", sans-serif;
+      font-size: 22px;
+      margin-bottom: 16px;
+      color: var(--y);
+    }
+
+    .checklist {
+      list-style: none;
+      text-align: left;
+      display: inline-block;
+    }
+
+    .checklist li {
+      padding: 6px 0;
+      font-size: 15px;
+      color: #b0b8d8;
+    }
+
+    .checklist li::before {
+      content: "✅ ";
+    }
+
+    /* NAV BUTTONS */
+    .nav-btns {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: "Hind Siliguri", sans-serif;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      border-color: var(--border2);
+      background: var(--card2);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .nav-btn.primary {
+      background: var(--y);
+      color: #000;
+      border-color: var(--y);
+      font-weight: 700;
+    }
+
+    .nav-btn.primary:hover {
+      background: #ffd44f;
+    }
+
+    /* HIGHLIGHT */
+    .hl {
+      color: var(--y);
+      font-weight: 600;
+    }
+
+    .hl-b {
+      color: var(--b);
+      font-weight: 600;
+    }
+
+    .hl-g {
+      color: var(--g);
+      font-weight: 600;
+    }
+
+    .hl-r {
+      color: var(--r);
+      font-weight: 600;
+    }
+
+    .hl-p {
+      color: var(--p);
+      font-weight: 600;
+    }
+
+    p {
+      line-height: 1.8;
+      color: #9099ba;
+      font-size: 15px;
+      margin-bottom: 12px;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 28px 0;
+    }
+
+    .info-box {
+      background: rgba(74, 158, 255, 0.07);
+      border: 1px solid rgba(74, 158, 255, 0.2);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 14px;
+      color: #8ab4f8;
+      line-height: 1.7;
+      margin: 12px 0;
+    }
+
+    .warn-box {
+      background: rgba(255, 107, 53, 0.07);
+      border: 1px solid rgba(255, 107, 53, 0.2);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 14px;
+      color: #ffaa88;
+      line-height: 1.7;
+      margin: 12px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- TOP NAV -->
+  <div class="topnav">
+    <span class="nav-phase">পর্যায় ১</span>
+    <span class="nav-title">JavaScript এর ভিত্তি (Foundation)</span>
+    <div class="nav-progress">
+      <div class="progress-dots" id="dots"></div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-label">বিষয়সমূহ</div>
+      <div class="sitem active" onclick="goTo(0)" id="s0">
+        <span class="sitem-num">০১</span> Variables & Data Types
+      </div>
+      <div class="sitem" onclick="goTo(1)" id="s1">
+        <span class="sitem-num">০২</span> Operators
+      </div>
+      <div class="sitem" onclick="goTo(2)" id="s2">
+        <span class="sitem-num">০৩</span> Console.log & I/O
+      </div>
+      <div class="sitem" onclick="goTo(3)" id="s3">
+        <span class="sitem-num">০৪</span> Comments & Structure
+      </div>
+      <div class="sitem" onclick="goTo(4)" id="s4">
+        <span class="sitem-num">🏆</span> সামগ্রিক প্রজেক্ট
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+      <!-- ===== SECTION 0: Variables ===== -->
+      <div class="section active" id="sec0">
+        <div class="sec-head">
+          <div class="sec-icon" style="background: rgba(247, 201, 72, 0.12)">
+            📦
+          </div>
+          <div>
+            <div class="sec-tag">টপিক ০১</div>
+            <div class="sec-title" style="color: var(--y)">
+              Variables & Data Types
+            </div>
+          </div>
+        </div>
+
+        <!-- Intro -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(247, 201, 72, 0.15)">
+              💡
+            </div>
+            Variable কি?
+          </div>
+          <p>
+            Variable হলো একটি <span class="hl">container</span> যেখানে আমরা
+            data সংরক্ষণ করি। এটি একটি নাম যার মাধ্যমে আমরা data কে চিনি এবং
+            ব্যবহার করি।
+          </p>
+          <p>JavaScript এ তিন ধরনের variable declaration আছে:</p>
+          <div class="comp-table" style="margin-top: 12px">
+            <table class="comp-table">
+              <thead>
+                <tr>
+                  <th>Keyword</th>
+                  <th>পরিবর্তনযোগ্য?</th>
+                  <th>Scope</th>
+                  <th>ব্যবহার</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>var</td>
+                  <td>✅ হ্যাঁ</td>
+                  <td>Function</td>
+                  <td>❌ পুরনো, এড়িয়ে চলুন</td>
+                </tr>
+                <tr>
+                  <td>let</td>
+                  <td>✅ হ্যাঁ</td>
+                  <td>Block</td>
+                  <td>✅ সাধারণ variables</td>
+                </tr>
+                <tr>
+                  <td>const</td>
+                  <td>❌ না</td>
+                  <td>Block</td>
+                  <td>✅ স্থির values</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="code-wrap">
+            <div class="code-bar">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre>
+                    <span class="cm">// var (এখন ব্যবহার করবেন না)</span>
+                    <span class="kw">var</span> <span class="vr">name</span> <span class="op">=</span> <span class="str">"রহিম"</span>;
+
+                    <span class="cm">// let — value পরিবর্তন করা যায়</span>
+                    <span class="kw">let</span> <span class="vr">age</span> <span class="op">=</span> <span class="num">25</span>;
+                    <span class="vr">age</span> <span class="op">=</span> <span class="num">26</span>; <span class="cm">// ✅ কাজ করবে</span>
+
+                    <span class="cm">// const — value পরিবর্তন করা যাবে না</span>
+                    <span class="kw">const</span> <span class="vr">country</span> <span class="op">=</span> <span class="str">"Bangladesh"</span>;
+                    <span class="cm">// country = "India"; ❌ Error দেবে</span>
+                </pre>
+          </div>
+        </div>
+
+        <!-- Data Types -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(74, 158, 255, 0.15)">
+              🗂️
+            </div>
+            Data Types (Primitive)
+          </div>
+          <div class="type-grid">
+            <div class="type-item">
+              <div class="type-name" style="color: var(--g)">String</div>
+              <div class="type-desc">
+                টেক্সট ডাটা<br /><code style="color: #c3e88d">"Hello", 'World'</code>
+              </div>
+            </div>
+            <div class="type-item">
+              <div class="type-name" style="color: var(--o)">Number</div>
+              <div class="type-desc">
+                সংখ্যা<br /><code style="color: #f78c6c">10, 3.14, -5</code>
+              </div>
+            </div>
+            <div class="type-item">
+              <div class="type-name" style="color: var(--p)">Boolean</div>
+              <div class="type-desc">
+                সত্য/মিথ্যা<br /><code style="color: #c792ea">true, false</code>
+              </div>
+            </div>
+            <div class="type-item">
+              <div class="type-name" style="color: var(--muted)">
+                Undefined
+              </div>
+              <div class="type-desc">
+                value দেওয়া হয়নি<br /><code>let x;</code>
+              </div>
+            </div>
+            <div class="type-item">
+              <div class="type-name" style="color: var(--r)">Null</div>
+              <div class="type-desc">
+                ইচ্ছাকৃত খালি<br /><code>let x = null;</code>
+              </div>
+            </div>
+            <div class="type-item">
+              <div class="type-name" style="color: var(--b)">
+                BigInt / Symbol
+              </div>
+              <div class="type-desc">Advanced types (পরে শিখব)</div>
+            </div>
+          </div>
+          <div class="code-wrap" style="margin-top: 16px">
+            <div class="code-bar">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre>
+              <span class="kw">let</span> <span class="vr">userName</span> <span class="op">=</span> <span class="str">"করিম"</span>;    <span class="cm">// String</span>
+              <span class="kw">let</span> <span class="vr">userAge</span> <span class="op">=</span> <span class="num">30</span>;        <span class="cm">// Number</span>
+              <span class="kw">let</span> <span class="vr">isStudent</span> <span class="op">=</span> <span class="bn">true</span>;    <span class="cm">// Boolean</span>
+              <span class="kw">let</span> <span class="vr">grade</span>;               <span class="cm">// Undefined</span>
+              <span class="kw">let</span> <span class="vr">salary</span> <span class="op">=</span> <span class="bn">null</span>;       <span class="cm">// Null</span>
+
+              <span class="cm">// typeof দিয়ে type চেক করুন</span>
+              <span class="fn">console</span>.<span class="fn">log</span>(<span class="kw">typeof</span> <span class="vr">userName</span>);  <span class="cm">// "string"</span>
+              <span class="fn">console</span>.<span class="fn">log</span>(<span class="kw">typeof</span> <span class="vr">userAge</span>);    <span class="cm">// "number"</span>
+              <span class="fn">console</span>.<span class="fn">log</span>(<span class="kw">typeof</span> <span class="vr">isStudent</span>);  <span class="cm">// "boolean"</span>
+              <span class="fn">console</span>.<span class="fn">log</span>(<span class="kw">typeof</span> <span class="vr">salary</span>);     <span class="cm">// "object" ⚠️ null এর bug</span>
+            </pre>
+          </div>
+          <div class="warn-box">
+            ⚠️ <strong>Special Case:</strong> <code>typeof null</code> রিটার্ন
+            করে <code>"object"</code> — এটি JavaScript এর একটি পুরনো bug। এটি
+            মুখস্থ রাখুন!
+          </div>
+        </div>
+
+        <!-- Naming Rules -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(167, 139, 250, 0.15)">
+              📝
+            </div>
+            Variable Naming Rules
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+            <div>
+              <div style="color: var(--g); font-size: 13px; font-weight: 600; margin-bottom: 8px;">✅ সঠিক
+              </div>
+              <div class="code-wrap">
+                <pre style="font-size: 12px; padding: 12px"><span class="kw">let</span> <span class="vr">userName</span> <span class="op">=</span> <span class="str">"..."</span>;
+                  <span class="kw">let</span> <span class="vr">_private</span> <span class="op">=</span> <span class="str">"..."</span>;
+                  <span class="kw">let</span> <span class="vr">$price</span> <span class="op">=</span> <span class="num">100</span>;
+                  <span class="kw">let</span> <span class="vr">myVar2</span> <span class="op">=</span> <span class="str">"..."</span>;
+                </pre>
+              </div>
+            </div>
+            <div>
+              <div style="
+                    color: var(--r);
+                    font-size: 13px;
+                    font-weight: 600;
+                    margin-bottom: 8px;
+                  ">
+                ❌ ভুল
+              </div>
+              <div class="code-wrap">
+                <pre style="font-size: 12px; padding: 12px"><span class="cm">// 2name — digit দিয়ে শুরু</span>
+<span class="cm">// let — reserved keyword</span>
+<span class="cm">// my-var — hyphen নয়</span>
+<span class="cm">// my var — space নয়</span></pre>
+              </div>
+            </div>
+          </div>
+          <div class="info-box" style="margin-top: 12px">
+            💡 JavaScript standard হলো <strong>camelCase</strong>:
+            <code>userName</code>, <code>totalPrice</code>,
+            <code>isLoggedIn</code>
+          </div>
+        </div>
+
+        <!-- Q&A -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(255, 77, 109, 0.15)">
+              🎓
+            </div>
+            ভাইবা বোর্ড প্রশ্ন-উত্তর
+          </div>
+          <div class="qa-list">
+            <div class="qa-item">
+              <div class="qa-q" onclick="toggleQA(this)">
+                var, let এবং const এর মধ্যে পার্থক্য কি?
+                <span class="qa-arrow">▼</span>
+              </div>
+              <div class="qa-a">
+                <strong style="color: var(--y)">var:</strong> function-scoped,
+                re-declare করা যায়, hoisting হয়<br />
+                <strong style="color: var(--b)">let:</strong> block-scoped,
+                re-declare করা যায় না, value পরিবর্তন করা যায়<br />
+                <strong style="color: var(--g)">const:</strong> block-scoped,
+                re-declare করা যায় না, value পরিবর্তনও করা যায় না
+              </div>
+            </div>
+            <div class="qa-item">
+              <div class="qa-q" onclick="toggleQA(this)">
+                typeof operator কি এবং কেন ব্যবহার করি?
+                <span class="qa-arrow">▼</span>
+              </div>
+              <div class="qa-a">
+                typeof দিয়ে কোনো variable এর data type জানা যায়।<br /><br />
+                <code style="color: #c3e88d">console.log(typeof "Hello"); // "string"</code><br />
+                <code style="color: #f78c6c">console.log(typeof 42); // "number"</code><br />
+                <code style="color: #c792ea">console.log(typeof true); // "boolean"</code>
+              </div>
+            </div>
+            <div class="qa-item">
+              <div class="qa-q" onclick="toggleQA(this)">
+                undefined এবং null এর পার্থক্য কি?
+                <span class="qa-arrow">▼</span>
+              </div>
+              <div class="qa-a">
+                <strong style="color: var(--y)">undefined:</strong> variable
+                declare করা হয়েছে কিন্তু value assign করা হয়নি — JavaScript
+                নিজে দেয়<br /><br />
+                <strong style="color: var(--r)">null:</strong> intentionally
+                খালি value দেয়া হয়েছে — programmer নিজে দেয়
+              </div>
+            </div>
+            <div class="qa-item">
+              <div class="qa-q" onclick="toggleQA(this)">
+                Variable naming এর rules কি কি?
+                <span class="qa-arrow">▼</span>
+              </div>
+              <div class="qa-a">
+                • Letter, digit, underscore (_), বা dollar sign ($) দিয়ে শুরু
+                করতে হবে<br />
+                • Digit দিয়ে শুরু করা যাবে না<br />
+                • Reserved keywords ব্যবহার করা যাবে না (let, const, if,
+                etc.)<br />
+                • Case-sensitive (<code>name</code> এবং
+                <code>Name</code> আলাদা)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Challenges -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(46, 204, 113, 0.15)">
+              🏋️
+            </div>
+            প্রাকটিস চ্যালেঞ্জ
+          </div>
+          <div class="challenge-list">
+            <div class="chal">
+              <div class="chal-num">চ্যালেঞ্জ ০১</div>
+              <div class="chal-title">
+                আপনার নাম সংরক্ষণ করুন এবং console.log করে দেখান।
+              </div>
+              <button class="show-sol-btn" onclick="toggleSol(this)">
+                সমাধান দেখুন ↓
+              </button>
+              <div class="solution">
+                <div class="code-wrap" style="margin-top: 10px">
+                  <div class="code-bar">
+                    <span class="code-lang">Solution</span><button class="copy-btn" onclick="copyCode(this)">
+                      copy
+                    </button>
+                  </div>
+                  <pre><span class="kw">const</span> <span class="vr">myName</span> <span class="op">=</span> <span class="str">"আপনার নাম"</span>;
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="vr">myName</span>);</pre>
+                </div>
+              </div>
+            </div>
+            <div class="chal">
+              <div class="chal-num">চ্যালেঞ্জ ০২</div>
+              <div class="chal-title">
+                বয়স (let), দেশ (const), পেশা (let) তৈরি করুন। তারপর বয়স
+                পরিবর্তন করুন।
+              </div>
+              <button class="show-sol-btn" onclick="toggleSol(this)">
+                সমাধান দেখুন ↓
+              </button>
+              <div class="solution">
+                <div class="code-wrap" style="margin-top: 10px">
+                  <div class="code-bar">
+                    <span class="code-lang">Solution</span><button class="copy-btn" onclick="copyCode(this)">
+                      copy
+                    </button>
+                  </div>
+                  <pre><span class="kw">let</span> <span class="vr">myAge</span> <span class="op">=</span> <span class="num">25</span>;
+<span class="kw">const</span> <span class="vr">myCountry</span> <span class="op">=</span> <span class="str">"Bangladesh"</span>;
+<span class="kw">let</span> <span class="vr">myProfession</span> <span class="op">=</span> <span class="str">"Student"</span>;
+
+<span class="vr">myAge</span> <span class="op">=</span> <span class="num">26</span>; <span class="cm">// ✅ কাজ করবে</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="vr">myAge</span>);</pre>
+                </div>
+              </div>
+            </div>
+            <div class="chal">
+              <div class="chal-num">চ্যালেঞ্জ ০৩</div>
+              <div class="chal-title">
+                ৫ ধরনের data type এর variable তৈরি করুন এবং typeof দিয়ে চেক
+                করুন।
+              </div>
+              <button class="show-sol-btn" onclick="toggleSol(this)">
+                সমাধান দেখুন ↓
+              </button>
+              <div class="solution">
+                <div class="code-wrap" style="margin-top: 10px">
+                  <div class="code-bar">
+                    <span class="code-lang">Solution</span><button class="copy-btn" onclick="copyCode(this)">
+                      copy
+                    </button>
+                  </div>
+                  <pre><span class="kw">let</span> <span class="vr">name</span> <span class="op">=</span> <span class="str">"রহিম"</span>;
+<span class="kw">let</span> <span class="vr">age</span> <span class="op">=</span> <span class="num">30</span>;
+<span class="kw">let</span> <span class="vr">isMarried</span> <span class="op">=</span> <span class="bn">false</span>;
+<span class="kw">let</span> <span class="vr">salary</span> <span class="op">=</span> <span class="bn">null</span>;
+<span class="kw">let</span> <span class="vr">bonus</span>;
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="kw">typeof</span> <span class="vr">name</span>);      <span class="cm">// "string"</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="kw">typeof</span> <span class="vr">age</span>);       <span class="cm">// "number"</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="kw">typeof</span> <span class="vr">isMarried</span>); <span class="cm">// "boolean"</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="kw">typeof</span> <span class="vr">salary</span>);    <span class="cm">// "object" (null এর bug)</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="kw">typeof</span> <span class="vr">bonus</span>);     <span class="cm">// "undefined"</span></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Future Use -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(74, 158, 255, 0.15)">
+              🚀
+            </div>
+            ভবিষ্যতে কোথায় ব্যবহার হবে
+          </div>
+          <div class="future-grid">
+            <div class="future-item">
+              <div class="future-dot" style="background: var(--b)"></div>
+              <div>
+                <strong style="color: var(--text)">Web Development</strong><br />User input সংরক্ষণ,
+                form data handle
+              </div>
+            </div>
+            <div class="future-item">
+              <div class="future-dot" style="background: var(--p)"></div>
+              <div>
+                <strong style="color: var(--text)">React/Vue</strong><br />Component state manage করা
+              </div>
+            </div>
+            <div class="future-item">
+              <div class="future-dot" style="background: var(--g)"></div>
+              <div>
+                <strong style="color: var(--text)">API Integration</strong><br />Server থেকে আসা data
+                সংরক্ষণ
+              </div>
+            </div>
+            <div class="future-item">
+              <div class="future-dot" style="background: var(--o)"></div>
+              <div>
+                <strong style="color: var(--text)">Game Development</strong><br />Score, player name,
+                level সংরক্ষণ
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-btns">
+          <button class="nav-btn" disabled>← আগের</button>
+          <button class="nav-btn primary" onclick="goTo(1)">
+            পরের টপিক →
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== SECTION 1: Operators ===== -->
+      <div class="section" id="sec1">
+        <div class="sec-head">
+          <div class="sec-icon" style="background: rgba(255, 107, 53, 0.12)">
+            ⚙️
+          </div>
+          <div>
+            <div class="sec-tag">টপিক ০২</div>
+            <div class="sec-title" style="color: var(--o)">Operators</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(255, 107, 53, 0.15)">
+              ➕
+            </div>
+            A. Arithmetic Operators (গাণিতিক)
+          </div>
+          <div class="code-wrap">
+            <div class="code-bar">
+              <span class="code-lang">JavaScript</span><button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="kw">let</span> <span class="vr">a</span> <span class="op">=</span> <span class="num">10</span>;
+<span class="kw">let</span> <span class="vr">b</span> <span class="op">=</span> <span class="num">3</span>;
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="vr">a</span> <span class="op">+</span> <span class="vr">b</span>);   <span class="cm">// 13  — যোগ</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="vr">a</span> <span class="op">-</span> <span class="vr">b</span>);   <span class="cm">// 7   — বিয়োগ</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="vr">a</span> <span class="op">*</span> <span class="vr">b</span>);   <span class="cm">// 30  — গুণ</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="vr">a</span> <span class="op">/</span> <span class="vr">b</span>);   <span class="cm">// 3.33 — ভাগ</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="vr">a</span> <span class="op">%</span> <span class="vr">b</span>);   <span class="cm">// 1   — ভাগশেষ (Modulus)</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="vr">a</span> <span class="op">**</span> <span class="vr">b</span>);  <span class="cm">// 1000 — ঘাত (Power)</span>
+
+<span class="cm">// Increment / Decrement</span>
+<span class="kw">let</span> <span class="vr">count</span> <span class="op">=</span> <span class="num">5</span>;
+<span class="vr">count</span><span class="op">++</span>;   <span class="cm">// count = 6</span>
+<span class="vr">count</span><span class="op">--</span>;   <span class="cm">// count = 5</span></pre>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(74, 158, 255, 0.15)">
+              ⚖️
+            </div>
+            B. Comparison Operators (তুলনা)
+          </div>
+          <div class="info-box">
+            ⭐ সবচেয়ে গুরুত্বপূর্ণ: <strong>==</strong> এবং
+            <strong>===</strong> এর পার্থক্য মনে রাখুন!
+          </div>
+          <div class="code-wrap" style="margin-top: 12px">
+            <div class="code-bar">
+              <span class="code-lang">JavaScript</span><button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="kw">let</span> <span class="vr">x</span> <span class="op">=</span> <span class="num">5</span>;
+<span class="kw">let</span> <span class="vr">y</span> <span class="op">=</span> <span class="str">"5"</span>;
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="vr">x</span> <span class="op">==</span>  <span class="vr">y</span>); <span class="cm">// true  — শুধু value চেক (type convert হয়)</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="vr">x</span> <span class="op">===</span> <span class="vr">y</span>); <span class="cm">// false — value + type উভয় চেক ✅ সবসময় এটা ব্যবহার করুন</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="vr">x</span> <span class="op">!=</span>  <span class="vr">y</span>); <span class="cm">// false</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="vr">x</span> <span class="op">!==</span> <span class="vr">y</span>); <span class="cm">// true</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="vr">x</span> <span class="op">></span>   <span class="num">3</span>); <span class="cm">// true</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="vr">x</span> <span class="op">>=</span>  <span class="num">5</span>); <span class="cm">// true</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="vr">x</span> <span class="op"><</span>   <span class="num">10</span>);<span class="cm">// true</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="vr">x</span> <span class="op"><=</span>  <span class="num">4</span>); <span class="cm">// false</span></pre>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(167, 139, 250, 0.15)">
+              🔗
+            </div>
+            C. Logical Operators (যুক্তি)
+          </div>
+          <div class="comp-table" style="margin-bottom: 14px">
+            <table class="comp-table">
+              <thead>
+                <tr>
+                  <th>Operator</th>
+                  <th>নাম</th>
+                  <th>কখন true?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>&&</td>
+                  <td>AND</td>
+                  <td>সব condition true হলে</td>
+                </tr>
+                <tr>
+                  <td>||</td>
+                  <td>OR</td>
+                  <td>যেকোনো একটি true হলে</td>
+                </tr>
+                <tr>
+                  <td>!</td>
+                  <td>NOT</td>
+                  <td>উল্টা করে দেয়</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="code-wrap">
+            <div class="code-bar">
+              <span class="code-lang">JavaScript</span><button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="kw">let</span> <span class="vr">age</span> <span class="op">=</span> <span class="num">20</span>;
+<span class="kw">let</span> <span class="vr">hasLicense</span> <span class="op">=</span> <span class="bn">true</span>;
+
+<span class="cm">// AND (&&) — সব condition true হতে হবে</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="vr">age</span> <span class="op">>=</span> <span class="num">18</span> <span class="op">&&</span> <span class="vr">hasLicense</span>); <span class="cm">// true</span>
+
+<span class="cm">// OR (||) — যেকোনো একটি true হলেই হবে</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="vr">age</span> <span class="op">>=</span> <span class="num">18</span> <span class="op">||</span> <span class="vr">hasLicense</span>); <span class="cm">// true</span>
+
+<span class="cm">// NOT (!) — উল্টা করে দেয়</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="op">!</span><span class="vr">hasLicense</span>);              <span class="cm">// false</span></pre>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(255, 77, 109, 0.15)">
+              🎓
+            </div>
+            ভাইবা বোর্ড প্রশ্ন-উত্তর
+          </div>
+          <div class="qa-list">
+            <div class="qa-item">
+              <div class="qa-q" onclick="toggleQA(this)">
+                == এবং === এর পার্থক্য কি?<span class="qa-arrow">▼</span>
+              </div>
+              <div class="qa-a">
+                <strong style="color: var(--r)">==</strong> শুধু value তুলনা
+                করে (type conversion হয়)<br /><strong style="color: var(--g)">===</strong>
+                value এবং type উভয় তুলনা করে (strict
+                equality)<br /><br /><code>5 == "5" // true ❌ avoid করুন</code><br /><code>5 === "5" // false ✅ সবসময় এটি ব্যবহার করুন</code>
+              </div>
+            </div>
+            <div class="qa-item">
+              <div class="qa-q" onclick="toggleQA(this)">
+                Modulus operator (%) কি কাজে লাগে?<span class="qa-arrow">▼</span>
+              </div>
+              <div class="qa-a">
+                ভাগশেষ বের করতে। জোড়-বিজোড় number চেক করতে খুব কাজে
+                লাগে।<br /><br /><code>10 % 2 === 0 // জোড় সংখ্যা</code><br /><code>11 % 2 === 1 // বিজোড় সংখ্যা</code>
+              </div>
+            </div>
+            <div class="qa-item">
+              <div class="qa-q" onclick="toggleQA(this)">
+                ++ এবং -- operator এর পার্থক্য কি?<span class="qa-arrow">▼</span>
+              </div>
+              <div class="qa-a">
+                <strong style="color: var(--g)">++</strong> value 1 বাড়ায়<br /><strong
+                  style="color: var(--r)">--</strong>
+                value 1
+                কমায়<br /><br /><code>let num = 5; num++; // num = 6</code><br /><code>num--; // num = 5</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(46, 204, 113, 0.15)">
+              🏋️
+            </div>
+            প্রাকটিস চ্যালেঞ্জ
+          </div>
+          <div class="challenge-list">
+            <div class="chal">
+              <div class="chal-num">চ্যালেঞ্জ ০১</div>
+              <div class="chal-title">
+                দুটি number নিয়ে সব arithmetic operation করুন।
+              </div>
+              <button class="show-sol-btn" onclick="toggleSol(this)">
+                সমাধান দেখুন ↓
+              </button>
+              <div class="solution">
+                <div class="code-wrap" style="margin-top: 10px">
+                  <div class="code-bar">
+                    <span class="code-lang">Solution</span><button class="copy-btn" onclick="copyCode(this)">
+                      copy
+                    </button>
+                  </div>
+                  <pre><span class="kw">let</span> <span class="vr">num1</span> <span class="op">=</span> <span class="num">20</span>, <span class="vr">num2</span> <span class="op">=</span> <span class="num">6</span>;
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"যোগ:"</span>,    <span class="vr">num1</span> <span class="op">+</span> <span class="vr">num2</span>);
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"বিয়োগ:"</span>,  <span class="vr">num1</span> <span class="op">-</span> <span class="vr">num2</span>);
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"গুণ:"</span>,    <span class="vr">num1</span> <span class="op">*</span> <span class="vr">num2</span>);
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"ভাগ:"</span>,    <span class="vr">num1</span> <span class="op">/</span> <span class="vr">num2</span>);
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"ভাগশেষ:"</span>,<span class="vr">num1</span> <span class="op">%</span> <span class="vr">num2</span>);
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"ঘাত:"</span>,    <span class="vr">num1</span> <span class="op">**</span> <span class="num">2</span>);</pre>
+                </div>
+              </div>
+            </div>
+            <div class="chal">
+              <div class="chal-num">চ্যালেঞ্জ ০২</div>
+              <div class="chal-title">
+                একটি number জোড় না বিজোড় check করুন।
+              </div>
+              <button class="show-sol-btn" onclick="toggleSol(this)">
+                সমাধান দেখুন ↓
+              </button>
+              <div class="solution">
+                <div class="code-wrap" style="margin-top: 10px">
+                  <div class="code-bar">
+                    <span class="code-lang">Solution</span><button class="copy-btn" onclick="copyCode(this)">
+                      copy
+                    </button>
+                  </div>
+                  <pre><span class="kw">let</span> <span class="vr">number</span> <span class="op">=</span> <span class="num">15</span>;
+<span class="kw">if</span> (<span class="vr">number</span> <span class="op">%</span> <span class="num">2</span> <span class="op">===</span> <span class="num">0</span>) {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"জোড় সংখ্যা"</span>);
+} <span class="kw">else</span> {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"বিজোড় সংখ্যা"</span>);
+}</pre>
+                </div>
+              </div>
+            </div>
+            <div class="chal">
+              <div class="chal-num">চ্যালেঞ্জ ০৩</div>
+              <div class="chal-title">
+                একজন ব্যক্তি ভোট দিতে পারবে কিনা check করুন (বয়স >= 18 এবং
+                নাগরিক হতে হবে)।
+              </div>
+              <button class="show-sol-btn" onclick="toggleSol(this)">
+                সমাধান দেখুন ↓
+              </button>
+              <div class="solution">
+                <div class="code-wrap" style="margin-top: 10px">
+                  <div class="code-bar">
+                    <span class="code-lang">Solution</span><button class="copy-btn" onclick="copyCode(this)">
+                      copy
+                    </button>
+                  </div>
+                  <pre><span class="kw">let</span> <span class="vr">age</span> <span class="op">=</span> <span class="num">20</span>;
+<span class="kw">let</span> <span class="vr">isCitizen</span> <span class="op">=</span> <span class="bn">true</span>;
+<span class="kw">if</span> (<span class="vr">age</span> <span class="op">>=</span> <span class="num">18</span> <span class="op">&&</span> <span class="vr">isCitizen</span>) {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"ভোট দিতে পারবে ✅"</span>);
+} <span class="kw">else</span> {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"ভোট দিতে পারবে না ❌"</span>);
+}</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-btns">
+          <button class="nav-btn" onclick="goTo(0)">← Variables</button>
+          <button class="nav-btn primary" onclick="goTo(2)">
+            Console.log →
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== SECTION 2: Console.log ===== -->
+      <div class="section" id="sec2">
+        <div class="sec-head">
+          <div class="sec-icon" style="background: rgba(46, 204, 113, 0.12)">
+            🖥️
+          </div>
+          <div>
+            <div class="sec-tag">টপিক ০৩</div>
+            <div class="sec-title" style="color: var(--g)">
+              Console.log & Input/Output
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(46, 204, 113, 0.15)">
+              📤
+            </div>
+            Console.log এর বিভিন্ন ব্যবহার
+          </div>
+          <div class="code-wrap">
+            <div class="code-bar">
+              <span class="code-lang">JavaScript</span><button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="cm">// Simple text print</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"Hello World"</span>);
+
+<span class="cm">// Variable print</span>
+<span class="kw">let</span> <span class="vr">name</span> <span class="op">=</span> <span class="str">"করিম"</span>;
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="vr">name</span>);
+
+<span class="cm">// Multiple values</span>
+<span class="kw">let</span> <span class="vr">age</span> <span class="op">=</span> <span class="num">25</span>;
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"নাম:"</span>, <span class="vr">name</span>, <span class="str">"বয়স:"</span>, <span class="vr">age</span>);
+
+<span class="cm">// Template literals ✅ আধুনিক পদ্ধতি</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">`আমার নাম <span class="op">${</span><span class="vr">name</span><span class="op">}</span> এবং বয়স <span class="op">${</span><span class="vr">age</span><span class="op">}</span>`</span>);
+
+<span class="cm">// Object print</span>
+<span class="kw">let</span> <span class="vr">person</span> <span class="op">=</span> {<span class="vr">name</span>: <span class="str">"রহিম"</span>, <span class="vr">age</span>: <span class="num">30</span>};
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="vr">person</span>);</pre>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(74, 158, 255, 0.15)">
+              🔧
+            </div>
+            Other Console Methods
+          </div>
+          <div class="code-wrap">
+            <div class="code-bar">
+              <span class="code-lang">JavaScript</span><button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="fn">console</span>.<span class="fn">error</span>(<span class="str">"এটি একটি error message"</span>);   <span class="cm">// 🔴 লাল রঙে দেখায়</span>
+<span class="fn">console</span>.<span class="fn">warn</span>(<span class="str">"এটি একটি warning message"</span>);   <span class="cm">// 🟡 হলুদ রঙে দেখায়</span>
+<span class="fn">console</span>.<span class="fn">table</span>([
+  {<span class="vr">name</span>: <span class="str">"করিম"</span>, <span class="vr">age</span>: <span class="num">25</span>},
+  {<span class="vr">name</span>: <span class="str">"রহিম"</span>, <span class="vr">age</span>: <span class="num">30</span>}
+]);                                            <span class="cm">// 📊 টেবিল আকারে দেখায়</span>
+<span class="fn">console</span>.<span class="fn">clear</span>();                              <span class="cm">// 🧹 Console clear করে</span></pre>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(247, 201, 72, 0.15)">
+              📥
+            </div>
+            Input নেওয়ার পদ্ধতি
+          </div>
+          <div class="code-wrap">
+            <div class="code-bar">
+              <span class="code-lang">Browser — prompt()</span><button class="copy-btn"
+                onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="cm">// User থেকে input নেওয়া</span>
+<span class="kw">let</span> <span class="vr">userName</span> <span class="op">=</span> <span class="fn">prompt</span>(<span class="str">"আপনার নাম কি?"</span>);
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"হ্যালো "</span> <span class="op">+</span> <span class="vr">userName</span>);
+
+<span class="cm">// Number input — prompt সবসময় String দেয়!</span>
+<span class="kw">let</span> <span class="vr">userAge</span> <span class="op">=</span> <span class="fn">Number</span>(<span class="fn">prompt</span>(<span class="str">"আপনার বয়স কত?"</span>));
+
+<span class="cm">// Confirm dialog (Yes/No)</span>
+<span class="kw">let</span> <span class="vr">isConfirmed</span> <span class="op">=</span> <span class="fn">confirm</span>(<span class="str">"আপনি কি নিশ্চিত?"</span>);
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="vr">isConfirmed</span>); <span class="cm">// true বা false</span></pre>
+          </div>
+          <div class="warn-box">
+            ⚠️ <strong>prompt() এর সমস্যা:</strong> এটি সবসময় String return
+            করে। Number দরকার হলে <code>Number()</code> দিয়ে convert করুন।
+            Real project এ HTML form ব্যবহার করুন।
+          </div>
+          <div class="code-wrap" style="margin-top: 12px">
+            <div class="code-bar">
+              <span class="code-lang">String → Number Conversion</span><button class="copy-btn"
+                onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="kw">let</span> <span class="vr">str</span> <span class="op">=</span> <span class="str">"123"</span>;
+<span class="kw">let</span> <span class="vr">num1</span> <span class="op">=</span> <span class="fn">Number</span>(<span class="vr">str</span>);    <span class="cm">// 123</span>
+<span class="kw">let</span> <span class="vr">num2</span> <span class="op">=</span> <span class="fn">parseInt</span>(<span class="vr">str</span>);  <span class="cm">// 123 (integer only)</span>
+<span class="kw">let</span> <span class="vr">num3</span> <span class="op">=</span> <span class="op">+</span><span class="vr">str</span>;           <span class="cm">// 123 (shorthand)</span></pre>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(255, 77, 109, 0.15)">
+              🎓
+            </div>
+            ভাইবা বোর্ড প্রশ্ন-উত্তর
+          </div>
+          <div class="qa-list">
+            <div class="qa-item">
+              <div class="qa-q" onclick="toggleQA(this)">
+                Console.log কেন ব্যবহার করি?<span class="qa-arrow">▼</span>
+              </div>
+              <div class="qa-a">
+                • Code debug করার জন্য<br />• Variable এর value check করার
+                জন্য<br />• Program এর flow বুঝার জন্য<br />• Error খুঁজে বের
+                করার জন্য
+              </div>
+            </div>
+            <div class="qa-item">
+              <div class="qa-q" onclick="toggleQA(this)">
+                Template literals কি এবং কেন ভালো?<span class="qa-arrow">▼</span>
+              </div>
+              <div class="qa-a">
+                Template literals (backticks ``) ব্যবহার করে string এর মধ্যে
+                variable সহজে embed করা যায়।<br /><br /><strong style="color: var(--r)">পুরাতন:</strong>
+                <code>"নাম: " + name + ", বয়স: " + age</code><br /><strong style="color: var(--g)">নতুন:</strong>
+                <code>`নাম: ${name}, বয়স: ${age}`</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(46, 204, 113, 0.15)">
+              🏋️
+            </div>
+            প্রাকটিস চ্যালেঞ্জ
+          </div>
+          <div class="challenge-list">
+            <div class="chal">
+              <div class="chal-num">চ্যালেঞ্জ ০১</div>
+              <div class="chal-title">
+                বিভিন্ন ধরনের data console.log করুন।
+              </div>
+              <button class="show-sol-btn" onclick="toggleSol(this)">
+                সমাধান দেখুন ↓
+              </button>
+              <div class="solution">
+                <div class="code-wrap" style="margin-top: 10px">
+                  <div class="code-bar">
+                    <span class="code-lang">Solution</span><button class="copy-btn" onclick="copyCode(this)">
+                      copy
+                    </button>
+                  </div>
+                  <pre><span class="kw">let</span> <span class="vr">name</span> <span class="op">=</span> <span class="str">"করিম"</span>;
+<span class="kw">let</span> <span class="vr">age</span> <span class="op">=</span> <span class="num">25</span>;
+<span class="kw">let</span> <span class="vr">isStudent</span> <span class="op">=</span> <span class="bn">true</span>;
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"String:"</span>, <span class="vr">name</span>);
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"Number:"</span>, <span class="vr">age</span>);
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"Boolean:"</span>, <span class="vr">isStudent</span>);
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">`Template: আমার নাম <span class="op">${</span><span class="vr">name</span><span class="op">}</span>, বয়স <span class="op">${</span><span class="vr">age</span><span class="op">}</span>`</span>);</pre>
+                </div>
+              </div>
+            </div>
+            <div class="chal">
+              <div class="chal-num">চ্যালেঞ্জ ০২</div>
+              <div class="chal-title">
+                দুটি number input নিয়ে তাদের যোগফল দেখান।
+              </div>
+              <button class="show-sol-btn" onclick="toggleSol(this)">
+                সমাধান দেখুন ↓
+              </button>
+              <div class="solution">
+                <div class="code-wrap" style="margin-top: 10px">
+                  <div class="code-bar">
+                    <span class="code-lang">Solution</span><button class="copy-btn" onclick="copyCode(this)">
+                      copy
+                    </button>
+                  </div>
+                  <pre><span class="kw">let</span> <span class="vr">num1</span> <span class="op">=</span> <span class="fn">Number</span>(<span class="fn">prompt</span>(<span class="str">"প্রথম সংখ্যা:"</span>));
+<span class="kw">let</span> <span class="vr">num2</span> <span class="op">=</span> <span class="fn">Number</span>(<span class="fn">prompt</span>(<span class="str">"দ্বিতীয় সংখ্যা:"</span>));
+<span class="kw">let</span> <span class="vr">sum</span> <span class="op">=</span> <span class="vr">num1</span> <span class="op">+</span> <span class="vr">num2</span>;
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">`যোগফল: <span class="op">${</span><span class="vr">sum</span><span class="op">}</span>`</span>);</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-btns">
+          <button class="nav-btn" onclick="goTo(1)">← Operators</button>
+          <button class="nav-btn primary" onclick="goTo(3)">
+            Comments →
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== SECTION 3: Comments ===== -->
+      <div class="section" id="sec3">
+        <div class="sec-head">
+          <div class="sec-icon" style="background: rgba(167, 139, 250, 0.12)">
+            📝
+          </div>
+          <div>
+            <div class="sec-tag">টপিক ০৪</div>
+            <div class="sec-title" style="color: var(--p)">
+              Comments & Code Structure
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(167, 139, 250, 0.15)">
+              💬
+            </div>
+            Comment এর প্রকারভেদ
+          </div>
+          <div class="code-wrap">
+            <div class="code-bar">
+              <span class="code-lang">JavaScript</span><button class="copy-btn" onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="cm">// এটি Single-line comment</span>
+<span class="cm">// Browser এই লাইন ignore করবে</span>
+
+<span class="cm">/*
+  এটি Multi-line comment
+  একাধিক লাইনে লেখা যায়
+  Complex logic explain করতে ব্যবহৃত
+*/</span>
+
+<span class="kw">let</span> <span class="vr">name</span> <span class="op">=</span> <span class="str">"করিম"</span>; <span class="cm">// Inline comment — Variable declare</span>
+
+<span class="cm">/*
+function greet() {
+  console.log("Hello");
+}
+*/</span>
+<span class="cm">// উপরের function টি comment out — execute হবে না</span></pre>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(46, 204, 113, 0.15)">
+              ✅
+            </div>
+            Good vs Bad Comments
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+            <div>
+              <div style="
+                    color: var(--g);
+                    font-size: 13px;
+                    font-weight: 600;
+                    margin-bottom: 8px;
+                  ">
+                ✅ ভালো Comment
+              </div>
+              <div class="code-wrap">
+                <pre style="font-size: 12px; padding: 12px"><span class="cm">// User এর বয়স 18+ হলে
+// access দিবো</span>
+<span class="kw">if</span> (<span class="vr">age</span> <span class="op">>=</span> <span class="num">18</span>) {
+  <span class="fn">allowAccess</span>();
+}</pre>
+              </div>
+            </div>
+            <div>
+              <div style="
+                    color: var(--r);
+                    font-size: 13px;
+                    font-weight: 600;
+                    margin-bottom: 8px;
+                  ">
+                ❌ খারাপ Comment
+              </div>
+              <div class="code-wrap">
+                <pre style="font-size: 12px; padding: 12px"><span class="cm">// age 18 এর সমান বা বড়
+// কিনা check করছি</span>
+<span class="kw">if</span> (<span class="vr">age</span> <span class="op">>=</span> <span class="num">18</span>) {
+  <span class="fn">allowAccess</span>();
+}</pre>
+              </div>
+            </div>
+          </div>
+          <div class="info-box" style="margin-top: 12px">
+            💡 ভালো comment বলে <strong>কেন</strong> করা হচ্ছে, code দেখেই
+            বোঝা যায় এমন কথা বলে না।
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(74, 158, 255, 0.15)">
+              🏗️
+            </div>
+            Code Structure Best Practices
+          </div>
+          <div class="code-wrap">
+            <div class="code-bar">
+              <span class="code-lang">JavaScript — Best Practices</span><button class="copy-btn"
+                onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="cm">// 1. Meaningful Variable Names</span>
+<span class="kw">let</span> <span class="vr">userName</span> <span class="op">=</span> <span class="str">"করিম"</span>; <span class="cm">// ✅ ভালো</span>
+<span class="kw">let</span> <span class="vr">x</span> <span class="op">=</span> <span class="str">"করিম"</span>;       <span class="cm">// ❌ খারাপ</span>
+
+<span class="cm">// 2. Proper Indentation</span>
+<span class="kw">if</span> (<span class="vr">age</span> <span class="op">>=</span> <span class="num">18</span>) {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"Adult"</span>);
+  <span class="kw">if</span> (<span class="vr">hasLicense</span>) {
+    <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"Can drive"</span>);
+  }
+}
+
+<span class="cm">// 3. Spacing (পড়তে সহজ)</span>
+<span class="kw">let</span> <span class="vr">sum</span> <span class="op">=</span> <span class="vr">a</span> <span class="op">+</span> <span class="vr">b</span>; <span class="cm">// ✅</span>
+<span class="kw">let</span> <span class="vr">sum</span><span class="op">=</span><span class="vr">a</span><span class="op">+</span><span class="vr">b</span>;     <span class="cm">// ❌</span>
+
+<span class="cm">// 4. Naming Conventions</span>
+<span class="kw">let</span> <span class="vr">userName</span>  <span class="op">=</span> <span class="str">"..."</span>; <span class="cm">// camelCase   — JS standard ✅</span>
+<span class="kw">let</span> <span class="vr">user_name</span> <span class="op">=</span> <span class="str">"..."</span>; <span class="cm">// snake_case  — Python style</span>
+<span class="kw">let</span> <span class="vr">UserName</span>  <span class="op">=</span> <span class="str">"..."</span>; <span class="cm">// PascalCase  — Class এর জন্য</span></pre>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(255, 77, 109, 0.15)">
+              🎓
+            </div>
+            ভাইবা বোর্ড প্রশ্ন-উত্তর
+          </div>
+          <div class="qa-list">
+            <div class="qa-item">
+              <div class="qa-q" onclick="toggleQA(this)">
+                Comment কখন ব্যবহার করা উচিত?<span class="qa-arrow">▼</span>
+              </div>
+              <div class="qa-a">
+                • Complex logic explain করার জন্য<br />• Future reference এর
+                জন্য<br />• TODO list লেখার জন্য (<code>// TODO: এটি পরে করতে হবে</code>)<br />•
+                Temporarily code disable করার জন্য<br />• Team
+                collaboration এর জন্য
+              </div>
+            </div>
+            <div class="qa-item">
+              <div class="qa-q" onclick="toggleQA(this)">
+                Good code structure কেন গুরুত্বপূর্ণ?<span class="qa-arrow">▼</span>
+              </div>
+              <div class="qa-a">
+                • Code পড়তে সহজ হয়<br />• Bug খুঁজে পাওয়া সহজ হয়<br />•
+                Team এ কাজ করতে সুবিধা<br />• Maintenance সহজ হয়<br />• Code
+                review এ ভালো impression
+              </div>
+            </div>
+            <div class="qa-item">
+              <div class="qa-q" onclick="toggleQA(this)">
+                camelCase কি এবং কেন ব্যবহার করি?<span class="qa-arrow">▼</span>
+              </div>
+              <div class="qa-a">
+                camelCase হলো একটি naming convention যেখানে প্রথম শব্দ
+                lowercase এবং পরবর্তী শব্দগুলো uppercase দিয়ে শুরু হয়।
+                JavaScript এ এটি standard
+                practice।<br /><br /><code>let myVariableName = "value";</code><br /><code>let totalPrice = 1000;</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(46, 204, 113, 0.15)">
+              🏋️
+            </div>
+            প্রাকটিস চ্যালেঞ্জ
+          </div>
+          <div class="challenge-list">
+            <div class="chal">
+              <div class="chal-num">চ্যালেঞ্জ</div>
+              <div class="chal-title">
+                Messy code কে proper structure এ লিখুন।
+              </div>
+              <div class="code-wrap" style="margin-top: 8px">
+                <div class="code-bar">
+                  <span class="code-lang">Messy Code</span>
+                </div>
+                <pre style="color: #ff6b35">
+let a="করিম";let b=25;if(b>=18){console.log("Adult");}</pre>
+              </div>
+              <button class="show-sol-btn" onclick="toggleSol(this)">
+                Clean Version দেখুন ↓
+              </button>
+              <div class="solution">
+                <div class="code-wrap" style="margin-top: 10px">
+                  <div class="code-bar">
+                    <span class="code-lang">Clean Code ✅</span><button class="copy-btn" onclick="copyCode(this)">
+                      copy
+                    </button>
+                  </div>
+                  <pre><span class="cm">// User information</span>
+<span class="kw">let</span> <span class="vr">userName</span> <span class="op">=</span> <span class="str">"করিম"</span>;
+<span class="kw">let</span> <span class="vr">userAge</span> <span class="op">=</span> <span class="num">25</span>;
+
+<span class="cm">// Age verification করে message দেখানো</span>
+<span class="kw">if</span> (<span class="vr">userAge</span> <span class="op">>=</span> <span class="num">18</span>) {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"Adult"</span>);
+}</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-btns">
+          <button class="nav-btn" onclick="goTo(2)">← Console.log</button>
+          <button class="nav-btn primary" onclick="goTo(4)">
+            🏆 চূড়ান্ত প্রজেক্ট →
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== SECTION 4: Final Project ===== -->
+      <div class="section" id="sec4">
+        <div class="sec-head">
+          <div class="sec-icon" style="background: rgba(247, 201, 72, 0.12)">
+            🏆
+          </div>
+          <div>
+            <div class="sec-tag">সামগ্রিক প্রজেক্ট</div>
+            <div class="sec-title" style="color: var(--y)">
+              Simple Age Calculator
+            </div>
+          </div>
+        </div>
+
+        <div class="summary" style="margin-bottom: 24px">
+          <h2>পর্যায় ১ সম্পন্ন! 🎉</h2>
+          <ul class="checklist">
+            <li>Variables (var, let, const) এবং Data Types</li>
+            <li>Operators (Arithmetic, Comparison, Logical)</li>
+            <li>Console.log এবং Input/Output</li>
+            <li>Comments এবং Code Structure</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(247, 201, 72, 0.15)">
+              📋
+            </div>
+            প্রজেক্টের বর্ণনা
+          </div>
+          <p>
+            এই প্রজেক্টে আপনি পর্যায় ১ এর সব বিষয় একসাথে ব্যবহার করবেন —
+            variables, operators, console.log, এবং proper comments সহ একটি Age
+            Calculator তৈরি করুন।
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(46, 204, 113, 0.15)">
+              💻
+            </div>
+            সম্পূর্ণ Code
+          </div>
+          <div class="code-wrap">
+            <div class="code-bar">
+              <span class="code-lang">Age Calculator — Full Project</span><button class="copy-btn"
+                onclick="copyCode(this)">copy</button>
+            </div>
+            <pre><span class="cm">// ===================================</span>
+<span class="cm">// Age Calculator Program</span>
+<span class="cm">// পর্যায় ১ এর সব concept ব্যবহার করা হয়েছে</span>
+<span class="cm">// ===================================</span>
+
+<span class="cm">// Current year — const কারণ পরিবর্তন হবে না</span>
+<span class="kw">const</span> <span class="vr">currentYear</span> <span class="op">=</span> <span class="num">2025</span>;
+
+<span class="cm">// User থেকে birth year নেওয়া</span>
+<span class="cm">// prompt সবসময় String দেয়, তাই Number() দিয়ে convert করলাম</span>
+<span class="kw">let</span> <span class="vr">birthYear</span> <span class="op">=</span> <span class="fn">Number</span>(<span class="fn">prompt</span>(<span class="str">"আপনার জন্ম সাল লিখুন:"</span>));
+
+<span class="cm">// Age calculation — arithmetic operator</span>
+<span class="kw">let</span> <span class="vr">age</span> <span class="op">=</span> <span class="vr">currentYear</span> <span class="op">-</span> <span class="vr">birthYear</span>;
+
+<span class="cm">// Result দেখানো — template literal ব্যবহার</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">`আপনার বয়স: <span class="op">${</span><span class="vr">age</span><span class="op">}</span> বছর`</span>);
+
+<span class="cm">// Adult/Minor check — comparison operator</span>
+<span class="kw">if</span> (<span class="vr">age</span> <span class="op">>=</span> <span class="num">18</span>) {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"✅ আপনি প্রাপ্তবয়স্ক!"</span>);
+} <span class="kw">else</span> {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"❌ আপনি অপ্রাপ্তবয়স্ক!"</span>);
+}
+
+<span class="cm">// Voting eligibility — logical AND operator</span>
+<span class="cm">// বয়স 18 থেকে 100 এর মধ্যে হতে হবে</span>
+<span class="kw">let</span> <span class="vr">canVote</span> <span class="op">=</span> <span class="vr">age</span> <span class="op">>=</span> <span class="num">18</span> <span class="op">&&</span> <span class="vr">age</span> <span class="op"><=</span> <span class="num">100</span>;
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"ভোট দিতে পারবেন:"</span>, <span class="vr">canVote</span>);
+
+<span class="cm">// typeof দিয়ে data types দেখানো</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"birthYear type:"</span>, <span class="kw">typeof</span> <span class="vr">birthYear</span>); <span class="cm">// "number"</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"canVote type:"</span>,   <span class="kw">typeof</span> <span class="vr">canVote</span>);   <span class="cm">// "boolean"</span></pre>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon" style="background: rgba(74, 158, 255, 0.15)">
+              🔍
+            </div>
+            Code এ কি কি শিখলাম?
+          </div>
+          <div class="type-grid">
+            <div class="type-item">
+              <div class="type-name" style="color: var(--y)">const</div>
+              <div class="type-desc">currentYear — পরিবর্তন হবে না</div>
+            </div>
+            <div class="type-item">
+              <div class="type-name" style="color: var(--b)">let</div>
+              <div class="type-desc">birthYear, age — পরিবর্তনযোগ্য</div>
+            </div>
+            <div class="type-item">
+              <div class="type-name" style="color: var(--o)">Number()</div>
+              <div class="type-desc">String → Number convert</div>
+            </div>
+            <div class="type-item">
+              <div class="type-name" style="color: var(--g)">- >= <=< /div>
+                  <div class="type-desc">Arithmetic & Comparison</div>
+              </div>
+              <div class="type-item">
+                <div class="type-name" style="color: var(--p)">&&</div>
+                <div class="type-desc">Logical AND operator</div>
+              </div>
+              <div class="type-item">
+                <div class="type-name" style="color: var(--r)">Template</div>
+                <div class="type-desc">`আপনার বয়স: ${age}`</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div class="card-icon" style="background: rgba(255, 107, 53, 0.15)">
+                🎯
+              </div>
+              পরের পর্যায়ে কি শিখবেন?
+            </div>
+            <p>
+              পর্যায় ২ তে শিখবেন
+              <strong style="color: var(--y)">Control Flow</strong> — if-else,
+              switch-case, ternary operator এবং truthy/falsy values। এই Age
+              Calculator কে আরও বেশি feature সহ তৈরি করতে পারবেন!
+            </p>
+            <div class="info-box" style="margin-top: 12px">
+              💪 প্রতিদিন কমপক্ষে ১ ঘণ্টা practice করুন। টিউটোরিয়াল দেখার চেয়ে
+              নিজে কোড লেখা ১০ গুণ বেশি কার্যকর!
+            </div>
+          </div>
+
+          <div class="nav-btns">
+            <button class="nav-btn" onclick="goTo(3)">← Comments</button>
+            <button class="nav-btn primary" onclick="goTo(0)">
+              🔄 শুরু থেকে দেখুন
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- /main -->
+    </div>
+    <!-- /layout -->
+
+    <script>
+      let current = 0;
+      const total = 5;
+
+      function buildDots() {
+        const c = document.getElementById("dots");
+        for (let i = 0; i < total; i++) {
+          const d = document.createElement("div");
+          d.className = "pdot" + (i === 0 ? " active" : "");
+          d.onclick = () => goTo(i);
+          c.appendChild(d);
+        }
+      }
+
+      function goTo(idx) {
+        document.getElementById("sec" + current)?.classList.remove("active");
+        document.getElementById("s" + current)?.classList.remove("active");
+
+        current = idx;
+        document.getElementById("sec" + idx)?.classList.add("active");
+        document.getElementById("s" + idx)?.classList.add("active");
+
+        // Update dots
+        const dots = document.querySelectorAll(".pdot");
+        dots.forEach((d, i) => {
+          d.className = "pdot";
+          if (i < idx) d.classList.add("done");
+          if (i === idx) d.classList.add("active");
+        });
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function toggleQA(el) {
+        el.parentElement.classList.toggle("open");
+      }
+
+      function toggleSol(btn) {
+        const sol = btn.nextElementSibling;
+        sol.classList.toggle("visible");
+        btn.textContent = sol.classList.contains("visible")
+          ? "লুকান ↑"
+          : "সমাধান দেখুন ↓";
+      }
+
+      function copyCode(btn) {
+        const pre = btn.closest(".code-wrap").querySelector("pre");
+        navigator.clipboard.writeText(pre.innerText).then(() => {
+          btn.textContent = "copied!";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.textContent = "copy";
+            btn.classList.remove("copied");
+          }, 2000);
+        });
+      }
+
+      buildDots();
+    </script>
+</body>
+
+</html>
