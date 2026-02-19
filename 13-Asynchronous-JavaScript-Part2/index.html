@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>পর্যায় ১৩ — Promises | JS বস মিশন</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Noto+Sans+Bengali:wght@400;600;700&family=Bebas+Neue&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #151820;
+    --card: #1a1e2a;
+    --border: #252a3a;
+    --accent: #f7c948;
+    --accent2: #4ecdc4;
+    --accent3: #ff6b6b;
+    --accent4: #a78bfa;
+    --text: #e2e8f0;
+    --muted: #8892a4;
+    --code-bg: #0a0c10;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans Bengali', sans-serif;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #0d0f14 0%, #151225 50%, #0d0f14 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 60px 40px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: 'PROMISE';
+    position: absolute;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 180px;
+    color: rgba(247,201,72,0.04);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .mission-tag {
+    display: inline-block;
+    background: var(--accent);
+    color: #000;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    padding: 4px 14px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(42px, 8vw, 80px);
+    color: var(--accent);
+    letter-spacing: 2px;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .hero p {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* NAV */
+  .toc {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 20px 40px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .toc a {
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 6px 16px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    transition: all .2s;
+  }
+  .toc a:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* LAYOUT */
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  /* SECTION HEADERS */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 60px 0 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: var(--accent);
+    opacity: .3;
+    line-height: 1;
+  }
+  .section-title { font-size: 22px; font-weight: 700; }
+  .section-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  /* TOPIC CARD */
+  .topic-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 32px;
+    overflow: hidden;
+  }
+  .topic-label {
+    padding: 14px 24px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .label-concept { background: rgba(247,201,72,.12); color: var(--accent); border-bottom: 1px solid rgba(247,201,72,.2); }
+  .label-viva { background: rgba(78,205,196,.12); color: var(--accent2); border-bottom: 1px solid rgba(78,205,196,.2); }
+  .label-challenge { background: rgba(255,107,107,.12); color: var(--accent3); border-bottom: 1px solid rgba(255,107,107,.2); }
+  .label-future { background: rgba(167,139,250,.12); color: var(--accent4); border-bottom: 1px solid rgba(167,139,250,.2); }
+
+  .topic-body { padding: 24px; }
+
+  /* CODE BLOCK */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    overflow-x: auto;
+    margin: 16px 0;
+    position: relative;
+  }
+  code {
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #abb2bf;
+  }
+  .kw { color: #c678dd; }
+  .fn { color: #61afef; }
+  .str { color: #98c379; }
+  .cm { color: #5c6370; font-style: italic; }
+  .num { color: #d19a66; }
+  .op { color: #56b6c2; }
+
+  /* PROSE */
+  .prose p { margin-bottom: 14px; font-size: 15px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .highlight { color: var(--accent); font-weight: 600; }
+  .hl2 { color: var(--accent2); font-weight: 600; }
+  .hl3 { color: var(--accent3); font-weight: 600; }
+  .hl4 { color: var(--accent4); font-weight: 600; }
+
+  /* VIVA CARDS */
+  .viva-item {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .viva-q {
+    background: rgba(78,205,196,.08);
+    padding: 14px 18px;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--accent2);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .viva-q::before { content: 'Q.'; font-family: 'Fira Code', monospace; opacity: .7; flex-shrink: 0; }
+  .viva-a {
+    padding: 14px 18px;
+    font-size: 14px;
+    color: var(--text);
+    border-top: 1px solid var(--border);
+    background: var(--code-bg);
+  }
+  .viva-a::before { content: '➤ '; color: var(--accent2); }
+
+  /* CHALLENGE */
+  .challenge-item {
+    border: 1px solid rgba(255,107,107,.2);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .challenge-header {
+    background: rgba(255,107,107,.08);
+    padding: 12px 18px;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--accent3);
+    letter-spacing: 1px;
+  }
+  .challenge-body { padding: 16px 18px; font-size: 14px; }
+
+  /* FUTURE USE GRID */
+  .future-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    margin-top: 12px;
+  }
+  .future-card {
+    background: rgba(167,139,250,.07);
+    border: 1px solid rgba(167,139,250,.2);
+    border-radius: 8px;
+    padding: 18px;
+  }
+  .future-icon { font-size: 24px; margin-bottom: 8px; }
+  .future-title { font-weight: 700; color: var(--accent4); font-size: 14px; margin-bottom: 6px; }
+  .future-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* DIVIDER */
+  .topic-divider {
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 4px;
+    margin: 40px 0;
+    opacity: .4;
+  }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 8px 0 24px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    animation: fillbar 1.5s ease-out;
+  }
+  @keyframes fillbar { from { width: 0; } }
+
+  /* BADGE */
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #000;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  /* STATE DIAGRAM */
+  .state-diagram {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  .state-box {
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+  }
+  .state-pending { background: rgba(139,92,246,.2); border: 2px solid #8b5cf6; color: #c4b5fd; }
+  .state-fulfilled { background: rgba(34,197,94,.15); border: 2px solid #22c55e; color: #86efac; }
+  .state-rejected { background: rgba(239,68,68,.15); border: 2px solid #ef4444; color: #fca5a5; }
+  .state-arrow {
+    font-size: 20px;
+    color: var(--muted);
+    padding: 0 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+  }
+  .state-arrow span { font-size: 18px; color: var(--accent); }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+    letter-spacing: 2px;
+  }
+
+  @media (max-width: 600px) {
+    .hero { padding: 40px 20px 30px; }
+    .toc { padding: 12px 16px; }
+    .container { padding: 24px 16px 60px; }
+    .topic-body { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="mission-tag">JS বস মিশন</div>
+  <h1>পর্যায় ১৩</h1>
+  <p style="font-size:20px; color: var(--accent2); font-weight:700; margin-bottom:8px;">Asynchronous JavaScript — Part 2</p>
+  <p>Promises এর ভিত্তি · then/catch/finally · Promise Chaining · Promise.all & Promise.race</p>
+</div>
+
+<!-- STICKY NAV -->
+<nav class="toc">
+  <a href="#topic1">📌 Promises ভিত্তি</a>
+  <a href="#topic2">📌 then/catch/finally</a>
+  <a href="#topic3">📌 Promise Chaining</a>
+  <a href="#topic4">📌 Promise.all & .race</a>
+</nav>
+
+<div class="container">
+
+  <!-- ████████ TOPIC 1 ████████ -->
+  <div id="topic1">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <div>
+        <div class="section-title">Promises এর ভিত্তি</div>
+        <div class="section-sub">Promise কি, কেন দরকার, এবং কিভাবে কাজ করে</div>
+      </div>
+    </div>
+
+    <!-- CONCEPT -->
+    <div class="topic-card">
+      <div class="topic-label label-concept">📖 কনসেপ্ট ও উদাহরণ</div>
+      <div class="topic-body prose">
+        <p>
+          <span class="highlight">Promise</span> হলো JavaScript-এর একটি Object যা ভবিষ্যতে সম্পন্ন হবে এমন একটি কাজের <em>প্রতিশ্রুতি</em> ধারণ করে। Callback Hell সমস্যার সমাধান হিসেবে ES6-এ এটি আনা হয়েছে।
+        </p>
+        <p>
+          Promise-এর <span class="highlight">৩টি অবস্থা</span> থাকে:
+        </p>
+
+        <div class="state-diagram">
+          <div class="state-box state-pending">⏳ Pending<br><small>অপেক্ষায়</small></div>
+          <div class="state-arrow">
+            <span>→</span>
+            <div>resolve()</div>
+          </div>
+          <div class="state-box state-fulfilled">✅ Fulfilled<br><small>সফল</small></div>
+          <div style="width:100%; height:8px;"></div>
+          <div class="state-box state-pending">⏳ Pending</div>
+          <div class="state-arrow">
+            <span>→</span>
+            <div>reject()</div>
+          </div>
+          <div class="state-box state-rejected">❌ Rejected<br><small>ব্যর্থ</small></div>
+        </div>
+
+        <p>একটি Promise settle হয়ে গেলে আর পরিবর্তন হয় না — এটি <span class="highlight">Immutable</span>।</p>
+
+        <pre><code><span class="cm">// ✅ Example 1: Promise তৈরি করা</span>
+<span class="kw">const</span> myPromise <span class="op">=</span> <span class="kw">new</span> <span class="fn">Promise</span>((resolve, reject) <span class="op">=></span> {
+  <span class="kw">let</span> success <span class="op">=</span> <span class="num">true</span>;
+
+  <span class="kw">if</span> (success) {
+    <span class="fn">resolve</span>(<span class="str">"কাজ সফল হয়েছে! 🎉"</span>);
+  } <span class="kw">else</span> {
+    <span class="fn">reject</span>(<span class="str">"কাজ ব্যর্থ হয়েছে! ❌"</span>);
+  }
+});
+
+console.<span class="fn">log</span>(myPromise); <span class="cm">// Promise { 'কাজ সফল হয়েছে! 🎉' }</span></code></pre>
+
+        <pre><code><span class="cm">// ✅ Example 2: Real-world — ডেটা লোড করার অনুকরণ</span>
+<span class="kw">function</span> <span class="fn">fetchUserData</span>(userId) {
+  <span class="kw">return new</span> <span class="fn">Promise</span>((resolve, reject) <span class="op">=></span> {
+    <span class="fn">setTimeout</span>(() <span class="op">=></span> {
+      <span class="kw">if</span> (userId <span class="op">></span> <span class="num">0</span>) {
+        <span class="fn">resolve</span>({ id: userId, name: <span class="str">"Rakib"</span>, age: <span class="num">25</span> });
+      } <span class="kw">else</span> {
+        <span class="fn">reject</span>(<span class="kw">new</span> <span class="fn">Error</span>(<span class="str">"Invalid User ID"</span>));
+      }
+    }, <span class="num">1000</span>);
+  });
+}
+
+<span class="fn">fetchUserData</span>(<span class="num">1</span>)
+  .<span class="fn">then</span>(user <span class="op">=></span> console.<span class="fn">log</span>(<span class="str">"User:"</span>, user))
+  .<span class="fn">catch</span>(err <span class="op">=></span> console.<span class="fn">log</span>(<span class="str">"Error:"</span>, err.message));</code></pre>
+
+        <pre><code><span class="cm">// ✅ Example 3: Promise State বোঝা</span>
+<span class="kw">const</span> p1 <span class="op">=</span> <span class="fn">Promise</span>.<span class="fn">resolve</span>(<span class="str">"সরাসরি সফল"</span>);   <span class="cm">// Fulfilled</span>
+<span class="kw">const</span> p2 <span class="op">=</span> <span class="fn">Promise</span>.<span class="fn">reject</span>(<span class="str">"সরাসরি ব্যর্থ"</span>);   <span class="cm">// Rejected</span>
+<span class="kw">const</span> p3 <span class="op">=</span> <span class="kw">new</span> <span class="fn">Promise</span>(() <span class="op">=></span> {});             <span class="cm">// Forever Pending!</span>
+
+console.<span class="fn">log</span>(p1); <span class="cm">// Promise { 'সরাসরি সফল' }</span>
+console.<span class="fn">log</span>(p2); <span class="cm">// Promise { &lt;rejected&gt; 'সরাসরি ব্যর্থ' }</span></code></pre>
+      </div>
+    </div>
+
+    <!-- VIVA -->
+    <div class="topic-card">
+      <div class="topic-label label-viva">🎤 ভাইবা গাইড</div>
+      <div class="topic-body">
+        <div class="viva-item">
+          <div class="viva-q">Promise কি এবং কেন ব্যবহার করা হয়?</div>
+          <div class="viva-a">Promise হলো একটি Object যা asynchronous কাজের ভবিষ্যৎ ফলাফল ধারণ করে। এটি Callback Hell এড়াতে এবং asynchronous কোডকে cleaner, readable ও maintainable করতে ব্যবহার হয়।</div>
+        </div>
+        <div class="viva-item">
+          <div class="viva-q">Promise-এর তিনটি state কি কি?</div>
+          <div class="viva-a">১. Pending — কাজ চলছে। ২. Fulfilled — resolve() কল হয়ে সফল হয়েছে। ৩. Rejected — reject() কল হয়ে ব্যর্থ হয়েছে। একবার Fulfilled বা Rejected হলে আর পরিবর্তন হয় না।</div>
+        </div>
+        <div class="viva-item">
+          <div class="viva-q">Promise.resolve() এবং new Promise() এর পার্থক্য কি?</div>
+          <div class="viva-a">Promise.resolve(value) সরাসরি একটি Fulfilled Promise দেয়। new Promise((resolve, reject) => {}) দিয়ে নিজে নিয়ন্ত্রণ করা যায় — কখন resolve বা reject করবো তা ঠিক করা যায়।</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHALLENGE -->
+    <div class="topic-card">
+      <div class="topic-label label-challenge">💪 কোডিং চ্যালেঞ্জ</div>
+      <div class="topic-body">
+        <div class="challenge-item">
+          <div class="challenge-header">CHALLENGE 01 — লটারি মেশিন</div>
+          <div class="challenge-body">
+            <p style="margin-bottom:12px;">একটি Promise তৈরি করো যা random number জেনারেট করবে। সংখ্যাটি ৫ এর বেশি হলে resolve (জিতেছ!), নইলে reject (হেরেছ!)।</p>
+            <pre><code><span class="cm">// 🎯 Solution</span>
+<span class="kw">function</span> <span class="fn">lottery</span>() {
+  <span class="kw">return new</span> <span class="fn">Promise</span>((resolve, reject) <span class="op">=></span> {
+    <span class="kw">const</span> num <span class="op">=</span> Math.<span class="fn">floor</span>(Math.<span class="fn">random</span>() <span class="op">*</span> <span class="num">10</span>) <span class="op">+</span> <span class="num">1</span>;
+    console.<span class="fn">log</span>(<span class="str">`Generated: ${num}`</span>);
+    num <span class="op">></span> <span class="num">5</span>
+      ? <span class="fn">resolve</span>(<span class="str">`🎉 জিতেছ! সংখ্যা ছিল ${num}`</span>)
+      : <span class="fn">reject</span>(<span class="str">`😢 হেরেছ! সংখ্যা ছিল ${num}`</span>);
+  });
+}
+
+<span class="fn">lottery</span>()
+  .<span class="fn">then</span>(msg <span class="op">=></span> console.<span class="fn">log</span>(msg))
+  .<span class="fn">catch</span>(msg <span class="op">=></span> console.<span class="fn">log</span>(msg));</code></pre>
+          </div>
+        </div>
+
+        <div class="challenge-item">
+          <div class="challenge-header">CHALLENGE 02 — Delayed Message</div>
+          <div class="challenge-body">
+            <p style="margin-bottom:12px;">একটি <code>delay(ms, message)</code> function তৈরি করো যা নির্দিষ্ট সময় পর message সহ resolve হবে।</p>
+            <pre><code><span class="cm">// 🎯 Solution</span>
+<span class="kw">function</span> <span class="fn">delay</span>(ms, message) {
+  <span class="kw">return new</span> <span class="fn">Promise</span>(resolve <span class="op">=></span> {
+    <span class="fn">setTimeout</span>(() <span class="op">=></span> <span class="fn">resolve</span>(message), ms);
+  });
+}
+
+<span class="fn">delay</span>(<span class="num">2000</span>, <span class="str">"২ সেকেন্ড পরে হ্যালো!"</span>)
+  .<span class="fn">then</span>(msg <span class="op">=></span> console.<span class="fn">log</span>(msg));</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FUTURE -->
+    <div class="topic-card">
+      <div class="topic-label label-future">🚀 ফিউচার ইমপ্লিমেন্টেশন</div>
+      <div class="topic-body">
+        <div class="future-grid">
+          <div class="future-card">
+            <div class="future-icon">🌐</div>
+            <div class="future-title">API Integration</div>
+            <div class="future-desc">fetch() ফাংশন Promise return করে। সব REST API call-এ Promise ব্যবহার হয়।</div>
+          </div>
+          <div class="future-card">
+            <div class="future-icon">🗄️</div>
+            <div class="future-title">Database Query</div>
+            <div class="future-desc">MongoDB, Firebase ইত্যাদির query সব Promise-based। Data save/load সব এখানে।</div>
+          </div>
+          <div class="future-card">
+            <div class="future-icon">📁</div>
+            <div class="future-title">File Operations</div>
+            <div class="future-desc">Node.js-এ file read/write Promise দিয়ে করা হয় (fs.promises)।</div>
+          </div>
+          <div class="future-card">
+            <div class="future-icon">⚙️</div>
+            <div class="future-title">Background Tasks</div>
+            <div class="future-desc">Image compression, data processing — heavy কাজ Promise দিয়ে background-এ চালানো হয়।</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="topic-divider">• • • • •</div>
+
+  <!-- ████████ TOPIC 2 ████████ -->
+  <div id="topic2">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <div>
+        <div class="section-title">then, catch, finally</div>
+        <div class="section-sub">Promise এর result handle করার তিনটি হাতিয়ার</div>
+      </div>
+    </div>
+
+    <div class="topic-card">
+      <div class="topic-label label-concept">📖 কনসেপ্ট ও উদাহরণ</div>
+      <div class="topic-body prose">
+        <p>
+          <span class="highlight">.then()</span> — সফল হলে চলে। Fulfilled value পায়।<br>
+          <span class="hl3">.catch()</span> — ব্যর্থ হলে চলে। Rejected reason পায়।<br>
+          <span class="hl2">.finally()</span> — সফল বা ব্যর্থ যাই হোক, সর্বদা চলে।
+        </p>
+
+        <pre><code><span class="cm">// ✅ Example 1: তিনটিই একসাথে</span>
+<span class="kw">function</span> <span class="fn">getWeather</span>(city) {
+  <span class="kw">return new</span> <span class="fn">Promise</span>((resolve, reject) <span class="op">=></span> {
+    <span class="fn">setTimeout</span>(() <span class="op">=></span> {
+      <span class="kw">if</span> (city <span class="op">===</span> <span class="str">"Dhaka"</span>) {
+        <span class="fn">resolve</span>({ temp: <span class="num">32</span>, humidity: <span class="num">85</span> });
+      } <span class="kw">else</span> {
+        <span class="fn">reject</span>(<span class="kw">new</span> <span class="fn">Error</span>(<span class="str">"শহর পাওয়া যায়নি"</span>));
+      }
+    }, <span class="num">1000</span>);
+  });
+}
+
+<span class="fn">getWeather</span>(<span class="str">"Dhaka"</span>)
+  .<span class="fn">then</span>(data <span class="op">=></span> {
+    console.<span class="fn">log</span>(<span class="str">`🌡️ তাপমাত্রা: ${data.temp}°C`</span>);
+    <span class="kw">return</span> data; <span class="cm">// পরের .then() এ পাঠাবো</span>
+  })
+  .<span class="fn">then</span>(data <span class="op">=></span> {
+    console.<span class="fn">log</span>(<span class="str">`💧 আর্দ্রতা: ${data.humidity}%`</span>);
+  })
+  .<span class="fn">catch</span>(err <span class="op">=></span> {
+    console.<span class="fn">log</span>(<span class="str">`❌ Error: ${err.message}`</span>);
+  })
+  .<span class="fn">finally</span>(() <span class="op">=></span> {
+    console.<span class="fn">log</span>(<span class="str">"✅ Weather check শেষ হয়েছে"</span>);
+  });</code></pre>
+
+        <pre><code><span class="cm">// ✅ Example 2: catch শুধু error ধরে না — throw ও ধরে</span>
+<span class="fn">Promise</span>.<span class="fn">resolve</span>(<span class="num">5</span>)
+  .<span class="fn">then</span>(val <span class="op">=></span> {
+    console.<span class="fn">log</span>(<span class="str">"Step 1:"</span>, val);
+    <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">"মাঝখানে সমস্যা!"</span>); <span class="cm">// catch এ যাবে</span>
+  })
+  .<span class="fn">then</span>(val <span class="op">=></span> {
+    console.<span class="fn">log</span>(<span class="str">"Step 2 — এটি skip হবে"</span>);
+  })
+  .<span class="fn">catch</span>(err <span class="op">=></span> {
+    console.<span class="fn">log</span>(<span class="str">"💥 Caught:"</span>, err.message);
+  })
+  .<span class="fn">finally</span>(() <span class="op">=></span> {
+    console.<span class="fn">log</span>(<span class="str">"🏁 সবশেষে এটি চলবেই"</span>);
+  });
+
+<span class="cm">// Output:
+// Step 1: 5
+// 💥 Caught: মাঝখানে সমস্যা!
+// 🏁 সবশেষে এটি চলবেই</span></code></pre>
+
+        <pre><code><span class="cm">// ✅ Example 3: Loading indicator pattern</span>
+<span class="kw">function</span> <span class="fn">showLoader</span>() { console.<span class="fn">log</span>(<span class="str">"⏳ Loading..."</span>); }
+<span class="kw">function</span> <span class="fn">hideLoader</span>() { console.<span class="fn">log</span>(<span class="str">"✅ Done!"</span>); }
+
+<span class="fn">showLoader</span>();
+
+<span class="fn">fetch</span>(<span class="str">"https://api.example.com/data"</span>)
+  .<span class="fn">then</span>(res <span class="op">=></span> res.<span class="fn">json</span>())
+  .<span class="fn">then</span>(data <span class="op">=></span> console.<span class="fn">log</span>(data))
+  .<span class="fn">catch</span>(err <span class="op">=></span> console.<span class="fn">log</span>(<span class="str">"Error:"</span>, err))
+  .<span class="fn">finally</span>(() <span class="op">=></span> <span class="fn">hideLoader</span>()); <span class="cm">// সবসময় loader বন্ধ হবে</span></code></pre>
+      </div>
+    </div>
+
+    <div class="topic-card">
+      <div class="topic-label label-viva">🎤 ভাইবা গাইড</div>
+      <div class="topic-body">
+        <div class="viva-item">
+          <div class="viva-q">.then() কি দুটো argument নিতে পারে?</div>
+          <div class="viva-a">হ্যাঁ! .then(onFulfilled, onRejected) — প্রথম callback সফলতায়, দ্বিতীয়টি ব্যর্থতায় চলে। তবে .catch() ব্যবহার করা best practice কারণ এটি then-এর ভেতর throw হওয়া error-ও ধরে।</div>
+        </div>
+        <div class="viva-item">
+          <div class="viva-q">.finally() কি value return করতে পারে?</div>
+          <div class="viva-a">না — finally() সাধারণত আগের Promise-এর value pass করে দেয় এবং নিজে কোনো value return করে না। এটি cleanup কাজের জন্য (loader বন্ধ, connection close ইত্যাদি)।</div>
+        </div>
+        <div class="viva-item">
+          <div class="viva-q">.then() chain-এ error হলে কি হয়?</div>
+          <div class="viva-a">Error হওয়া .then() এর পরের সব .then() skip হয়ে যায় এবং সরাসরি .catch() এ চলে যায়।</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic-card">
+      <div class="topic-label label-challenge">💪 কোডিং চ্যালেঞ্জ</div>
+      <div class="topic-body">
+        <div class="challenge-item">
+          <div class="challenge-header">CHALLENGE 03 — Login System</div>
+          <div class="challenge-body">
+            <p style="margin-bottom:12px;">checkPassword(password) function বানাও। সঠিক password (১২৩৪৫৬) হলে resolve, নইলে reject। finally তে "Login attempt recorded" print করো।</p>
+            <pre><code><span class="cm">// 🎯 Solution</span>
+<span class="kw">function</span> <span class="fn">checkPassword</span>(password) {
+  <span class="kw">return new</span> <span class="fn">Promise</span>((resolve, reject) <span class="op">=></span> {
+    <span class="fn">setTimeout</span>(() <span class="op">=></span> {
+      password <span class="op">===</span> <span class="str">"123456"</span>
+        ? <span class="fn">resolve</span>(<span class="str">"✅ Login সফল! স্বাগতম!"</span>)
+        : <span class="fn">reject</span>(<span class="kw">new</span> <span class="fn">Error</span>(<span class="str">"❌ ভুল পাসওয়ার্ড!"</span>));
+    }, <span class="num">500</span>);
+  });
+}
+
+<span class="fn">checkPassword</span>(<span class="str">"abcdef"</span>)
+  .<span class="fn">then</span>(msg <span class="op">=></span> console.<span class="fn">log</span>(msg))
+  .<span class="fn">catch</span>(err <span class="op">=></span> console.<span class="fn">log</span>(err.message))
+  .<span class="fn">finally</span>(() <span class="op">=></span> console.<span class="fn">log</span>(<span class="str">"📝 Login attempt recorded"</span>));</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic-card">
+      <div class="topic-label label-future">🚀 ফিউচার ইমপ্লিমেন্টেশন</div>
+      <div class="topic-body">
+        <div class="future-grid">
+          <div class="future-card">
+            <div class="future-icon">⏳</div>
+            <div class="future-title">Loading Spinner</div>
+            <div class="future-desc">API call শুরুতে loader দেখাও, .finally() তে বন্ধ করো — সফল-ব্যর্থ যাই হোক।</div>
+          </div>
+          <div class="future-card">
+            <div class="future-icon">🔐</div>
+            <div class="future-title">Auth System</div>
+            <div class="future-desc">Login API থেকে .then() এ token save, .catch() এ error message দেখাও।</div>
+          </div>
+          <div class="future-card">
+            <div class="future-icon">📊</div>
+            <div class="future-title">Analytics</div>
+            <div class="future-desc">.finally() তে page analytics, activity log পাঠানো হয় সব request-এ।</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="topic-divider">• • • • •</div>
+
+  <!-- ████████ TOPIC 3 ████████ -->
+  <div id="topic3">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <div>
+        <div class="section-title">Promise Chaining</div>
+        <div class="section-sub">একের পর এক async কাজ সুন্দরভাবে সাজানো</div>
+      </div>
+    </div>
+
+    <div class="topic-card">
+      <div class="topic-label label-concept">📖 কনসেপ্ট ও উদাহরণ</div>
+      <div class="topic-body prose">
+        <p>
+          <span class="highlight">Promise Chaining</span> মানে একটি .then() এর ভেতর থেকে আরেকটি Promise return করা — এভাবে sequential async কাজ করা যায় cleanly। এটিই Callback Hell এর আসল সমাধান।
+        </p>
+
+        <pre><code><span class="cm">// ✅ Example 1: Basic Chaining</span>
+<span class="kw">const</span> <span class="fn">step1</span> <span class="op">=</span> () <span class="op">=></span> <span class="kw">new</span> <span class="fn">Promise</span>(res <span class="op">=></span> <span class="fn">setTimeout</span>(() <span class="op">=></span> <span class="fn">res</span>(<span class="num">10</span>), <span class="num">500</span>));
+<span class="kw">const</span> <span class="fn">step2</span> <span class="op">=</span> (val) <span class="op">=></span> <span class="kw">new</span> <span class="fn">Promise</span>(res <span class="op">=></span> <span class="fn">setTimeout</span>(() <span class="op">=></span> <span class="fn">res</span>(val <span class="op">*</span> <span class="num">2</span>), <span class="num">500</span>));
+<span class="kw">const</span> <span class="fn">step3</span> <span class="op">=</span> (val) <span class="op">=></span> <span class="kw">new</span> <span class="fn">Promise</span>(res <span class="op">=></span> <span class="fn">setTimeout</span>(() <span class="op">=></span> <span class="fn">res</span>(val <span class="op">+</span> <span class="num">5</span>), <span class="num">500</span>));
+
+<span class="fn">step1</span>()
+  .<span class="fn">then</span>(val <span class="op">=></span> {
+    console.<span class="fn">log</span>(<span class="str">"Step 1 result:"</span>, val); <span class="cm">// 10</span>
+    <span class="kw">return</span> <span class="fn">step2</span>(val);
+  })
+  .<span class="fn">then</span>(val <span class="op">=></span> {
+    console.<span class="fn">log</span>(<span class="str">"Step 2 result:"</span>, val); <span class="cm">// 20</span>
+    <span class="kw">return</span> <span class="fn">step3</span>(val);
+  })
+  .<span class="fn">then</span>(val <span class="op">=></span> {
+    console.<span class="fn">log</span>(<span class="str">"Final result:"</span>, val); <span class="cm">// 25</span>
+  })
+  .<span class="fn">catch</span>(err <span class="op">=></span> console.<span class="fn">log</span>(<span class="str">"Error:"</span>, err));</code></pre>
+
+        <pre><code><span class="cm">// ✅ Example 2: Real-world — Order Processing System</span>
+<span class="kw">function</span> <span class="fn">validateOrder</span>(order) {
+  <span class="kw">return new</span> <span class="fn">Promise</span>((resolve, reject) <span class="op">=></span> {
+    <span class="fn">setTimeout</span>(() <span class="op">=></span> {
+      order.items.<span class="fn">length</span> <span class="op">></span> <span class="num">0</span>
+        ? <span class="fn">resolve</span>({ ...order, status: <span class="str">"validated"</span> })
+        : <span class="fn">reject</span>(<span class="kw">new</span> <span class="fn">Error</span>(<span class="str">"কার্ট খালি!"</span>));
+    }, <span class="num">500</span>);
+  });
+}
+
+<span class="kw">function</span> <span class="fn">processPayment</span>(order) {
+  <span class="kw">return new</span> <span class="fn">Promise</span>(resolve <span class="op">=></span> {
+    <span class="fn">setTimeout</span>(() <span class="op">=></span> <span class="fn">resolve</span>({ ...order, status: <span class="str">"paid"</span>, txnId: <span class="str">"TXN123"</span> }), <span class="num">800</span>);
+  });
+}
+
+<span class="kw">function</span> <span class="fn">shipOrder</span>(order) {
+  <span class="kw">return new</span> <span class="fn">Promise</span>(resolve <span class="op">=></span> {
+    <span class="fn">setTimeout</span>(() <span class="op">=></span> <span class="fn">resolve</span>({ ...order, status: <span class="str">"shipped"</span>, tracking: <span class="str">"BD456"</span> }), <span class="num">600</span>);
+  });
+}
+
+<span class="kw">const</span> myOrder <span class="op">=</span> { id: <span class="num">1</span>, items: [<span class="str">"Book"</span>, <span class="str">"Pen"</span>], total: <span class="num">500</span> };
+
+<span class="fn">validateOrder</span>(myOrder)
+  .<span class="fn">then</span>(order <span class="op">=></span> {
+    console.<span class="fn">log</span>(<span class="str">"✅ Validated"</span>);
+    <span class="kw">return</span> <span class="fn">processPayment</span>(order);
+  })
+  .<span class="fn">then</span>(order <span class="op">=></span> {
+    console.<span class="fn">log</span>(<span class="str">`💳 Paid — TxnID: ${order.txnId}`</span>);
+    <span class="kw">return</span> <span class="fn">shipOrder</span>(order);
+  })
+  .<span class="fn">then</span>(order <span class="op">=></span> {
+    console.<span class="fn">log</span>(<span class="str">`📦 Shipped! Tracking: ${order.tracking}`</span>);
+  })
+  .<span class="fn">catch</span>(err <span class="op">=></span> console.<span class="fn">log</span>(<span class="str">`❌ Failed: ${err.message}`</span>));</code></pre>
+      </div>
+    </div>
+
+    <div class="topic-card">
+      <div class="topic-label label-viva">🎤 ভাইবা গাইড</div>
+      <div class="topic-body">
+        <div class="viva-item">
+          <div class="viva-q">Promise Chaining এ return না করলে কি হয়?</div>
+          <div class="viva-a">return না করলে পরের .then() undefined পাবে এবং chain break হয়ে যাবে। সবসময় Promise বা value return করতে হবে।</div>
+        </div>
+        <div class="viva-item">
+          <div class="viva-q">Promise Chaining vs Callback Hell — পার্থক্য কি?</div>
+          <div class="viva-a">Callback Hell এ nested structure হয় (পিরামিড আকার)। Promise Chaining flat ও linear — পড়তে সহজ, maintain করা সহজ, একটি .catch() দিয়ে সব error handle করা যায়।</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic-card">
+      <div class="topic-label label-challenge">💪 কোডিং চ্যালেঞ্জ</div>
+      <div class="topic-body">
+        <div class="challenge-item">
+          <div class="challenge-header">CHALLENGE 04 — User Profile Builder</div>
+          <div class="challenge-body">
+            <p style="margin-bottom:12px;">তিনটি async function বানাও: getUser(id), getPosts(userId), getComments(postId)। Chain করে প্রতিটি step এর result print করো।</p>
+            <pre><code><span class="cm">// 🎯 Solution</span>
+<span class="kw">const</span> <span class="fn">getUser</span> <span class="op">=</span> (id) <span class="op">=></span>
+  <span class="kw">new</span> <span class="fn">Promise</span>(res <span class="op">=></span> <span class="fn">setTimeout</span>(() <span class="op">=></span> <span class="fn">res</span>({ id, name: <span class="str">"Rakib"</span> }), <span class="num">500</span>));
+
+<span class="kw">const</span> <span class="fn">getPosts</span> <span class="op">=</span> (userId) <span class="op">=></span>
+  <span class="kw">new</span> <span class="fn">Promise</span>(res <span class="op">=></span> <span class="fn">setTimeout</span>(() <span class="op">=></span> <span class="fn">res</span>([<span class="str">"Post 1"</span>, <span class="str">"Post 2"</span>]), <span class="num">400</span>));
+
+<span class="kw">const</span> <span class="fn">getComments</span> <span class="op">=</span> (postId) <span class="op">=></span>
+  <span class="kw">new</span> <span class="fn">Promise</span>(res <span class="op">=></span> <span class="fn">setTimeout</span>(() <span class="op">=></span> <span class="fn">res</span>([<span class="str">"Nice!"</span>, <span class="str">"Great!"</span>]), <span class="num">300</span>));
+
+<span class="fn">getUser</span>(<span class="num">1</span>)
+  .<span class="fn">then</span>(user <span class="op">=></span> {
+    console.<span class="fn">log</span>(<span class="str">"👤 User:"</span>, user.name);
+    <span class="kw">return</span> <span class="fn">getPosts</span>(user.id);
+  })
+  .<span class="fn">then</span>(posts <span class="op">=></span> {
+    console.<span class="fn">log</span>(<span class="str">"📝 Posts:"</span>, posts);
+    <span class="kw">return</span> <span class="fn">getComments</span>(posts[<span class="num">0</span>]);
+  })
+  .<span class="fn">then</span>(comments <span class="op">=></span> {
+    console.<span class="fn">log</span>(<span class="str">"💬 Comments:"</span>, comments);
+  })
+  .<span class="fn">catch</span>(err <span class="op">=></span> console.<span class="fn">log</span>(<span class="str">"Error:"</span>, err));</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic-card">
+      <div class="topic-label label-future">🚀 ফিউচার ইমপ্লিমেন্টেশন</div>
+      <div class="topic-body">
+        <div class="future-grid">
+          <div class="future-card">
+            <div class="future-icon">🛒</div>
+            <div class="future-title">E-commerce Flow</div>
+            <div class="future-desc">Cart validate → Payment → Invoice generate → Email পাঠানো — সব chain করা হয়।</div>
+          </div>
+          <div class="future-card">
+            <div class="future-icon">🔄</div>
+            <div class="future-title">Data Pipeline</div>
+            <div class="future-desc">Fetch → Parse → Transform → Save — sequential data processing।</div>
+          </div>
+          <div class="future-card">
+            <div class="future-icon">👤</div>
+            <div class="future-title">User Onboarding</div>
+            <div class="future-desc">Create account → Send verification → Setup profile → Welcome email — chain করা হয়।</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="topic-divider">• • • • •</div>
+
+  <!-- ████████ TOPIC 4 ████████ -->
+  <div id="topic4">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <div>
+        <div class="section-title">Promise.all এবং Promise.race</div>
+        <div class="section-sub">একাধিক Promise একসাথে পরিচালনা করার শক্তিশালী পদ্ধতি</div>
+      </div>
+    </div>
+
+    <div class="topic-card">
+      <div class="topic-label label-concept">📖 কনসেপ্ট ও উদাহরণ</div>
+      <div class="topic-body prose">
+        <p>
+          <span class="highlight">Promise.all()</span> — সব Promise সফল হলে তবেই resolve। একটিও ব্যর্থ হলে পুরো টা reject।<br>
+          <span class="hl2">Promise.race()</span> — যে Promise আগে settle হবে (সফল বা ব্যর্থ), সেটিই জেতে।<br>
+          <span class="hl4">Promise.allSettled()</span> — সব শেষ হওয়া পর্যন্ত অপেক্ষা করে, সফল-ব্যর্থ সব result দেয়।<br>
+          <span class="hl3">Promise.any()</span> — যেকোনো একটি সফল হলে resolve।
+        </p>
+
+        <pre><code><span class="cm">// ✅ Example 1: Promise.all — সব API একসাথে call</span>
+<span class="kw">const</span> <span class="fn">getUserAPI</span>  <span class="op">=</span> () <span class="op">=></span> <span class="kw">new</span> <span class="fn">Promise</span>(res <span class="op">=></span> <span class="fn">setTimeout</span>(() <span class="op">=></span> <span class="fn">res</span>({ name: <span class="str">"Rakib"</span> }),  <span class="num">1000</span>));
+<span class="kw">const</span> <span class="fn">getPostsAPI</span> <span class="op">=</span> () <span class="op">=></span> <span class="kw">new</span> <span class="fn">Promise</span>(res <span class="op">=></span> <span class="fn">setTimeout</span>(() <span class="op">=></span> <span class="fn">res</span>([<span class="str">"P1"</span>, <span class="str">"P2"</span>]), <span class="num">800</span>));
+<span class="kw">const</span> <span class="fn">getAdsAPI</span>   <span class="op">=</span> () <span class="op">=></span> <span class="kw">new</span> <span class="fn">Promise</span>(res <span class="op">=></span> <span class="fn">setTimeout</span>(() <span class="op">=></span> <span class="fn">res</span>([<span class="str">"Ad1"</span>]),     <span class="num">600</span>));
+
+<span class="cm">// সব একসাথে — মোট সময় ১০০০ms (সবচেয়ে বেশি)</span>
+<span class="fn">Promise</span>.<span class="fn">all</span>([<span class="fn">getUserAPI</span>(), <span class="fn">getPostsAPI</span>(), <span class="fn">getAdsAPI</span>()])
+  .<span class="fn">then</span>(([user, posts, ads]) <span class="op">=></span> {
+    console.<span class="fn">log</span>(<span class="str">"👤 User:"</span>, user.name);
+    console.<span class="fn">log</span>(<span class="str">"📝 Posts:"</span>, posts);
+    console.<span class="fn">log</span>(<span class="str">"📢 Ads:"</span>, ads);
+  })
+  .<span class="fn">catch</span>(err <span class="op">=></span> console.<span class="fn">log</span>(<span class="str">"❌ একটি fail করেছে:"</span>, err));</code></pre>
+
+        <pre><code><span class="cm">// ✅ Example 2: Promise.race — Timeout প্যাটার্ন</span>
+<span class="kw">function</span> <span class="fn">slowAPI</span>() {
+  <span class="kw">return new</span> <span class="fn">Promise</span>(res <span class="op">=></span> <span class="fn">setTimeout</span>(() <span class="op">=></span> <span class="fn">res</span>(<span class="str">"API Data"</span>), <span class="num">5000</span>));
+}
+
+<span class="kw">function</span> <span class="fn">timeout</span>(ms) {
+  <span class="kw">return new</span> <span class="fn">Promise</span>((_, reject) <span class="op">=></span>
+    <span class="fn">setTimeout</span>(() <span class="op">=></span> <span class="fn">reject</span>(<span class="kw">new</span> <span class="fn">Error</span>(<span class="str">"⏱️ Timeout! API অনেক ধীর"</span>)), ms)
+  );
+}
+
+<span class="fn">Promise</span>.<span class="fn">race</span>([<span class="fn">slowAPI</span>(), <span class="fn">timeout</span>(<span class="num">3000</span>)])
+  .<span class="fn">then</span>(data <span class="op">=></span> console.<span class="fn">log</span>(<span class="str">"✅ Data:"</span>, data))
+  .<span class="fn">catch</span>(err <span class="op">=></span> console.<span class="fn">log</span>(err.message));
+<span class="cm">// Output: ⏱️ Timeout! API অনেক ধীর</span></code></pre>
+
+        <pre><code><span class="cm">// ✅ Example 3: Promise.allSettled — সব result দেখতে চাই</span>
+<span class="kw">const</span> p1 <span class="op">=</span> <span class="fn">Promise</span>.<span class="fn">resolve</span>(<span class="str">"✅ Success"</span>);
+<span class="kw">const</span> p2 <span class="op">=</span> <span class="fn">Promise</span>.<span class="fn">reject</span>(<span class="str">"❌ Failed"</span>);
+<span class="kw">const</span> p3 <span class="op">=</span> <span class="fn">Promise</span>.<span class="fn">resolve</span>(<span class="str">"✅ Also Success"</span>);
+
+<span class="fn">Promise</span>.<span class="fn">allSettled</span>([p1, p2, p3])
+  .<span class="fn">then</span>(results <span class="op">=></span> {
+    results.<span class="fn">forEach</span>((result, i) <span class="op">=></span> {
+      <span class="kw">if</span> (result.status <span class="op">===</span> <span class="str">"fulfilled"</span>) {
+        console.<span class="fn">log</span>(<span class="str">`P${i+1} সফল: ${result.value}`</span>);
+      } <span class="kw">else</span> {
+        console.<span class="fn">log</span>(<span class="str">`P${i+1} ব্যর্থ: ${result.reason}`</span>);
+      }
+    });
+  });
+<span class="cm">// P1 সফল: ✅ Success
+// P2 ব্যর্থ: ❌ Failed
+// P3 সফল: ✅ Also Success</span></code></pre>
+      </div>
+    </div>
+
+    <div class="topic-card">
+      <div class="topic-label label-viva">🎤 ভাইবা গাইড</div>
+      <div class="topic-body">
+        <div class="viva-item">
+          <div class="viva-q">Promise.all এবং Promise.allSettled এর পার্থক্য কি?</div>
+          <div class="viva-a">Promise.all — একটিও reject হলে পুরো reject হয়। Promise.allSettled — সব শেষ হওয়া পর্যন্ত অপেক্ষা করে এবং প্রতিটির status ও value/reason সহ দেয়। Critical কাজে .all, reporting বা partial result দরকার হলে .allSettled।</div>
+        </div>
+        <div class="viva-item">
+          <div class="viva-q">Promise.race কোথায় ব্যবহার হয়?</div>
+          <div class="viva-a">API timeout implement করতে, multiple server এর মধ্যে সবচেয়ে দ্রুত response নিতে (CDN fallback), এবং cache vs network race করতে ব্যবহার হয়।</div>
+        </div>
+        <div class="viva-item">
+          <div class="viva-q">Promise.all কি parallel নাকি sequential?</div>
+          <div class="viva-a">Parallel — সব Promise একসাথে শুরু হয়। এটি chaining এর চেয়ে দ্রুত কারণ একটির জন্য অপরটি অপেক্ষা করে না।</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic-card">
+      <div class="topic-label label-challenge">💪 কোডিং চ্যালেঞ্জ</div>
+      <div class="topic-body">
+        <div class="challenge-item">
+          <div class="challenge-header">CHALLENGE 05 — Dashboard Loader</div>
+          <div class="challenge-body">
+            <p style="margin-bottom:12px;">একটি dashboard এর জন্য users, products, orders এই তিনটি API একসাথে call করো Promise.all দিয়ে। যেকোনো একটি fail হলে error দেখাও।</p>
+            <pre><code><span class="cm">// 🎯 Solution</span>
+<span class="kw">const</span> <span class="fn">fakeAPI</span> <span class="op">=</span> (name, delay, fail <span class="op">=</span> <span class="num">false</span>) <span class="op">=></span>
+  <span class="kw">new</span> <span class="fn">Promise</span>((res, rej) <span class="op">=></span> {
+    <span class="fn">setTimeout</span>(() <span class="op">=></span> {
+      fail ? <span class="fn">rej</span>(<span class="kw">new</span> <span class="fn">Error</span>(<span class="str">`${name} API failed!`</span>))
+           : <span class="fn">res</span>(<span class="str">`${name} data loaded`</span>);
+    }, delay);
+  });
+
+<span class="kw">const</span> startTime <span class="op">=</span> Date.<span class="fn">now</span>();
+
+<span class="fn">Promise</span>.<span class="fn">all</span>([
+  <span class="fn">fakeAPI</span>(<span class="str">"Users"</span>,    <span class="num">1000</span>),
+  <span class="fn">fakeAPI</span>(<span class="str">"Products"</span>, <span class="num">800</span>),
+  <span class="fn">fakeAPI</span>(<span class="str">"Orders"</span>,   <span class="num">600</span>),
+])
+.<span class="fn">then</span>(([users, products, orders]) <span class="op">=></span> {
+  <span class="kw">const</span> elapsed <span class="op">=</span> ((Date.<span class="fn">now</span>() <span class="op">-</span> startTime) / <span class="num">1000</span>).<span class="fn">toFixed</span>(<span class="num">1</span>);
+  console.<span class="fn">log</span>(<span class="str">`⚡ ${elapsed}s এ সব লোড:`</span>);
+  console.<span class="fn">log</span>(<span class="str">"  ✅"</span>, users);
+  console.<span class="fn">log</span>(<span class="str">"  ✅"</span>, products);
+  console.<span class="fn">log</span>(<span class="str">"  ✅"</span>, orders);
+})
+.<span class="fn">catch</span>(err <span class="op">=></span> console.<span class="fn">log</span>(<span class="str">"❌ Dashboard load fail:"</span>, err.message));</code></pre>
+          </div>
+        </div>
+
+        <div class="challenge-item">
+          <div class="challenge-header">CHALLENGE 06 — Fastest Server Finder</div>
+          <div class="challenge-body">
+            <p style="margin-bottom:12px;">৩টি server URL আছে — Promise.race দিয়ে সবচেয়ে দ্রুত respond করা server খুঁজে বের করো।</p>
+            <pre><code><span class="cm">// 🎯 Solution</span>
+<span class="kw">function</span> <span class="fn">pingServer</span>(name, delay) {
+  <span class="kw">return new</span> <span class="fn">Promise</span>(resolve <span class="op">=></span>
+    <span class="fn">setTimeout</span>(() <span class="op">=></span> <span class="fn">resolve</span>(<span class="str">`🏆 Fastest: ${name} (${delay}ms)`</span>), delay)
+  );
+}
+
+<span class="fn">Promise</span>.<span class="fn">race</span>([
+  <span class="fn">pingServer</span>(<span class="str">"Server US"</span>,   <span class="num">900</span>),
+  <span class="fn">pingServer</span>(<span class="str">"Server BD"</span>,   <span class="num">300</span>),
+  <span class="fn">pingServer</span>(<span class="str">"Server EU"</span>,   <span class="num">600</span>),
+])
+.<span class="fn">then</span>(result <span class="op">=></span> console.<span class="fn">log</span>(result));
+<span class="cm">// 🏆 Fastest: Server BD (300ms)</span></code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic-card">
+      <div class="topic-label label-future">🚀 ফিউচার ইমপ্লিমেন্টেশন</div>
+      <div class="topic-body">
+        <div class="future-grid">
+          <div class="future-card">
+            <div class="future-icon">📊</div>
+            <div class="future-title">Dashboard Load</div>
+            <div class="future-desc">Analytics, Sales, Users — সব widget একসাথে Promise.all দিয়ে load করা হয়।</div>
+          </div>
+          <div class="future-card">
+            <div class="future-icon">⏱️</div>
+            <div class="future-title">API Timeout</div>
+            <div class="future-desc">Promise.race দিয়ে slow API এর জন্য timeout enforce করা হয় production এ।</div>
+          </div>
+          <div class="future-card">
+            <div class="future-icon">🌐</div>
+            <div class="future-title">CDN Fallback</div>
+            <div class="future-desc">একাধিক CDN থেকে সবচেয়ে দ্রুত resource serve করতে race pattern ব্যবহার।</div>
+          </div>
+          <div class="future-card">
+            <div class="future-icon">📧</div>
+            <div class="future-title">Bulk Operations</div>
+            <div class="future-desc">১০০০ email পাঠানো, bulk image resize — Promise.allSettled দিয়ে partial success handle।</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUMMARY CARD -->
+  <div style="background: linear-gradient(135deg, rgba(247,201,72,.08), rgba(78,205,196,.05)); border: 1px solid rgba(247,201,72,.3); border-radius: 16px; padding: 32px; margin-top: 60px; text-align: center;">
+    <div style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--accent); letter-spacing: 2px; margin-bottom: 12px;">পর্যায় ১৩ — সম্পন্ন! ✅</div>
+    <p style="color: var(--muted); margin-bottom: 20px; font-size: 14px;">পরের পর্যায়ে যাওয়ার আগে নিশ্চিত করো:</p>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+      <span style="background: rgba(247,201,72,.15); color: var(--accent); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700;">✅ Promise তৈরি করতে পারি</span>
+      <span style="background: rgba(78,205,196,.15); color: var(--accent2); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700;">✅ then/catch/finally বুঝি</span>
+      <span style="background: rgba(255,107,107,.15); color: var(--accent3); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700;">✅ Chaining করতে পারি</span>
+      <span style="background: rgba(167,139,250,.15); color: var(--accent4); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700;">✅ Promise.all & race জানি</span>
+    </div>
+    <p style="color: var(--muted); margin-top: 20px; font-size: 13px;">পরের পর্যায়ের জন্য <strong style="color: var(--accent);">Next</strong> টাইপ করো ➜ পর্যায় ১৪: Modern Async/Await</p>
+  </div>
+
+</div>
+
+<div class="footer">JS BOS MISSION &nbsp;·&nbsp; STAGE 13 COMPLETE &nbsp;·&nbsp; KEEP GOING 🔥</div>
+
+</body>
+</html>
