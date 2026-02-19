@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript শেখার সম্পূর্ণ রোডম্যাপ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&family=Hind+Siliguri:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --card: #16161f;
+    --border: #252535;
+    --accent-yellow: #f7c948;
+    --accent-orange: #ff6b35;
+    --accent-blue: #4d9de0;
+    --accent-green: #3ecf8e;
+    --accent-purple: #9b72cf;
+    --accent-pink: #ff4d6d;
+    --text: #e8e8f0;
+    --muted: #6b6b85;
+  }
+
+- { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+background: var(--bg);
+color: var(--text);
+font-family: 'Hind Siliguri', sans-serif;
+overflow-x: hidden;
+min-height: 100vh;
+}
+
+/_ Animated background grid _/
+body::before {
+content: '';
+position: fixed;
+inset: 0;
+background-image:
+linear-gradient(rgba(247,201,72,0.03) 1px, transparent 1px),
+linear-gradient(90deg, rgba(247,201,72,0.03) 1px, transparent 1px);
+background-size: 60px 60px;
+pointer-events: none;
+z-index: 0;
+}
+
+.container {
+max-width: 1200px;
+margin: 0 auto;
+padding: 0 24px;
+position: relative;
+z-index: 1;
+}
+
+/_ HEADER _/
+header {
+padding: 80px 0 60px;
+text-align: center;
+position: relative;
+}
+
+.header-tag {
+display: inline-block;
+font-family: 'JetBrains Mono', monospace;
+font-size: 12px;
+color: var(--accent-yellow);
+background: rgba(247,201,72,0.1);
+border: 1px solid rgba(247,201,72,0.3);
+padding: 4px 16px;
+border-radius: 100px;
+margin-bottom: 24px;
+animation: fadeDown 0.6s ease both;
+}
+
+h1 {
+font-family: 'Syne', sans-serif;
+font-size: clamp(36px, 6vw, 72px);
+font-weight: 800;
+line-height: 1.05;
+letter-spacing: -2px;
+animation: fadeDown 0.7s ease both;
+}
+
+h1 span {
+color: var(--accent-yellow);
+position: relative;
+}
+
+h1 span::after {
+content: '';
+position: absolute;
+bottom: 4px;
+left: 0; right: 0;
+height: 3px;
+background: var(--accent-yellow);
+border-radius: 2px;
+animation: expand 0.8s 0.8s ease both;
+transform-origin: left;
+transform: scaleX(0);
+}
+
+@keyframes expand { to { transform: scaleX(1); } }
+
+.subtitle {
+margin-top: 16px;
+color: var(--muted);
+font-size: 18px;
+animation: fadeDown 0.8s ease both;
+}
+
+.stats {
+display: flex;
+justify-content: center;
+gap: 48px;
+margin-top: 40px;
+animation: fadeDown 0.9s ease both;
+}
+
+.stat {
+text-align: center;
+}
+
+.stat-number {
+font-family: 'JetBrains Mono', monospace;
+font-size: 32px;
+font-weight: 600;
+color: var(--accent-yellow);
+}
+
+.stat-label {
+font-size: 13px;
+color: var(--muted);
+margin-top: 4px;
+}
+
+/_ TIMELINE _/
+.timeline {
+padding: 40px 0 80px;
+position: relative;
+}
+
+.timeline::before {
+content: '';
+position: absolute;
+left: 50%;
+top: 0; bottom: 0;
+width: 2px;
+background: linear-gradient(to bottom, transparent, var(--border) 5%, var(--border) 95%, transparent);
+transform: translateX(-50%);
+}
+
+@media (max-width: 768px) {
+.timeline::before { left: 24px; }
+}
+
+.phase {
+display: flex;
+align-items: flex-start;
+gap: 40px;
+margin-bottom: 32px;
+opacity: 0;
+transform: translateY(30px);
+transition: all 0.5s ease;
+}
+
+.phase.visible {
+opacity: 1;
+transform: translateY(0);
+}
+
+.phase:nth-child(odd) { flex-direction: row; }
+.phase:nth-child(even) { flex-direction: row-reverse; }
+
+@media (max-width: 768px) {
+.phase, .phase:nth-child(even) {
+flex-direction: row;
+padding-left: 48px;
+}
+}
+
+.phase-content {
+flex: 1;
+background: var(--card);
+border: 1px solid var(--border);
+border-radius: 16px;
+padding: 24px 28px;
+position: relative;
+transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+cursor: default;
+}
+
+.phase-content:hover {
+transform: translateY(-4px);
+box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+
+.phase-spacer {
+flex: 0 0 60px;
+display: flex;
+justify-content: center;
+align-items: flex-start;
+padding-top: 20px;
+position: relative;
+z-index: 2;
+}
+
+@media (max-width: 768px) {
+.phase-spacer { display: none; }
+.phase-content { width: 100%; }
+}
+
+.phase-dot {
+width: 16px;
+height: 16px;
+border-radius: 50%;
+border: 3px solid var(--bg);
+flex-shrink: 0;
+}
+
+.phase-header {
+display: flex;
+align-items: center;
+gap: 12px;
+margin-bottom: 16px;
+}
+
+.phase-num {
+font-family: 'JetBrains Mono', monospace;
+font-size: 11px;
+padding: 3px 10px;
+border-radius: 100px;
+font-weight: 600;
+opacity: 0.9;
+}
+
+.phase-title {
+font-family: 'Syne', sans-serif;
+font-size: 18px;
+font-weight: 700;
+}
+
+.topics {
+list-style: none;
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 8px;
+}
+
+@media (max-width: 500px) {
+.topics { grid-template-columns: 1fr; }
+}
+
+.topics li {
+display: flex;
+align-items: flex-start;
+gap: 8px;
+font-size: 14px;
+color: #b0b0c8;
+line-height: 1.5;
+}
+
+.topics li::before {
+content: '›';
+font-family: 'JetBrains Mono', monospace;
+font-weight: 600;
+flex-shrink: 0;
+margin-top: 1px;
+}
+
+/_ Color themes per category _/
+.cat-1 { --cat: var(--accent-yellow); }
+.cat-2 { --cat: var(--accent-orange); }
+.cat-3 { --cat: var(--accent-green); }
+.cat-4 { --cat: var(--accent-blue); }
+.cat-5 { --cat: var(--accent-purple); }
+.cat-6 { --cat: var(--accent-pink); }
+
+.phase-content {
+border-top: 3px solid var(--cat, var(--accent-yellow));
+}
+
+.phase-content:hover {
+border-color: var(--cat, var(--accent-yellow));
+box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 30px -5px var(--cat, transparent);
+}
+
+.phase-dot { background: var(--cat, var(--accent-yellow)); }
+.phase-num { background: color-mix(in srgb, var(--cat) 15%, transparent); color: var(--cat); border: 1px solid color-mix(in srgb, var(--cat) 30%, transparent); }
+.phase-title { color: var(--cat); }
+.topics li::before { color: var(--cat); }
+
+/_ FINAL NOTE _/
+.final-note {
+background: linear-gradient(135deg, rgba(247,201,72,0.08), rgba(255,107,53,0.05));
+border: 1px solid rgba(247,201,72,0.2);
+border-radius: 16px;
+padding: 32px 36px;
+margin: 40px 0 80px;
+text-align: center;
+opacity: 0;
+transform: translateY(20px);
+transition: all 0.5s ease;
+}
+
+.final-note.visible { opacity: 1; transform: translateY(0); }
+
+.final-note h2 {
+font-family: 'Syne', sans-serif;
+font-size: 22px;
+color: var(--accent-yellow);
+margin-bottom: 12px;
+}
+
+.final-note p {
+color: #a0a0b8;
+line-height: 1.8;
+font-size: 15px;
+}
+
+.next-steps {
+display: flex;
+justify-content: center;
+gap: 12px;
+margin-top: 20px;
+flex-wrap: wrap;
+}
+
+.badge {
+font-family: 'JetBrains Mono', monospace;
+font-size: 12px;
+padding: 6px 16px;
+border-radius: 100px;
+border: 1px solid;
+}
+
+.badge-react { color: #61dafb; border-color: rgba(97,218,251,0.3); background: rgba(97,218,251,0.06); }
+.badge-vue { color: #42b883; border-color: rgba(66,184,131,0.3); background: rgba(66,184,131,0.06); }
+.badge-node { color: #8cc84b; border-color: rgba(140,200,75,0.3); background: rgba(140,200,75,0.06); }
+.badge-ts { color: #3178c6; border-color: rgba(49,120,198,0.3); background: rgba(49,120,198,0.06); }
+
+@keyframes fadeDown {
+from { opacity: 0; transform: translateY(-16px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+/_ Progress bar at top _/
+.progress-bar {
+position: fixed;
+top: 0; left: 0;
+height: 3px;
+background: linear-gradient(90deg, var(--accent-yellow), var(--accent-orange));
+width: 0;
+z-index: 100;
+transition: width 0.1s;
+}
+</style>
+
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+
+<div class="container">
+  <header>
+    <div class="header-tag">console.log("তুমি পারবে! 🚀")</div>
+    <h1>JavaScript<br><span>শেখার রোডম্যাপ</span></h1>
+    <p class="subtitle">বস হওয়ার মিশন — শুরু থেকে এক্সপার্ট পর্যন্ত</p>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-number">২০</div>
+        <div class="stat-label">পর্যায়</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">৭০+</div>
+        <div class="stat-label">টপিক</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">∞</div>
+        <div class="stat-label">সম্ভাবনা</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="timeline">
+
+    <div class="phase cat-1">
+      <div class="phase-content">
+        <div class="phase-header">
+          <span class="phase-num">০১</span>
+          <span class="phase-title">JavaScript এর ভিত্তি (Foundation)</span>
+        </div>
+        <ul class="topics">
+          <li>Variables (var, let, const) এবং Data Types</li>
+          <li>Operators (arithmetic, comparison, logical)</li>
+          <li>Console.log এবং Basic Input/Output</li>
+          <li>Comments এবং Code Structure</li>
+        </ul>
+      </div>
+      <div class="phase-spacer"><div class="phase-dot"></div></div>
+      <div style="flex:1"></div>
+    </div>
+
+    <div class="phase cat-1">
+      <div style="flex:1"></div>
+      <div class="phase-spacer"><div class="phase-dot"></div></div>
+      <div class="phase-content">
+        <div class="phase-header">
+          <span class="phase-num">০২</span>
+          <span class="phase-title">Control Flow</span>
+        </div>
+        <ul class="topics">
+          <li>if-else statements</li>
+          <li>switch-case</li>
+          <li>Ternary Operator</li>
+          <li>Truthy এবং Falsy Values</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase cat-2">
+      <div class="phase-content">
+        <div class="phase-header">
+          <span class="phase-num">০৩</span>
+          <span class="phase-title">Loops (লুপ)</span>
+        </div>
+        <ul class="topics">
+          <li>for loop</li>
+          <li>while এবং do-while loop</li>
+          <li>break এবং continue</li>
+          <li>Loop দিয়ে Simple Patterns</li>
+        </ul>
+      </div>
+      <div class="phase-spacer"><div class="phase-dot"></div></div>
+      <div style="flex:1"></div>
+    </div>
+
+    <div class="phase cat-2">
+      <div style="flex:1"></div>
+      <div class="phase-spacer"><div class="phase-dot"></div></div>
+      <div class="phase-content">
+        <div class="phase-header">
+          <span class="phase-num">০৪</span>
+          <span class="phase-title">Functions (ফাংশন)</span>
+        </div>
+        <ul class="topics">
+          <li>Function Declaration এবং Expression</li>
+          <li>Parameters এবং Arguments</li>
+          <li>Return Statement</li>
+          <li>Arrow Functions</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase cat-3">
+      <div class="phase-content">
+        <div class="phase-header">
+          <span class="phase-num">০৫</span>
+          <span class="phase-title">Arrays (অ্যারে)</span>
+        </div>
+        <ul class="topics">
+          <li>Array তৈরি এবং Access</li>
+          <li>push, pop, shift, unshift</li>
+          <li>slice, splice, concat</li>
+          <li>forEach, map, filter</li>
+        </ul>
+      </div>
+      <div class="phase-spacer"><div class="phase-dot"></div></div>
+      <div style="flex:1"></div>
+    </div>
+
+    <div class="phase cat-3">
+      <div style="flex:1"></div>
+      <div class="phase-spacer"><div class="phase-dot"></div></div>
+      <div class="phase-content">
+        <div class="phase-header">
+          <span class="phase-num">০৬</span>
+          <span class="phase-title">Objects (অবজেক্ট)</span>
+        </div>
+        <ul class="topics">
+          <li>Object তৈরি এবং Properties Access</li>
+          <li>Object Methods</li>
+          <li>Object Destructuring</li>
+          <li>JSON format বোঝা</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase cat-3">
+      <div class="phase-content">
+        <div class="phase-header">
+          <span class="phase-num">০৭</span>
+          <span class="phase-title">Advanced Array Methods</span>
+        </div>
+        <ul class="topics">
+          <li>find, findIndex, some, every</li>
+          <li>reduce Method</li>
+          <li>sort এবং reverse</li>
+          <li>Chaining Methods</li>
+        </ul>
+      </div>
+      <div class="phase-spacer"><div class="phase-dot"></div></div>
+      <div style="flex:1"></div>
+    </div>
+
+    <div class="phase cat-3">
+      <div style="flex:1"></div>
+      <div class="phase-spacer"><div class="phase-dot"></div></div>
+      <div class="phase-content">
+        <div class="phase-header">
+          <span class="phase-num">০৮</span>
+          <span class="phase-title">Strings এবং String Methods</span>
+        </div>
+        <ul class="topics">
+          <li>String Properties এবং Basic Methods</li>
+          <li>Template Literals (Backticks)</li>
+          <li>split, join, trim, replace</li>
+          <li>Regular Expressions পরিচিতি</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase cat-4">
+      <div class="phase-content">
+        <div class="phase-header">
+          <span class="phase-num">০৯</span>
+          <span class="phase-title">DOM Manipulation</span>
+        </div>
+        <ul class="topics">
+          <li>DOM কি এবং কীভাবে কাজ করে</li>
+          <li>getElementById, querySelector</li>
+          <li>innerHTML, textContent পরিবর্তন</li>
+          <li>Attributes এবং Styles পরিবর্তন</li>
+        </ul>
+      </div>
+      <div class="phase-spacer"><div class="phase-dot"></div></div>
+      <div style="flex:1"></div>
+    </div>
+
+    <div class="phase cat-4">
+      <div style="flex:1"></div>
+      <div class="phase-spacer"><div class="phase-dot"></div></div>
+      <div class="phase-content">
+        <div class="phase-header">
+          <span class="phase-num">১০</span>
+          <span class="phase-title">Events (ইভেন্ট)</span>
+        </div>
+        <ul class="topics">
+          <li>Event Listeners যোগ করা</li>
+          <li>click, mouseover, keypress</li>
+          <li>Event Object</li>
+          <li>Event Delegation</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase cat-5">
+      <div class="phase-content">
+        <div class="phase-header">
+          <span class="phase-num">১১</span>
+          <span class="phase-title">Advanced Functions</span>
+        </div>
+        <ul class="topics">
+          <li>Scope (Global, Function, Block)</li>
+          <li>Closures</li>
+          <li>Higher Order Functions</li>
+          <li>Callback Functions</li>
+        </ul>
+      </div>
+      <div class="phase-spacer"><div class="phase-dot"></div></div>
+      <div style="flex:1"></div>
+    </div>
+
+    <div class="phase cat-5">
+      <div style="flex:1"></div>
+      <div class="phase-spacer"><div class="phase-dot"></div></div>
+      <div class="phase-content">
+        <div class="phase-header">
+          <span class="phase-num">১২</span>
+          <span class="phase-title">Async JavaScript — Part 1</span>
+        </div>
+        <ul class="topics">
+          <li>setTimeout এবং setInterval</li>
+          <li>Callbacks</li>
+          <li>Callback Hell সমস্যা</li>
+          <li>Async vs Synchronous</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase cat-5">
+      <div class="phase-content">
+        <div class="phase-header">
+          <span class="phase-num">১৩</span>
+          <span class="phase-title">Async JavaScript — Part 2</span>
+        </div>
+        <ul class="topics">
+          <li>Promises এর ভিত্তি</li>
+          <li>then, catch, finally</li>
+          <li>Promise Chaining</li>
+          <li>Promise.all এবং Promise.race</li>
+        </ul>
+      </div>
+      <div class="phase-spacer"><div class="phase-dot"></div></div>
+      <div style="flex:1"></div>
+    </div>
+
+    <div class="phase cat-5">
+      <div style="flex:1"></div>
+      <div class="phase-spacer"><div class="phase-dot"></div></div>
+      <div class="phase-content">
+        <div class="phase-header">
+          <span class="phase-num">১৪</span>
+          <span class="phase-title">Modern Async/Await</span>
+        </div>
+        <ul class="topics">
+          <li>async/await Syntax</li>
+          <li>Error Handling (try-catch)</li>
+          <li>Real API Call করা (fetch)</li>
+          <li>Best Practices</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase cat-6">
+      <div class="phase-content">
+        <div class="phase-header">
+          <span class="phase-num">১৫</span>
+          <span class="phase-title">ES6+ Features</span>
+        </div>
+        <ul class="topics">
+          <li>Spread এবং Rest Operator</li>
+          <li>Default Parameters</li>
+          <li>Optional Chaining (?.)</li>
+          <li>Nullish Coalescing (??)</li>
+        </ul>
+      </div>
+      <div class="phase-spacer"><div class="phase-dot"></div></div>
+      <div style="flex:1"></div>
+    </div>
+
+    <div class="phase cat-6">
+      <div style="flex:1"></div>
+      <div class="phase-spacer"><div class="phase-dot"></div></div>
+      <div class="phase-content">
+        <div class="phase-header">
+          <span class="phase-num">১৬</span>
+          <span class="phase-title">Classes এবং OOP</span>
+        </div>
+        <ul class="topics">
+          <li>Class Syntax</li>
+          <li>Constructor এবং Methods</li>
+          <li>Inheritance (extends)</li>
+          <li>this Keyword বোঝা</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase cat-6">
+      <div class="phase-content">
+        <div class="phase-header">
+          <span class="phase-num">১৭</span>
+          <span class="phase-title">Error Handling</span>
+        </div>
+        <ul class="topics">
+          <li>try-catch-finally</li>
+          <li>Throwing Custom Errors</li>
+          <li>Error Types</li>
+          <li>Debugging Techniques</li>
+        </ul>
+      </div>
+      <div class="phase-spacer"><div class="phase-dot"></div></div>
+      <div style="flex:1"></div>
+    </div>
+
+    <div class="phase cat-4">
+      <div style="flex:1"></div>
+      <div class="phase-spacer"><div class="phase-dot"></div></div>
+      <div class="phase-content">
+        <div class="phase-header">
+          <span class="phase-num">১৮</span>
+          <span class="phase-title">Local Storage & Session Storage</span>
+        </div>
+        <ul class="topics">
+          <li>localStorage ব্যবহার</li>
+          <li>sessionStorage ব্যবহার</li>
+          <li>JSON.stringify এবং JSON.parse</li>
+          <li>Simple CRUD Application</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase cat-4">
+      <div class="phase-content">
+        <div class="phase-header">
+          <span class="phase-num">১৯</span>
+          <span class="phase-title">Advanced DOM & Browser APIs</span>
+        </div>
+        <ul class="topics">
+          <li>Form Handling এবং Validation</li>
+          <li>Intersection Observer API</li>
+          <li>Geolocation API</li>
+          <li>localStorage দিয়ে Theme Toggle</li>
+        </ul>
+      </div>
+      <div class="phase-spacer"><div class="phase-dot"></div></div>
+      <div style="flex:1"></div>
+    </div>
+
+    <div class="phase cat-1">
+      <div style="flex:1"></div>
+      <div class="phase-spacer"><div class="phase-dot"></div></div>
+      <div class="phase-content">
+        <div class="phase-header">
+          <span class="phase-num">২০</span>
+          <span class="phase-title">Projects এবং Practice 🏆</span>
+        </div>
+        <ul class="topics">
+          <li>Todo App (CRUD Operations)</li>
+          <li>Weather App (API Integration)</li>
+          <li>Quiz App বা Calculator</li>
+          <li>Portfolio Interactive Features</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="final-note" id="finalNote">
+    <h2>🎯 পরামর্শ — বস হওয়ার সিক্রেট</h2>
+    <p>প্রতিটি পর্যায় শেষে ছোট ছোট প্রজেক্ট বানান। শুধু টিউটোরিয়াল দেখলে হবে না — নিজে কোড লিখে practice করতে হবে। ভুল করুন, শিখুন, এগিয়ে যান।</p>
+    <div class="next-steps">
+      <span style="color: var(--muted); font-size: 13px; align-self: center;">পরের ধাপ →</span>
+      <span class="badge badge-react">React</span>
+      <span class="badge badge-vue">Vue.js</span>
+      <span class="badge badge-node">Node.js</span>
+      <span class="badge badge-ts">TypeScript</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Scroll progress
+  window.addEventListener('scroll', () => {
+    const scrolled = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+    document.getElementById('progress').style.width = (scrolled * 100) + '%';
+  });
+
+  // Intersection Observer for scroll animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.phase, .final-note').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
