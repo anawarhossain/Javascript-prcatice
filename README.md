@@ -129,7 +129,7 @@
 - [ ] Geolocation API
 - [ ] Dark Mode / Theme Toggle ফিচার
 
-### 🏆 পর্যায় ২০: Projects এবং Practice
+[### 🏆 পর্যায় ২০: Projects এবং Practice](https://anawarhossain.github.io/Javascript-prcatice/20-Projects/)
 - [ ] **Todo App**: (CRUD Operations সহ)
 - [ ] **Weather App**: (API Integration সহ)
 - [ ] **Quiz App** বা **Advanced Calculator**
